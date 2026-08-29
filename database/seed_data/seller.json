@@ -1,0 +1,577 @@
+{
+  "shop": {
+    "name": "فروشگاه آریا",
+    "slug": "arya-store",
+    "phone": "09121234567",
+    "email": "seller@digishop.ir",
+    "city": "تهران",
+    "about": "عرضه‌کننده محصولات دیجیتال اصل با گارانتی معتبر، ارسال سریع از انبار تهران و پشتیبانی اختصاصی فروشنده.",
+    "rating": 4.7,
+    "reviewCount": 1284,
+    "joinDate": "۱۴۰۲/۰۳/۱۸"
+  },
+  "listings": [
+    {
+      "productId": "iphone-16-pro",
+      "stock": 14,
+      "sold": 86,
+      "views": 12450,
+      "status": "active"
+    },
+    {
+      "productId": "galaxy-s25-ultra",
+      "stock": 8,
+      "sold": 54,
+      "views": 8320,
+      "status": "active"
+    },
+    {
+      "productId": "macbook-m4",
+      "stock": 5,
+      "sold": 21,
+      "views": 4180,
+      "status": "active"
+    },
+    {
+      "productId": "sony-xm5",
+      "stock": 32,
+      "sold": 140,
+      "views": 15640,
+      "status": "active"
+    },
+    {
+      "productId": "apple-watch-ultra",
+      "stock": 10,
+      "sold": 0,
+      "views": 980,
+      "status": "pending"
+    },
+    {
+      "productId": "ps5-pro",
+      "stock": 3,
+      "sold": 67,
+      "views": 9870,
+      "status": "active"
+    },
+    {
+      "productId": "ipad-pro-m4",
+      "stock": 12,
+      "sold": 18,
+      "views": 2640,
+      "status": "inactive"
+    },
+    {
+      "productId": "airpods-pro-2",
+      "stock": 45,
+      "sold": 210,
+      "views": 18920,
+      "status": "active"
+    },
+    {
+      "productId": "jbl-charge-5",
+      "stock": 0,
+      "sold": 88,
+      "views": 5410,
+      "status": "out_of_stock"
+    },
+    {
+      "productId": "xiaomi-robot-vac",
+      "stock": 7,
+      "sold": 33,
+      "views": 3120,
+      "status": "active"
+    },
+    {
+      "productId": "nike-air-max",
+      "stock": 20,
+      "sold": 0,
+      "views": 640,
+      "status": "pending"
+    },
+    {
+      "productId": "lg-oled-c4",
+      "stock": 2,
+      "sold": 9,
+      "views": 1880,
+      "status": "active"
+    }
+  ],
+  "orders": [
+    {
+      "id": "SL-20411",
+      "date": "۱۴۰۳/۰۹/۲۲",
+      "dateKey": "14030922",
+      "status": "new",
+      "customerName": "نگار موسوی",
+      "customerPhone": "09123334455",
+      "city": "تهران",
+      "address": {
+        "province": "تهران",
+        "city": "تهران",
+        "address": "خیابان شریعتی، نرسیده به میرداماد، کوچه بهار، پلاک ۸، واحد ۴",
+        "postalCode": "1949632145"
+      },
+      "items": [
+        {
+          "productId": "iphone-16-pro",
+          "qty": 1,
+          "price": 89900000
+        }
+      ],
+      "total": 89900000,
+      "shippingMethod": "پیک اکسپرس",
+      "paymentMethod": "پرداخت آنلاین",
+      "note": "تحویل در ساعات اداری ترجیح داده می‌شود."
+    },
+    {
+      "id": "SL-20408",
+      "date": "۱۴۰۳/۰۹/۲۱",
+      "dateKey": "14030921",
+      "status": "packing",
+      "customerName": "رضا کریمی",
+      "customerPhone": "09351234567",
+      "city": "کرج",
+      "address": {
+        "province": "البرز",
+        "city": "کرج",
+        "address": "گوهردشت، فاز ۳، خیابان ارم، پلاک ۲۲",
+        "postalCode": "3145678901"
+      },
+      "items": [
+        {
+          "productId": "sony-xm5",
+          "qty": 1,
+          "price": 18500000
+        },
+        {
+          "productId": "airpods-pro-2",
+          "qty": 1,
+          "price": 12400000
+        }
+      ],
+      "total": 30900000,
+      "shippingMethod": "تیپاکس",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20398",
+      "date": "۱۴۰۳/۰۹/۲۰",
+      "dateKey": "14030920",
+      "status": "new",
+      "customerName": "الهام جعفری",
+      "customerPhone": "09125556677",
+      "city": "قم",
+      "address": {
+        "province": "قم",
+        "city": "قم",
+        "address": "بلوار امین، کوچه ۱۲، پلاک ۵",
+        "postalCode": "3713890012"
+      },
+      "items": [
+        {
+          "productId": "airpods-pro-2",
+          "qty": 2,
+          "price": 12400000
+        }
+      ],
+      "total": 24800000,
+      "shippingMethod": "پست پیشتاز",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20391",
+      "date": "۱۴۰۳/۰۹/۱۸",
+      "dateKey": "14030918",
+      "status": "shipped",
+      "customerName": "سارا محمدی",
+      "customerPhone": "09127654321",
+      "city": "اصفهان",
+      "address": {
+        "province": "اصفهان",
+        "city": "اصفهان",
+        "address": "خیابان چهارباغ عباسی، کوچه گلستان، پلاک ۱۷",
+        "postalCode": "8145612345"
+      },
+      "items": [
+        {
+          "productId": "galaxy-s25-ultra",
+          "qty": 1,
+          "price": 72400000
+        }
+      ],
+      "total": 72400000,
+      "shippingMethod": "پست پیشتاز",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20382",
+      "date": "۱۴۰۳/۰۹/۱۶",
+      "dateKey": "14030916",
+      "status": "packing",
+      "customerName": "کیانوش مرادی",
+      "customerPhone": "09361112233",
+      "city": "رشت",
+      "address": {
+        "province": "گیلان",
+        "city": "رشت",
+        "address": "خیابان مطهری، بعد از میدان فرهنگ، پلاک ۴۱",
+        "postalCode": "4135678901"
+      },
+      "items": [
+        {
+          "productId": "xiaomi-robot-vac",
+          "qty": 1,
+          "price": 15900000
+        }
+      ],
+      "total": 15900000,
+      "shippingMethod": "تیپاکس",
+      "paymentMethod": "پرداخت در محل"
+    },
+    {
+      "id": "SL-20370",
+      "date": "۱۴۰۳/۰۹/۱۲",
+      "dateKey": "14030912",
+      "status": "delivered",
+      "customerName": "امیر حسینی",
+      "customerPhone": "09199887766",
+      "city": "مشهد",
+      "address": {
+        "province": "خراسان رضوی",
+        "city": "مشهد",
+        "address": "بلوار وکیل‌آباد، بین وکیل‌آباد ۱۸ و ۲۰، پلاک ۹۰",
+        "postalCode": "9178945123"
+      },
+      "items": [
+        {
+          "productId": "ps5-pro",
+          "qty": 1,
+          "price": 32500000
+        }
+      ],
+      "total": 32500000,
+      "shippingMethod": "تیپاکس",
+      "paymentMethod": "پرداخت در محل"
+    },
+    {
+      "id": "SL-20361",
+      "date": "۱۴۰۳/۰۹/۰۹",
+      "dateKey": "14030909",
+      "status": "shipped",
+      "customerName": "نیلوفر اکبری",
+      "customerPhone": "09134445566",
+      "city": "یزد",
+      "address": {
+        "province": "یزد",
+        "city": "یزد",
+        "address": "صفائیه، خیابان تیمسار فلاحی، پلاک ۱۲",
+        "postalCode": "8916789012"
+      },
+      "items": [
+        {
+          "productId": "sony-xm5",
+          "qty": 1,
+          "price": 18500000
+        },
+        {
+          "productId": "jbl-charge-5",
+          "qty": 1,
+          "price": 7400000
+        }
+      ],
+      "total": 25900000,
+      "shippingMethod": "پست پیشتاز",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20355",
+      "date": "۱۴۰۳/۰۹/۰۵",
+      "dateKey": "14030905",
+      "status": "delivered",
+      "customerName": "مینا رضایی",
+      "customerPhone": "09211223344",
+      "city": "شیراز",
+      "address": {
+        "province": "فارس",
+        "city": "شیراز",
+        "address": "خیابان زند، کوچه بهار، پلاک ۳، واحد ۲",
+        "postalCode": "7134567890"
+      },
+      "items": [
+        {
+          "productId": "macbook-m4",
+          "qty": 1,
+          "price": 145000000
+        }
+      ],
+      "total": 145000000,
+      "shippingMethod": "پست پیشتاز",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20340",
+      "date": "۱۴۰۳/۰۹/۰۱",
+      "dateKey": "14030901",
+      "status": "delivered",
+      "customerName": "فرهاد صالحی",
+      "customerPhone": "09127778899",
+      "city": "تهران",
+      "address": {
+        "province": "تهران",
+        "city": "تهران",
+        "address": "سعادت‌آباد، میدان کاج، خیابان سرو غربی، پلاک ۲۸",
+        "postalCode": "1998612345"
+      },
+      "items": [
+        {
+          "productId": "lg-oled-c4",
+          "qty": 1,
+          "price": 98000000
+        }
+      ],
+      "total": 98000000,
+      "shippingMethod": "پیک اکسپرس",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20328",
+      "date": "۱۴۰۳/۰۸/۳۰",
+      "dateKey": "14030830",
+      "status": "new",
+      "customerName": "مهدی کاظمی",
+      "customerPhone": "09390001122",
+      "city": "اهواز",
+      "address": {
+        "province": "خوزستان",
+        "city": "اهواز",
+        "address": "کیانپارس، خیابان ۳ غربی، پلاک ۱۵",
+        "postalCode": "6155678901"
+      },
+      "items": [
+        {
+          "productId": "iphone-16-pro",
+          "qty": 1,
+          "price": 89900000
+        }
+      ],
+      "total": 89900000,
+      "shippingMethod": "تیپاکس",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20312",
+      "date": "۱۴۰۳/۰۸/۲۸",
+      "dateKey": "14030828",
+      "status": "returned",
+      "customerName": "حسین نادری",
+      "customerPhone": "09370001122",
+      "city": "تبریز",
+      "address": {
+        "province": "آذربایجان شرقی",
+        "city": "تبریز",
+        "address": "ولیعصر، خیابان ۲۹ بهمن، پلاک ۶۶",
+        "postalCode": "5166612345"
+      },
+      "items": [
+        {
+          "productId": "jbl-charge-5",
+          "qty": 1,
+          "price": 7400000
+        }
+      ],
+      "total": 7400000,
+      "shippingMethod": "پست پیشتاز",
+      "paymentMethod": "پرداخت آنلاین",
+      "note": "کالا آسیب‌دیده دریافت شده؛ درخواست مرجوعی تأیید شد."
+    },
+    {
+      "id": "SL-20301",
+      "date": "۱۴۰۳/۰۸/۲۴",
+      "dateKey": "14030824",
+      "status": "delivered",
+      "customerName": "زهرا نوری",
+      "customerPhone": "09121110022",
+      "city": "کرمان",
+      "address": {
+        "province": "کرمان",
+        "city": "کرمان",
+        "address": "خیابان شریعتی، کوچه ۱۲، پلاک ۹",
+        "postalCode": "7614567890"
+      },
+      "items": [
+        {
+          "productId": "apple-watch-ultra",
+          "qty": 1,
+          "price": 21800000
+        }
+      ],
+      "total": 21800000,
+      "shippingMethod": "پست پیشتاز",
+      "paymentMethod": "پرداخت آنلاین"
+    },
+    {
+      "id": "SL-20288",
+      "date": "۱۴۰۳/۰۸/۱۹",
+      "dateKey": "14030819",
+      "status": "cancelled",
+      "customerName": "پارسا احمدی",
+      "customerPhone": "09120001122",
+      "city": "اهواز",
+      "address": {
+        "province": "خوزستان",
+        "city": "اهواز",
+        "address": "زیتون کارمندی، خیابان ۱۸، پلاک ۷",
+        "postalCode": "6134512345"
+      },
+      "items": [
+        {
+          "productId": "apple-watch-ultra",
+          "qty": 1,
+          "price": 21800000
+        }
+      ],
+      "total": 21800000,
+      "shippingMethod": "پیک اکسپرس",
+      "paymentMethod": "پرداخت آنلاین",
+      "note": "لغو توسط خریدار قبل از آماده‌سازی."
+    },
+    {
+      "id": "SL-20275",
+      "date": "۱۴۰۳/۰۸/۱۴",
+      "dateKey": "14030814",
+      "status": "delivered",
+      "customerName": "سپیده رحیمی",
+      "customerPhone": "09126667788",
+      "city": "همدان",
+      "address": {
+        "province": "همدان",
+        "city": "همدان",
+        "address": "بلوار آیت‌الله مدنی، پلاک ۳۳",
+        "postalCode": "6515678901"
+      },
+      "items": [
+        {
+          "productId": "airpods-pro-2",
+          "qty": 1,
+          "price": 12400000
+        },
+        {
+          "productId": "sony-xm5",
+          "qty": 1,
+          "price": 18500000
+        }
+      ],
+      "total": 30900000,
+      "shippingMethod": "تیپاکس",
+      "paymentMethod": "پرداخت در محل"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rv-1",
+      "productId": "iphone-16-pro",
+      "name": "علی رضایی",
+      "rating": 5,
+      "text": "کیفیت فوق‌العاده‌ای داره. خیلی راضی هستم از خرید. ارسال هم سریع بود.",
+      "date": "۱۴۰۳/۰۹/۲۰",
+      "reply": "از خرید شما سپاسگزاریم؛ همیشه در خدمتیم."
+    },
+    {
+      "id": "rv-2",
+      "productId": "sony-xm5",
+      "name": "سارا محمدی",
+      "rating": 4,
+      "text": "محصول خوبیه ولی قیمت یکم بالاست. در کل ارزش خرید داره.",
+      "date": "۱۴۰۳/۰۹/۱۷"
+    },
+    {
+      "id": "rv-3",
+      "productId": "ps5-pro",
+      "name": "محمد کریمی",
+      "rating": 5,
+      "text": "بهترین خریدی که تا حالا انجام دادم. حتماً پیشنهاد می‌کنم.",
+      "date": "۱۴۰۳/۰۹/۱۱",
+      "reply": "خوشحالیم که راضی بودید."
+    },
+    {
+      "id": "rv-4",
+      "productId": "airpods-pro-2",
+      "name": "نگار موسوی",
+      "rating": 5,
+      "text": "نویزکنسلینگ عالی و بسته‌بندی سالم رسید. فروشنده پاسخگو بود.",
+      "date": "۱۴۰۳/۰۹/۰۸"
+    },
+    {
+      "id": "rv-5",
+      "productId": "galaxy-s25-ultra",
+      "name": "رضا کریمی",
+      "rating": 3,
+      "text": "گوشی خوبه ولی ارسال یک روز دیرتر از موعد بود.",
+      "date": "۱۴۰۳/۰۹/۰۲"
+    },
+    {
+      "id": "rv-6",
+      "productId": "jbl-charge-5",
+      "name": "حسین نادری",
+      "rating": 2,
+      "text": "کالا سالم نبود و مجبور به مرجوعی شدم. پیگیری کنید.",
+      "date": "۱۴۰۳/۰۸/۲۹"
+    }
+  ],
+  "payouts": [
+    {
+      "id": "PO-8841",
+      "date": "۱۴۰۳/۰۹/۱۵",
+      "amount": 86400000,
+      "status": "paid"
+    },
+    {
+      "id": "PO-8790",
+      "date": "۱۴۰۳/۰۹/۰۱",
+      "amount": 54200000,
+      "status": "paid"
+    },
+    {
+      "id": "PO-8712",
+      "date": "۱۴۰۳/۰۸/۱۵",
+      "amount": 71800000,
+      "status": "paid"
+    },
+    {
+      "id": "PO-8902",
+      "date": "۱۴۰۳/۰۹/۲۲",
+      "amount": 42800000,
+      "status": "pending"
+    }
+  ],
+  "sales": [
+    {
+      "label": "شنبه",
+      "value": 18200000
+    },
+    {
+      "label": "یکشنبه",
+      "value": 24600000
+    },
+    {
+      "label": "دوشنبه",
+      "value": 12400000
+    },
+    {
+      "label": "سه‌شنبه",
+      "value": 31800000
+    },
+    {
+      "label": "چهارشنبه",
+      "value": 27100000
+    },
+    {
+      "label": "پنجشنبه",
+      "value": 41500000
+    },
+    {
+      "label": "جمعه",
+      "value": 19900000
+    }
+  ]
+}

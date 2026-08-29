@@ -1,0 +1,86 @@
+import { DateTime } from 'luxon'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Product from '#models/product'
+
+export type CategorySub = {
+  name: string
+  items: string[]
+}
+
+export type CategoryPageMeta = {
+  hero: {
+    image: string
+    eyebrow: string
+    title: string
+    subtitle: string
+  }
+  seo: {
+    heading: string
+    paragraphs: string[]
+  }
+}
+
+export type CategorySuggestedItem = {
+  id: string
+  title: string
+  image: string
+  query: string
+}
+
+export default class Category extends BaseModel {
+  static selfAssignPrimaryKey = true
+
+  @column({ isPrimary: true })
+  declare id: string
+
+  @column()
+  declare name: string
+
+  @column()
+  declare icon: string
+
+  @column({
+    prepare: (value: CategorySub[]) => JSON.stringify(value),
+    consume: (value: CategorySub[] | string) =>
+      typeof value === 'string' ? JSON.parse(value) : value,
+  })
+  declare subs: CategorySub[]
+
+  @column({
+    prepare: (value: CategoryPageMeta | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: CategoryPageMeta | string | null) => {
+      if (!value) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare pageMeta: CategoryPageMeta | null
+
+  @column({
+    prepare: (value: CategorySuggestedItem[] | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: CategorySuggestedItem[] | string | null) => {
+      if (!value) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare suggested: CategorySuggestedItem[] | null
+
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+
+  @hasMany(() => Product, { foreignKey: 'category' })
+  declare products: HasMany<typeof Product>
+
+  /** Frontend Category shape */
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      icon: this.icon,
+      subs: this.subs ?? [],
+    }
+  }
+}

@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: digishop-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: digishop
+      POSTGRES_PASSWORD: digishop
+      POSTGRES_DB: digishop
+    volumes:
+      - digishop_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U digishop -d digishop']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: digishop-api
+    restart: unless-stopped
+    ports:
+      - '3333:3333'
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3333
+      NODE_ENV: development
+      APP_URL: http://localhost:3333
+      FRONTEND_URL: http://localhost:3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: digishop
+      DB_PASSWORD: digishop
+      DB_DATABASE: digishop
+      ZARINPAL_CALLBACK_URL: http://localhost:3333/api/v1/payments/zarinpal/callback
+    volumes:
+      - ./app:/app/app
+      - ./start:/app/start
+      - ./config:/app/config
+      - ./database:/app/database
+      - ./providers:/app/providers
+      - ./adonisrc.ts:/app/adonisrc.ts
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  digishop_pg_data:
