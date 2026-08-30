@@ -1,8 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
 import Payment from '#models/payment'
+import OrderItemRow from '#models/order_item_row'
+import SellerOrder from '#models/seller_order'
 
 export type OrderItem = {
   productId: string
@@ -28,6 +30,14 @@ export type OrderStatus =
   | 'processing'
   | 'cancelled'
   | 'pending_payment'
+
+export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  pending_payment: ['processing', 'cancelled'],
+  processing: ['shipping', 'cancelled'],
+  shipping: ['delivered', 'cancelled'],
+  delivered: [],
+  cancelled: [],
+}
 
 export default class Order extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -88,7 +98,12 @@ export default class Order extends BaseModel {
   @hasOne(() => Payment)
   declare payment: HasOne<typeof Payment>
 
-  /** Frontend ShopOrder (hides pending_payment as processing for UI) */
+  @hasMany(() => OrderItemRow)
+  declare itemRows: HasMany<typeof OrderItemRow>
+
+  @hasMany(() => SellerOrder, { foreignKey: 'buyerOrderId' })
+  declare sellerOrders: HasMany<typeof SellerOrder>
+
   toShopOrderJSON() {
     const status =
       this.status === 'pending_payment' ? ('processing' as const) : this.status

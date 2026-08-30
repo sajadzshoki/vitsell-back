@@ -1,10 +1,10 @@
 import User from '#models/user'
 import Profile from '#models/profile'
 import OtpService from '#services/otp_service'
+import { OtpUnavailableError } from '#services/kavenegar_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import env from '#start/env'
-import app from '@adonisjs/core/services/app'
 
 const phoneRule = vine.string().regex(/^09\d{9}$/)
 
@@ -25,17 +25,26 @@ export default class AuthController {
   async requestOtp({ request, response }: HttpContext) {
     const { phone } = await request.validateUsing(requestOtpValidator)
     const otp = new OtpService()
-    const result = await otp.request(phone)
+    try {
+      const result = await otp.request(phone)
+      const exposeDevCode =
+        result.mocked === true &&
+        env.get('NODE_ENV') !== 'production' &&
+        env.get('ALLOW_OTP_MOCK') === true
 
-    // Always return code when SMS is mocked (no Kavenegar key) or in non-production.
-    const exposeDevCode =
-      result.mocked || app.inDev || !env.get('KAVENEGAR_API_KEY')
-
-    return response.ok({
-      message: 'کد تأیید ارسال شد',
-      expiresIn: result.expiresIn,
-      ...(exposeDevCode ? { devCode: result.code } : {}),
-    })
+      return response.ok({
+        message: 'کد تأیید ارسال شد',
+        expiresIn: result.expiresIn,
+        ...(exposeDevCode ? { devCode: result.code } : {}),
+      })
+    } catch (error) {
+      if (error instanceof OtpUnavailableError) {
+        return response.serviceUnavailable({
+          errors: [{ field: 'otp', message: error.message }],
+        })
+      }
+      throw error
+    }
   }
 
   async verifyOtp({ request, response }: HttpContext) {
@@ -66,7 +75,7 @@ export default class AuthController {
         birth: null,
         gender: null,
       })
-      await user.load('profile')
+      await (user as any).load('profile')
     } else if (!user.profile) {
       await Profile.create({
         userId: user.id,
@@ -76,7 +85,7 @@ export default class AuthController {
         birth: null,
         gender: null,
       })
-      await user.load('profile')
+      await (user as any).load('profile')
     }
 
     const token = await User.accessTokens.create(user)
@@ -89,7 +98,7 @@ export default class AuthController {
 
   async me({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    await user.load('profile')
+    await (user as any).load('profile')
     if (!user.profile) {
       return response.notFound({ errors: [{ field: 'profile', message: 'پروفایل یافت نشد' }] })
     }

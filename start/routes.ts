@@ -11,6 +11,7 @@ const CheckoutController = () => import('#controllers/checkout_controller')
 const NotificationsController = () => import('#controllers/notifications_controller')
 const ContentController = () => import('#controllers/content_controller')
 const SellerController = () => import('#controllers/seller_controller')
+const ContactController = () => import('#controllers/contact_controller')
 
 router.get('/', () => {
   return { name: 'digishop-api', version: '1' }
@@ -35,6 +36,12 @@ router
     router.get('products/:id', [ProductsController, 'show'])
     router.get('products/:id/reviews', [ProductsController, 'reviews'])
     router.get('products/:id/questions', [ProductsController, 'questions'])
+    router
+      .post('products/:id/reviews', [ProductsController, 'storeReview'])
+      .use(middleware.auth())
+    router
+      .post('products/:id/questions', [ProductsController, 'storeQuestion'])
+      .use(middleware.auth())
 
     router.get('home', [ContentController, 'home'])
     router.get('locations', [ContentController, 'locations'])
@@ -44,6 +51,7 @@ router
     router.get('blog', [ContentController, 'blogIndex'])
     router.get('blog/:id', [ContentController, 'blogShow'])
     router.get('static-pages/:id', [ContentController, 'staticPage'])
+    router.post('contact', [ContactController, 'store'])
 
     router.get('payments/zarinpal/callback', [CheckoutController, 'zarinpalCallback'])
 
@@ -97,15 +105,18 @@ router
         router.get('shop', [SellerController, 'shop'])
         router.put('shop', [SellerController, 'updateShop'])
         router.get('listings', [SellerController, 'listings'])
+        router.post('listings', [SellerController, 'storeListing'])
+        router.patch('listings/:productId', [SellerController, 'updateListingStatus'])
         router.get('orders', [SellerController, 'orders'])
         router.get('orders/:id', [SellerController, 'showOrder'])
         router.patch('orders/:id/status', [SellerController, 'updateOrderStatus'])
         router.get('reviews', [SellerController, 'reviews'])
         router.post('reviews/:id/reply', [SellerController, 'replyReview'])
         router.get('payouts', [SellerController, 'payouts'])
+        router.post('payouts', [SellerController, 'requestPayout'])
         router.get('sales', [SellerController, 'sales'])
       })
       .prefix('seller')
-      .use(middleware.auth())
+      .use([middleware.auth(), middleware.seller()])
   })
   .prefix('/api/v1')

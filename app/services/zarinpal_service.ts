@@ -14,9 +14,17 @@ type ZarinpalVerifyResult = {
   message?: string
 }
 
+export class PaymentUnavailableError extends Error {
+  constructor(message = 'درگاه پرداخت در دسترس نیست') {
+    super(message)
+    this.name = 'PaymentUnavailableError'
+  }
+}
+
 /**
  * Zarinpal payment gateway v4.
  * Amounts stored/passed here are Rials (frontend toman × 10).
+ * Mock only when NODE_ENV !== production AND ALLOW_PAYMENT_MOCK === true.
  */
 export default class ZarinpalService {
   private merchantId() {
@@ -25,6 +33,10 @@ export default class ZarinpalService {
 
   private sandbox() {
     return env.get('ZARINPAL_SANDBOX') !== false
+  }
+
+  private allowMock() {
+    return env.get('NODE_ENV') !== 'production' && env.get('ALLOW_PAYMENT_MOCK') === true
   }
 
   private baseApi() {
@@ -52,10 +64,15 @@ export default class ZarinpalService {
       `${env.get('APP_URL')}/api/v1/payments/zarinpal/callback`
 
     if (!merchantId) {
+      if (!this.allowMock()) {
+        throw new PaymentUnavailableError(
+          'ZARINPAL_MERCHANT_ID تنظیم نشده و mock پرداخت غیرفعال است'
+        )
+      }
       const authority = `SANDBOX${Date.now()}${Math.floor(Math.random() * 1e6)}`
       logger.info(
         { authority, amountRial: input.amountRial },
-        '[Zarinpal] merchant missing — mock authority for local dev'
+        '[Zarinpal] merchant missing — mock authority (ALLOW_PAYMENT_MOCK)'
       )
       return {
         authority,
@@ -101,7 +118,12 @@ export default class ZarinpalService {
     const merchantId = this.merchantId()
 
     if (!merchantId) {
-      logger.info({ authority: input.authority }, '[Zarinpal] mock verify OK')
+      if (!this.allowMock()) {
+        throw new PaymentUnavailableError(
+          'ZARINPAL_MERCHANT_ID تنظیم نشده و mock پرداخت غیرفعال است'
+        )
+      }
+      logger.info({ authority: input.authority }, '[Zarinpal] mock verify OK (ALLOW_PAYMENT_MOCK)')
       return {
         ok: true,
         code: 100,

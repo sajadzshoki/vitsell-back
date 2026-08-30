@@ -70,12 +70,29 @@ export default class extends BaseSeeder {
         fastDelivery?: boolean
         shortDesc?: string
         shortName?: string
+        description?: string
+        features?: string[]
+        buyNotes?: { icon: string; text: string }[]
         scores?: Record<string, number>
         specs?: { key: string; value: string }[]
       }[]
     >('products.json')
 
     for (const p of products) {
+      const description =
+        p.description ??
+        `${p.shortDesc || p.title}\n\nاین محصول با گارانتی اصالت کالا از فروشگاه دیجی‌شاپ عرضه می‌شود.`
+      const features =
+        p.features ??
+        (['گارانتی اصالت کالا', 'ارسال سریع', 'پشتیبانی تخصصی'].filter(Boolean) as string[])
+      const buyNotes =
+        p.buyNotes ??
+        ([
+          { icon: 'truck-delivery', text: 'ارسال سریع از انبار فروشنده' },
+          { icon: 'refresh', text: '۷ روز ضمانت بازگشت کالا' },
+          { icon: 'shield-check', text: 'تضمین اصالت کالا' },
+        ] as { icon: string; text: string }[])
+
       await Product.updateOrCreate(
         { id: p.id },
         {
@@ -96,6 +113,9 @@ export default class extends BaseSeeder {
           fastDelivery: !!p.fastDelivery,
           shortDesc: p.shortDesc ?? null,
           shortName: p.shortName ?? null,
+          description,
+          features,
+          buyNotes,
           scores: p.scores ?? null,
           specs: p.specs ?? null,
           soldCount: 0,

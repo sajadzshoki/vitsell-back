@@ -30,7 +30,7 @@ const addressValidator = vine.compile(
 export default class AccountController {
   async showProfile({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    await user.load('profile')
+    await (user as any).load('profile')
     if (!user.profile) {
       return response.notFound({ errors: [{ field: 'profile', message: 'پروفایل یافت نشد' }] })
     }

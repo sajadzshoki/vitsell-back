@@ -98,6 +98,28 @@ export default class Product extends BaseModel {
   @column()
   declare viewCount: number
 
+  @column()
+  declare description: string | null
+
+  @column({
+    prepare: (value: string[] | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: string[] | string | null) => {
+      if (!value) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare features: string[] | null
+
+  @column({
+    prepare: (value: Array<{ icon: string; text: string }> | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: Array<{ icon: string; text: string }> | string | null) => {
+      if (!value) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare buyNotes: Array<{ icon: string; text: string }> | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -135,6 +157,9 @@ export default class Product extends BaseModel {
       ...(this.shortName ? { shortName: this.shortName } : {}),
       ...(this.scores ? { scores: this.scores } : {}),
       ...(this.specs?.length ? { specs: this.specs } : {}),
+      ...(this.description ? { description: this.description } : {}),
+      ...(this.features?.length ? { features: this.features } : {}),
+      ...(this.buyNotes?.length ? { buyNotes: this.buyNotes } : {}),
     }
   }
 }

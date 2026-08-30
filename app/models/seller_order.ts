@@ -1,7 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import SellerShop from '#models/seller_shop'
+import Order from '#models/order'
+import SellerOrderItemRow from '#models/seller_order_item_row'
 
 export type SellerOrderItem = { productId: string; qty: number; price: number }
 export type SellerOrderAddress = {
@@ -9,6 +11,23 @@ export type SellerOrderAddress = {
   city: string
   address: string
   postalCode: string
+}
+
+export type SellerOrderStatus =
+  | 'new'
+  | 'packing'
+  | 'shipped'
+  | 'delivered'
+  | 'returned'
+  | 'cancelled'
+
+export const SELLER_ORDER_TRANSITIONS: Record<SellerOrderStatus, SellerOrderStatus[]> = {
+  new: ['packing', 'cancelled'],
+  packing: ['shipped', 'cancelled'],
+  shipped: ['delivered', 'returned'],
+  delivered: [],
+  returned: [],
+  cancelled: [],
 }
 
 export default class SellerOrder extends BaseModel {
@@ -22,13 +41,19 @@ export default class SellerOrder extends BaseModel {
   declare shopId: number
 
   @column()
+  declare buyerOrderId: string | null
+
+  @column()
+  declare stockReserved: boolean
+
+  @column()
   declare date: string
 
   @column()
   declare dateKey: string
 
   @column()
-  declare status: 'new' | 'packing' | 'shipped' | 'delivered' | 'returned' | 'cancelled'
+  declare status: SellerOrderStatus
 
   @column()
   declare customerName: string
@@ -74,9 +99,16 @@ export default class SellerOrder extends BaseModel {
   @belongsTo(() => SellerShop, { foreignKey: 'shopId' })
   declare shop: BelongsTo<typeof SellerShop>
 
+  @belongsTo(() => Order, { foreignKey: 'buyerOrderId' })
+  declare buyerOrder: BelongsTo<typeof Order>
+
+  @hasMany(() => SellerOrderItemRow, { foreignKey: 'sellerOrderId' })
+  declare itemRows: HasMany<typeof SellerOrderItemRow>
+
   toJSON() {
     return {
       id: this.id,
+      buyerOrderId: this.buyerOrderId,
       date: this.date,
       dateKey: this.dateKey,
       status: this.status,
