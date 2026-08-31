@@ -28,8 +28,10 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   KAVENEGAR_API_KEY: Env.schema.string.optional(),
   KAVENEGAR_OTP_TEMPLATE: Env.schema.string.optional(),
+  ALLOW_OTP_MOCK: Env.schema.boolean.optional(),
 
   ZARINPAL_MERCHANT_ID: Env.schema.string.optional(),
   ZARINPAL_SANDBOX: Env.schema.boolean.optional(),
   ZARINPAL_CALLBACK_URL: Env.schema.string.optional(),
+  ALLOW_PAYMENT_MOCK: Env.schema.boolean.optional(),
 })

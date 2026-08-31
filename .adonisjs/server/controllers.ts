@@ -10,6 +10,7 @@ export const controllers = {
   Cart: () => import('#controllers/cart_controller'),
   Categories: () => import('#controllers/categories_controller'),
   Checkout: () => import('#controllers/checkout_controller'),
+  Contact: () => import('#controllers/contact_controller'),
   Content: () => import('#controllers/content_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Notifications: () => import('#controllers/notifications_controller'),
