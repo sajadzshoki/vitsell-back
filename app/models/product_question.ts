@@ -62,6 +62,7 @@ export default class ProductQuestion extends BaseModel {
   toJSON() {
     return {
       id: this.id,
+      productId: this.productId,
       name: this.name,
       date: this.date,
       verified: this.verified,

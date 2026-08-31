@@ -15,7 +15,16 @@ import { homeBrands, homeCircleItems, homePromos } from '../../digishop-front/ap
 import { cartDiscountCodes } from '../../digishop-front/app/data/cart.ts'
 import { citiesByProvince } from '../../digishop-front/app/data/iran-locations.ts'
 import { compareTemplates, radarCriteriaByCategory } from '../../digishop-front/app/data/compare.ts'
-import { footerTrustItems, footerColumns, footerSocials } from '../../digishop-front/app/data/footer.ts'
+import {
+  footerTrustItems,
+  footerColumns,
+  footerSocials,
+  footerAbout,
+  footerCopyright,
+  footerContact,
+  footerAppStores,
+  footerBadges,
+} from '../../digishop-front/app/data/footer.ts'
 import {
   defaultSellerShop,
   defaultSellerListings,
@@ -66,9 +75,11 @@ write('content.json', {
   footerTrustItems,
   footerColumns,
   footerSocials,
-  footerAbout:
-    'دیجی‌شاپ بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
-  footerCopyright: '© ۱۴۰۵ فروشگاه اینترنتی دیجی‌شاپ. تمامی حقوق محفوظ است.',
+  footerAbout,
+  footerCopyright,
+  footerContact,
+  footerAppStores,
+  footerBadges,
   categoryLabels,
   cartDiscountCodes,
 })

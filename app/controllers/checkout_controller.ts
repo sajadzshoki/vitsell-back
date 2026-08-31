@@ -1,11 +1,11 @@
 import Address from '#models/address'
 import CartItem from '#models/cart_item'
-import DiscountCode from '#models/discount_code'
 import Order from '#models/order'
 import Payment from '#models/payment'
 import Product from '#models/product'
 import Notification from '#models/notification'
 import ZarinpalService from '#services/zarinpal_service'
+import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
 import env from '#start/env'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -80,15 +80,22 @@ export default class CheckoutController {
     let discountAmount = 0
     let discountCode: string | null = null
     if (payload.discountCode) {
-      const code = payload.discountCode.trim().toUpperCase()
-      const row = await DiscountCode.find(code)
-      if (!row || !row.active) {
-        return response.unprocessableEntity({
-          errors: [{ field: 'discountCode', message: 'کد تخفیف نامعتبر است' }],
+      try {
+        const resolved = await resolveDiscountAmount({
+          code: payload.discountCode,
+          subtotal,
+          userId: user.id,
         })
+        discountAmount = resolved.amount
+        discountCode = resolved.code
+      } catch (err) {
+        if (err instanceof DiscountResolveError) {
+          return response.unprocessableEntity({
+            errors: [{ field: err.field, message: err.message }],
+          })
+        }
+        throw err
       }
-      discountAmount = Math.floor(subtotal * row.percent)
-      discountCode = code
     }
 
     const shipCost = shippingPrice(payload.shippingMethod, subtotal)

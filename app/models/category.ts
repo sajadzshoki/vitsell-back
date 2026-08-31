@@ -6,6 +6,7 @@ import Product from '#models/product'
 export type CategorySub = {
   name: string
   items: string[]
+  image?: string | null
 }
 
 export type CategoryPageMeta = {
@@ -80,7 +81,7 @@ export default class Category extends BaseModel {
   @hasMany(() => Product, { foreignKey: 'category' })
   declare products: HasMany<typeof Product>
 
-  /** Frontend Category shape */
+  /** Public / storefront Category shape */
   toJSON() {
     return {
       id: this.id,
@@ -89,6 +90,22 @@ export default class Category extends BaseModel {
       image: this.image ?? null,
       text: this.text ?? null,
       subs: this.subs ?? [],
+    }
+  }
+
+  /** Admin panel full shape */
+  toAdminJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      icon: this.icon,
+      image: this.image ?? null,
+      text: this.text ?? null,
+      subs: this.subs ?? [],
+      pageMeta: this.pageMeta ?? null,
+      suggested: this.suggested ?? null,
+      createdAt: this.createdAt?.toISO() ?? null,
+      updatedAt: this.updatedAt?.toISO() ?? null,
     }
   }
 }

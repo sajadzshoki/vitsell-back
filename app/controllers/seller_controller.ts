@@ -1,82 +1,150 @@
 import ContentBlock from '#models/content_block'
 import Product from '#models/product'
+import ProductQuestion from '#models/product_question'
 import SellerListing from '#models/seller_listing'
-import SellerOrder from '#models/seller_order'
+import SellerOrder, { SELLER_ORDER_TRANSITIONS } from '#models/seller_order'
 import SellerReview from '#models/seller_review'
 import SellerPayout from '#models/seller_payout'
 import SellerShop from '#models/seller_shop'
 import User from '#models/user'
+import { saveFooterPayload } from '#utils/footer'
+import {
+  defaultSiteSettings,
+  loadFooterWithSiteOverlay,
+  loadSiteSettings,
+  saveSiteSettings,
+  SiteSettingsError,
+  syncSiteSettingsFromFooter,
+} from '#utils/site_settings'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 
-const SITE_SETTINGS_KEY = 'siteSettings'
 const SITE_SALES_KEY = 'siteSales'
-
-const defaultSiteSettings = {
-  name: 'دیجی‌شاپ',
-  slug: 'digishop',
-  phone: '02191000000',
-  email: 'info@digishop.ir',
-  city: 'تهران',
-  about: 'فروشگاه اینترنتی دیجی‌شاپ',
-  rating: 0,
-  reviewCount: 0,
-  joinDate: '',
-}
 
 const siteSettingsValidator = vine.compile(
   vine.object({
     name: vine.string().trim(),
-    phone: vine.string().trim(),
+    phone: vine.string().trim().regex(/^09\d{9}$/),
     email: vine.string().email(),
     city: vine.string().trim(),
     about: vine.string().trim(),
   })
 )
 
-const listingStatusValidator = vine.compile(
+const footerValidator = vine.compile(
   vine.object({
-    status: vine.enum(['active', 'pending', 'inactive', 'out_of_stock'] as const),
+    about: vine.string().trim(),
+    copyright: vine.string().trim(),
+    trustItems: vine.array(
+      vine.object({
+        id: vine.string().trim(),
+        icon: vine.string().trim(),
+        title: vine.string().trim(),
+        subtitle: vine.string().trim(),
+      })
+    ),
+    columns: vine.array(
+      vine.object({
+        id: vine.string().trim(),
+        title: vine.string().trim(),
+        links: vine.array(
+          vine.object({
+            label: vine.string().trim(),
+            to: vine.string().trim(),
+          })
+        ),
+      })
+    ),
+    socials: vine.array(
+      vine.object({
+        id: vine.string().trim(),
+        label: vine.string().trim(),
+        icon: vine.string().trim(),
+        href: vine.string().trim(),
+      })
+    ),
+    contact: vine.object({
+      phones: vine.array(
+        vine.object({
+          label: vine.string().trim(),
+          href: vine.string().trim(),
+        })
+      ),
+      email: vine.object({
+        label: vine.string().trim(),
+        href: vine.string().trim(),
+      }),
+    }),
+    appStores: vine.array(
+      vine.object({
+        id: vine.string().trim(),
+        label: vine.string().trim(),
+        icon: vine.string().trim(),
+        href: vine.string().trim(),
+      })
+    ),
+    badges: vine.array(
+      vine.object({
+        id: vine.string().trim(),
+        label: vine.string().trim(),
+        icon: vine.string().trim(),
+      })
+    ),
   })
 )
 
+const listingStatusEnum = ['active', 'pending', 'inactive', 'out_of_stock'] as const
+
+const listingProductFields = {
+  id: vine.string().trim().optional(),
+  title: vine.string().trim(),
+  shortName: vine.string().trim().optional(),
+  brand: vine.string().trim(),
+  category: vine.string().trim(),
+  categoryLabel: vine.string().trim(),
+  price: vine.number().min(1),
+  oldPrice: vine.number().min(1).optional(),
+  image: vine.string().trim(),
+  imageDark: vine.string().trim().optional(),
+  gallery: vine.array(vine.string()).optional(),
+  colors: vine
+    .array(
+      vine.object({
+        name: vine.string(),
+        hex: vine.string(),
+      })
+    )
+    .optional(),
+  shortDesc: vine.string().trim().optional(),
+  description: vine.string().trim().optional(),
+  features: vine.array(vine.string()).optional(),
+  specs: vine
+    .array(
+      vine.object({
+        key: vine.string(),
+        value: vine.string(),
+      })
+    )
+    .optional(),
+  badge: vine.string().trim().optional(),
+  inStock: vine.boolean().optional(),
+  fastDelivery: vine.boolean().optional(),
+}
+
 const storeListingValidator = vine.compile(
   vine.object({
-    product: vine.object({
-      id: vine.string().trim().optional(),
-      title: vine.string().trim(),
-      shortName: vine.string().trim().optional(),
-      brand: vine.string().trim(),
-      category: vine.string().trim(),
-      categoryLabel: vine.string().trim(),
-      price: vine.number().min(1),
-      oldPrice: vine.number().min(1).optional(),
-      image: vine.string().trim(),
-      imageDark: vine.string().trim().optional(),
-      gallery: vine.array(vine.string()).optional(),
-      colors: vine
-        .array(
-          vine.object({
-            name: vine.string(),
-            hex: vine.string(),
-          })
-        )
-        .optional(),
-      shortDesc: vine.string().trim().optional(),
-      specs: vine
-        .array(
-          vine.object({
-            key: vine.string(),
-            value: vine.string(),
-          })
-        )
-        .optional(),
-      badge: vine.string().trim().optional(),
-      inStock: vine.boolean().optional(),
-      fastDelivery: vine.boolean().optional(),
-    }),
+    product: vine.object(listingProductFields),
     stock: vine.number().min(0),
-    status: vine.enum(['active', 'pending', 'inactive', 'out_of_stock'] as const).optional(),
+    status: vine.enum(listingStatusEnum).optional(),
+  })
+)
+
+/** Status-only or full product+stock update from admin panel */
+const updateListingValidator = vine.compile(
+  vine.object({
+    status: vine.enum(listingStatusEnum).optional(),
+    stock: vine.number().min(0).optional(),
+    product: vine.object(listingProductFields).optional(),
   })
 )
 
@@ -91,34 +159,79 @@ function slugify(input: string) {
   )
 }
 
+async function resolveSiteShop() {
+  let siteShop = await SellerShop.query().where('slug', 'digishop').first()
+  if (!siteShop) {
+    siteShop = await SellerShop.query().orderBy('id', 'asc').first()
+  }
+  if (!siteShop) {
+    const admin = await User.query().where('role', 'admin').first()
+    siteShop = await SellerShop.create({
+      userId: admin?.id ?? 1,
+      name: defaultSiteSettings.name,
+      slug: defaultSiteSettings.slug,
+      phone: defaultSiteSettings.phone,
+      email: defaultSiteSettings.email,
+      city: defaultSiteSettings.city,
+      about: defaultSiteSettings.about,
+      rating: 0,
+      reviewCount: 0,
+      joinDate: new Intl.DateTimeFormat('fa-IR-u-ca-persian').format(new Date()),
+    })
+  }
+  return siteShop
+}
+
+function jalaliishDate() {
+  return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
+}
+
 /**
  * Single-tenant admin panel under /seller.
  * No per-user shop: site settings + global catalog/ops.
  */
 export default class SellerController {
   async shop({ response }: HttpContext) {
-    const block = await ContentBlock.find(SITE_SETTINGS_KEY)
-    const value = (block?.value as Record<string, unknown> | null) ?? null
-    return response.ok({
-      ...defaultSiteSettings,
-      ...(value && typeof value === 'object' ? value : {}),
-    })
+    return response.ok(await loadSiteSettings())
   }
 
   async updateShop({ request, response }: HttpContext) {
     const payload = await request.validateUsing(siteSettingsValidator)
-    const existing = await ContentBlock.find(SITE_SETTINGS_KEY)
-    const prev = (existing?.value as Record<string, unknown> | null) ?? {}
-    const next = {
-      ...defaultSiteSettings,
-      ...prev,
-      ...payload,
+    try {
+      const next = await saveSiteSettings(payload, { syncFooter: true })
+      return response.ok(next)
+    } catch (err) {
+      if (err instanceof SiteSettingsError) {
+        return response.unprocessableEntity({
+          errors: [{ field: err.field, message: err.message }],
+        })
+      }
+      throw err
     }
-    await ContentBlock.updateOrCreate(
-      { key: SITE_SETTINGS_KEY },
-      { key: SITE_SETTINGS_KEY, value: next },
-    )
-    return response.ok(next)
+  }
+
+  async footer({ response }: HttpContext) {
+    return response.ok(await loadFooterWithSiteOverlay())
+  }
+
+  async updateFooter({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(footerValidator)
+    try {
+      await saveFooterPayload(payload)
+      await syncSiteSettingsFromFooter(payload)
+    } catch (err) {
+      if (err instanceof SiteSettingsError) {
+        return response.unprocessableEntity({
+          errors: [{ field: err.field, message: err.message }],
+        })
+      }
+      throw err
+    }
+    return response.ok(await loadFooterWithSiteOverlay())
   }
 
   async listings({ response }: HttpContext) {
@@ -131,6 +244,20 @@ export default class SellerController {
         ...(l.product ? { product: l.product.toCatalogJSON() } : {}),
       }))
     )
+  }
+
+  async showListing({ params, response }: HttpContext) {
+    const listing = await SellerListing.query()
+      .where('product_id', params.productId)
+      .preload('product')
+      .first()
+    if (!listing) {
+      return response.notFound({ errors: [{ field: 'productId', message: 'محصول یافت نشد' }] })
+    }
+    return response.ok({
+      ...listing.toJSON(),
+      ...(listing.product ? { product: listing.product.toCatalogJSON() } : {}),
+    })
   }
 
   async storeListing({ request, response }: HttpContext) {
@@ -168,25 +295,7 @@ export default class SellerController {
 
     const status = payload.status ?? (payload.stock > 0 ? 'pending' : 'out_of_stock')
 
-    let siteShop = await SellerShop.query().where('slug', 'digishop').first()
-    if (!siteShop) {
-      siteShop = await SellerShop.query().orderBy('id', 'asc').first()
-    }
-    if (!siteShop) {
-      const admin = await User.query().where('role', 'admin').first()
-      siteShop = await SellerShop.create({
-        userId: admin?.id ?? 1,
-        name: defaultSiteSettings.name,
-        slug: defaultSiteSettings.slug,
-        phone: defaultSiteSettings.phone,
-        email: defaultSiteSettings.email,
-        city: defaultSiteSettings.city,
-        about: defaultSiteSettings.about,
-        rating: 0,
-        reviewCount: 0,
-        joinDate: new Intl.DateTimeFormat('fa-IR-u-ca-persian').format(new Date()),
-      })
-    }
+    const siteShop = await resolveSiteShop()
 
     const existing = await SellerListing.query().where('product_id', product.id).first()
     let listing: SellerListing
@@ -214,28 +323,83 @@ export default class SellerController {
   }
 
   async updateListing({ params, request, response }: HttpContext) {
-    const payload = await request.validateUsing(listingStatusValidator)
+    const payload = await request.validateUsing(updateListingValidator)
     const listing = await SellerListing.query().where('product_id', params.productId).first()
     if (!listing) {
       return response.notFound({ errors: [{ field: 'productId', message: 'محصول یافت نشد' }] })
     }
-    listing.status = payload.status
-    if (payload.status === 'out_of_stock') {
-      listing.stock = 0
+
+    if (payload.status == null && payload.stock == null && !payload.product) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'status', message: 'حداقل یکی از status، stock یا product لازم است' }],
+      })
     }
+
+    let product = await Product.find(listing.productId)
+
+    if (payload.product) {
+      const p = payload.product
+      product = await Product.updateOrCreate(
+        { id: listing.productId },
+        {
+          id: listing.productId,
+          title: p.title,
+          brand: p.brand,
+          category: p.category,
+          categoryLabel: p.categoryLabel,
+          price: p.price,
+          oldPrice: p.oldPrice ?? null,
+          rating: product?.rating ?? 0,
+          reviews: product?.reviews ?? 0,
+          image: p.image,
+          imageDark: p.imageDark ?? null,
+          gallery: p.gallery?.length ? p.gallery : null,
+          badge: p.badge || null,
+          colors: p.colors?.length ? p.colors : null,
+          inStock: p.inStock ?? (payload.stock ?? listing.stock) > 0,
+          fastDelivery: p.fastDelivery ?? false,
+          shortDesc: p.shortDesc ?? null,
+          shortName: p.shortName ?? null,
+          description: p.description ?? product?.description ?? null,
+          features: p.features?.length ? p.features : product?.features ?? null,
+          specs: p.specs?.length ? p.specs : null,
+          scores: product?.scores ?? null,
+          soldCount: product?.soldCount ?? 0,
+          viewCount: product?.viewCount ?? 0,
+        }
+      )
+    }
+
+    if (payload.stock != null) {
+      listing.stock = payload.stock
+    }
+
+    if (payload.status) {
+      listing.status = payload.status
+      if (payload.status === 'out_of_stock') {
+        listing.stock = 0
+      }
+    }
+    else if (payload.stock != null && payload.stock <= 0 && listing.status === 'active') {
+      listing.status = 'out_of_stock'
+    }
+
     await listing.save()
 
-    const product = await Product.find(listing.productId)
     if (product) {
-      product.inStock = payload.status === 'active' || payload.status === 'pending'
-        ? listing.stock > 0
-        : payload.status !== 'out_of_stock' && listing.stock > 0
-      if (payload.status === 'out_of_stock') product.inStock = false
-      if (payload.status === 'active') product.inStock = true
+      const status = listing.status
+      if (status === 'out_of_stock') product.inStock = false
+      else if (status === 'active') product.inStock = listing.stock > 0
+      else if (status === 'pending') product.inStock = listing.stock > 0
+      else product.inStock = listing.stock > 0
       await product.save()
     }
 
-    return response.ok(listing.toJSON())
+    await listing.load('product')
+    return response.ok({
+      listing: listing.toJSON(),
+      ...(listing.product ? { product: listing.product.toCatalogJSON() } : {}),
+    })
   }
 
   async orders({ request, response }: HttpContext) {
@@ -284,6 +448,20 @@ export default class SellerController {
     if (!order) {
       return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
     }
+
+    const allowed = SELLER_ORDER_TRANSITIONS[order.status] ?? []
+    const isSame = status === order.status
+    const isAdjacent
+      = allowed.includes(status)
+        || Object.entries(SELLER_ORDER_TRANSITIONS).some(
+          ([from, tos]) => from === status && tos.includes(order.status)
+        )
+    if (!isSame && !isAdjacent) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'status', message: 'تغییر وضعیت مجاز نیست' }],
+      })
+    }
+
     order.status = status
     await order.save()
     return response.ok(order.toJSON())
@@ -306,9 +484,97 @@ export default class SellerController {
     return response.ok(review.toJSON())
   }
 
+  async questions({ response }: HttpContext) {
+    const questions = await ProductQuestion.query().orderBy('created_at', 'desc')
+    return response.ok(questions.map((q) => q.toJSON()))
+  }
+
+  async replyQuestion({ params, request, response }: HttpContext) {
+    const validator = vine.compile(
+      vine.object({
+        text: vine.string().trim().minLength(2).maxLength(2000),
+        author: vine.string().trim().minLength(2).maxLength(80).optional(),
+      })
+    )
+    const { text, author } = await request.validateUsing(validator)
+    const question = await ProductQuestion.find(params.id)
+    if (!question) {
+      return response.notFound({ errors: [{ field: 'id', message: 'پرسش یافت نشد' }] })
+    }
+
+    const previous = question.answer
+    question.answer = {
+      author: author?.trim() || 'کارشناس دیجی‌شاپ',
+      date: jalaliishDate(),
+      text,
+      helpfulYes: previous?.helpfulYes ?? 0,
+      helpfulNo: previous?.helpfulNo ?? 0,
+      role: 'support',
+    }
+    await question.save()
+    return response.ok(question.toJSON())
+  }
+
+  async clearQuestionAnswer({ params, response }: HttpContext) {
+    const question = await ProductQuestion.find(params.id)
+    if (!question) {
+      return response.notFound({ errors: [{ field: 'id', message: 'پرسش یافت نشد' }] })
+    }
+    question.answer = null
+    await question.save()
+    return response.ok(question.toJSON())
+  }
+
+  async setQuestionVerified({ params, request, response }: HttpContext) {
+    const validator = vine.compile(vine.object({ verified: vine.boolean() }))
+    const { verified } = await request.validateUsing(validator)
+    const question = await ProductQuestion.find(params.id)
+    if (!question) {
+      return response.notFound({ errors: [{ field: 'id', message: 'پرسش یافت نشد' }] })
+    }
+    question.verified = verified
+    await question.save()
+    return response.ok(question.toJSON())
+  }
+
+  async destroyQuestion({ params, response }: HttpContext) {
+    const question = await ProductQuestion.find(params.id)
+    if (!question) {
+      return response.notFound({ errors: [{ field: 'id', message: 'پرسش یافت نشد' }] })
+    }
+    await question.delete()
+    return response.ok({ ok: true })
+  }
+
   async payouts({ response }: HttpContext) {
     const payouts = await SellerPayout.query().orderBy('created_at', 'desc')
     return response.ok(payouts.map((p) => p.toJSON()))
+  }
+
+  async storePayout({ request, response }: HttpContext) {
+    const validator = vine.compile(
+      vine.object({
+        amount: vine.number().min(1),
+      })
+    )
+    const { amount } = await request.validateUsing(validator)
+    const rounded = Math.round(amount)
+    if (rounded <= 0) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'amount', message: 'مبلغ تسویه نامعتبر است' }],
+      })
+    }
+
+    const siteShop = await resolveSiteShop()
+    const id = `PO-${Math.floor(1000 + Math.random() * 9000)}`
+    const payout = await SellerPayout.create({
+      id,
+      shopId: siteShop.id,
+      date: jalaliishDate(),
+      amount: rounded,
+      status: 'pending',
+    })
+    return response.created(payout.toJSON())
   }
 
   async sales({ response }: HttpContext) {

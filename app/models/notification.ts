@@ -30,6 +30,9 @@ export default class Notification extends BaseModel {
   @column()
   declare to: string | null
 
+  @column()
+  declare campaignId: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

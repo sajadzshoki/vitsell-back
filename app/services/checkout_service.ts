@@ -1,6 +1,5 @@
 import Address from '#models/address'
 import CartItem from '#models/cart_item'
-import DiscountCode from '#models/discount_code'
 import Notification from '#models/notification'
 import Order from '#models/order'
 import OrderItemRow from '#models/order_item_row'
@@ -9,6 +8,7 @@ import SellerListing from '#models/seller_listing'
 import SellerOrder from '#models/seller_order'
 import SellerOrderItemRow from '#models/seller_order_item_row'
 import User from '#models/user'
+import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import db from '@adonisjs/lucid/services/db'
 
@@ -128,13 +128,20 @@ export default class CheckoutService {
     let discountAmount = 0
     let discountCode: string | null = null
     if (input.discountCode) {
-      const code = input.discountCode.trim().toUpperCase()
-      const row = await DiscountCode.find(code)
-      if (!row || !row.active) {
-        throw new CheckoutError(422, 'discountCode', 'کد تخفیف نامعتبر است')
+      try {
+        const resolved = await resolveDiscountAmount({
+          code: input.discountCode,
+          subtotal,
+          userId: user.id,
+        })
+        discountAmount = resolved.amount
+        discountCode = resolved.code
+      } catch (err) {
+        if (err instanceof DiscountResolveError) {
+          throw new CheckoutError(422, err.field, err.message)
+        }
+        throw err
       }
-      discountAmount = Math.floor(subtotal * row.percent)
-      discountCode = code
     }
 
     const shipCost = shippingPrice(input.shippingMethod, subtotal)

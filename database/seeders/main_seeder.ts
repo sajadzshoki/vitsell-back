@@ -8,6 +8,7 @@ import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
 import DiscountCode from '#models/discount_code'
 import ContentBlock from '#models/content_block'
+import ContentPromo from '#models/content_promo'
 import BlogPost from '#models/blog_post'
 import StaticPage from '#models/static_page'
 import User from '#models/user'
@@ -17,6 +18,8 @@ import SellerListing from '#models/seller_listing'
 import SellerOrder from '#models/seller_order'
 import SellerReview from '#models/seller_review'
 import SellerPayout from '#models/seller_payout'
+import AmazingDeal from '#models/amazing_deal'
+import { DateTime } from 'luxon'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const seedDir = join(__dirname, '../seed_data')
@@ -128,6 +131,28 @@ export default class extends BaseSeeder {
       )
     }
 
+    {
+      const now = DateTime.utc()
+      const discounted = products.filter((p) => p.oldPrice && p.oldPrice > p.price).slice(0, 6)
+      for (const [index, p] of discounted.entries()) {
+        const discountPercent = Math.min(
+          99,
+          Math.max(1, Math.round((1 - p.price / p.oldPrice!) * 100))
+        )
+        await AmazingDeal.updateOrCreate(
+          { id: `deal-${p.id}` },
+          {
+            id: `deal-${p.id}`,
+            productId: p.id,
+            discountPercent,
+            startsAt: now.minus({ hours: 1 }),
+            endsAt: now.plus({ hours: 48 }),
+            active: index < 4,
+          }
+        )
+      }
+    }
+
     const featuredId = products[0]?.id ?? 'iphone-16-pro'
     const reviews = loadJson<any[]>('reviews.json')
     for (const r of reviews) {
@@ -172,8 +197,51 @@ export default class extends BaseSeeder {
     }
 
     const codes = (content.cartDiscountCodes || {}) as Record<string, number>
+    const codeNow = DateTime.utc()
+    let codeIndex = 0
     for (const [code, percent] of Object.entries(codes)) {
-      await DiscountCode.updateOrCreate({ code }, { code, percent, active: true })
+      await DiscountCode.updateOrCreate(
+        { code },
+        {
+          code,
+          percent,
+          active: true,
+          startsAt: codeNow.minus({ days: 7 }),
+          endsAt: codeNow.plus({ days: 60 }),
+          minAmount: codeIndex === 0 ? 0 : 500_000,
+          oncePerUser: code.startsWith('WELCOME'),
+        }
+      )
+      codeIndex++
+    }
+
+    const homePromos = (content.homePromos || []) as Array<{
+      id: string
+      eyebrow?: string
+      title: string
+      subtitle: string
+      tone?: string
+      icon?: string
+      primaryCta?: { label?: string; to?: string }
+      secondaryCta?: { label?: string; to?: string }
+    }>
+    for (const promo of homePromos) {
+      await ContentPromo.updateOrCreate(
+        { id: promo.id },
+        {
+          id: promo.id,
+          eyebrow: promo.eyebrow ?? '',
+          title: promo.title,
+          subtitle: promo.subtitle,
+          tone: promo.tone === 'warning' ? 'warning' : 'primary',
+          icon: promo.icon || 'sparkles',
+          primaryCtaLabel: promo.primaryCta?.label ?? '',
+          primaryCtaTo: promo.primaryCta?.to ?? null,
+          secondaryCtaLabel: promo.secondaryCta?.label ?? null,
+          secondaryCtaTo: promo.secondaryCta?.to ?? null,
+          active: true,
+        }
+      )
     }
 
     const blog = loadJson<any[]>('blog.json')
@@ -350,12 +418,13 @@ export default class extends BaseSeeder {
       {
         key: 'siteSettings',
         value: {
-          name: seller.shop.name,
-          slug: seller.shop.slug,
-          phone: seller.shop.phone,
-          email: seller.shop.email,
-          city: seller.shop.city,
-          about: seller.shop.about,
+          name: 'دیجی‌شاپ',
+          slug: 'digishop',
+          phone: '09121234567',
+          email: 'info@digishop.ir',
+          city: 'تهران',
+          about:
+            'دیجی‌شاپ بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
           rating: seller.shop.rating,
           reviewCount: seller.shop.reviewCount,
           joinDate: seller.shop.joinDate,

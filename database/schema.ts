@@ -36,6 +36,27 @@ export class AddressSchema extends BaseModel {
   declare userId: number
 }
 
+export class AmazingDealSchema extends BaseModel {
+  static $columns = ['active', 'createdAt', 'discountPercent', 'endsAt', 'id', 'productId', 'startsAt', 'updatedAt'] as const
+  $columns = AmazingDealSchema.$columns
+  @column()
+  declare active: boolean
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare discountPercent: number
+  @column.dateTime()
+  declare endsAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare productId: string
+  @column.dateTime()
+  declare startsAt: DateTime
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class AuthAccessTokenSchema extends BaseModel {
   static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
@@ -134,6 +155,27 @@ export class CategorySchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class ContactMessageSchema extends BaseModel {
+  static $columns = ['createdAt', 'email', 'fullName', 'id', 'message', 'phone', 'subject', 'updatedAt'] as const
+  $columns = ContactMessageSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare email: string | null
+  @column()
+  declare fullName: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare message: string
+  @column()
+  declare phone: string
+  @column()
+  declare subject: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class ContentBlockSchema extends BaseModel {
   static $columns = ['createdAt', 'key', 'updatedAt', 'value'] as const
   $columns = ContentBlockSchema.$columns
@@ -147,8 +189,39 @@ export class ContentBlockSchema extends BaseModel {
   declare value: any
 }
 
+export class ContentPromoSchema extends BaseModel {
+  static $columns = ['active', 'createdAt', 'eyebrow', 'icon', 'id', 'primaryCtaLabel', 'primaryCtaTo', 'secondaryCtaLabel', 'secondaryCtaTo', 'subtitle', 'title', 'tone', 'updatedAt'] as const
+  $columns = ContentPromoSchema.$columns
+  @column()
+  declare active: boolean
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare eyebrow: string
+  @column()
+  declare icon: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare primaryCtaLabel: string
+  @column()
+  declare primaryCtaTo: string | null
+  @column()
+  declare secondaryCtaLabel: string | null
+  @column()
+  declare secondaryCtaTo: string | null
+  @column()
+  declare subtitle: string
+  @column()
+  declare title: string
+  @column()
+  declare tone: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class DiscountCodeSchema extends BaseModel {
-  static $columns = ['active', 'code', 'createdAt', 'percent', 'updatedAt'] as const
+  static $columns = ['active', 'code', 'createdAt', 'endsAt', 'minAmount', 'oncePerUser', 'percent', 'startsAt', 'updatedAt'] as const
   $columns = DiscountCodeSchema.$columns
   @column()
   declare active: boolean
@@ -156,15 +229,56 @@ export class DiscountCodeSchema extends BaseModel {
   declare code: string
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column.dateTime()
+  declare endsAt: DateTime | null
+  @column()
+  declare minAmount: bigint | number
+  @column()
+  declare oncePerUser: boolean
   @column()
   declare percent: number
+  @column.dateTime()
+  declare startsAt: DateTime | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
 
+export class NotificationCampaignSchema extends BaseModel {
+  static $columns = ['audienceGroup', 'audienceType', 'createdAt', 'description', 'icon', 'id', 'link', 'recipientCount', 'sentAt', 'status', 'title', 'updatedAt', 'userIds'] as const
+  $columns = NotificationCampaignSchema.$columns
+  @column()
+  declare audienceGroup: string | null
+  @column()
+  declare audienceType: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string
+  @column()
+  declare icon: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare link: string | null
+  @column()
+  declare recipientCount: number
+  @column.dateTime()
+  declare sentAt: DateTime | null
+  @column()
+  declare status: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userIds: any
+}
+
 export class NotificationSchema extends BaseModel {
-  static $columns = ['createdAt', 'description', 'icon', 'id', 'read', 'time', 'title', 'to', 'updatedAt', 'userId'] as const
+  static $columns = ['campaignId', 'createdAt', 'description', 'icon', 'id', 'read', 'time', 'title', 'to', 'updatedAt', 'userId'] as const
   $columns = NotificationSchema.$columns
+  @column()
+  declare campaignId: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
@@ -185,6 +299,25 @@ export class NotificationSchema extends BaseModel {
   declare updatedAt: DateTime | null
   @column()
   declare userId: number
+}
+
+export class OrderItemSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'orderId', 'productId', 'qty', 'unitPrice', 'updatedAt'] as const
+  $columns = OrderItemSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare orderId: string
+  @column()
+  declare productId: string
+  @column()
+  declare qty: number
+  @column()
+  declare unitPrice: bigint | number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class OrderSchema extends BaseModel {
@@ -323,12 +456,14 @@ export class ProductReviewSchema extends BaseModel {
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['badge', 'brand', 'category', 'categoryLabel', 'colors', 'createdAt', 'fastDelivery', 'gallery', 'id', 'image', 'imageDark', 'inStock', 'oldPrice', 'price', 'rating', 'reviews', 'scores', 'shortDesc', 'shortName', 'soldCount', 'specs', 'title', 'updatedAt', 'viewCount'] as const
+  static $columns = ['badge', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'features', 'gallery', 'id', 'image', 'imageDark', 'inStock', 'oldPrice', 'price', 'rating', 'reviews', 'scores', 'shortDesc', 'shortName', 'soldCount', 'specs', 'title', 'updatedAt', 'viewCount'] as const
   $columns = ProductSchema.$columns
   @column()
   declare badge: string | null
   @column()
   declare brand: string
+  @column()
+  declare buyNotes: any | null
   @column()
   declare category: string
   @column()
@@ -338,7 +473,11 @@ export class ProductSchema extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
+  declare description: string | null
+  @column()
   declare fastDelivery: boolean
+  @column()
+  declare features: any | null
   @column()
   declare gallery: any | null
   @column({ isPrimary: true })
@@ -421,11 +560,32 @@ export class SellerListingSchema extends BaseModel {
   declare views: number
 }
 
+export class SellerOrderItemSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'productId', 'qty', 'sellerOrderId', 'unitPrice', 'updatedAt'] as const
+  $columns = SellerOrderItemSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare productId: string
+  @column()
+  declare qty: number
+  @column()
+  declare sellerOrderId: string
+  @column()
+  declare unitPrice: bigint | number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class SellerOrderSchema extends BaseModel {
-  static $columns = ['address', 'city', 'createdAt', 'customerName', 'customerPhone', 'date', 'dateKey', 'id', 'items', 'note', 'paymentMethod', 'shippingMethod', 'shopId', 'status', 'total', 'updatedAt'] as const
+  static $columns = ['address', 'buyerOrderId', 'city', 'createdAt', 'customerName', 'customerPhone', 'date', 'dateKey', 'id', 'items', 'note', 'paymentMethod', 'shippingMethod', 'shopId', 'status', 'stockReserved', 'total', 'updatedAt'] as const
   $columns = SellerOrderSchema.$columns
   @column()
   declare address: any
+  @column()
+  declare buyerOrderId: string | null
   @column()
   declare city: string
   @column.dateTime({ autoCreate: true })
@@ -452,6 +612,8 @@ export class SellerOrderSchema extends BaseModel {
   declare shopId: number
   @column()
   declare status: string
+  @column()
+  declare stockReserved: boolean
   @column()
   declare total: bigint | number
   @column.dateTime({ autoCreate: true, autoUpdate: true })

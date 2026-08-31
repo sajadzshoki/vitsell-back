@@ -932,6 +932,27 @@
   ],
   "footerAbout": "دیجی‌شاپ بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.",
   "footerCopyright": "© ۱۴۰۵ فروشگاه اینترنتی دیجی‌شاپ. تمامی حقوق محفوظ است.",
+  "footerContact": {
+    "phones": [
+      { "label": "۰۲۱-۶۱۹۳۰۰۰۰", "href": "tel:02161930000" },
+      { "label": "۰۲۱-۹۱۰۰۱۲۳۴", "href": "tel:02191001234" }
+    ],
+    "email": {
+      "label": "support@digishop.ir",
+      "href": "mailto:support@digishop.ir"
+    }
+  },
+  "footerAppStores": [
+    { "id": "bazaar", "label": "بازار", "icon": "shopping-bag", "href": "#" },
+    { "id": "sibapp", "label": "سیب‌اپ", "icon": "brand-apple", "href": "#" },
+    { "id": "myket", "label": "مایکت", "icon": "brand-android", "href": "#" }
+  ],
+  "footerBadges": [
+    { "id": "enamad", "label": "نماد اعتماد", "icon": "certificate" },
+    { "id": "samandehi", "label": "ساماندهی", "icon": "shield-check" },
+    { "id": "ecunion", "label": "اتحادیه کشوری", "icon": "building-store" },
+    { "id": "payment", "label": "پرداخت امن", "icon": "lock" }
+  ],
   "categoryLabels": {
     "mobile": "موبایل",
     "laptop": "لپ‌تاپ",

@@ -41,6 +41,7 @@
 | `POST` | `/activity/sync` | ✅ | همگام رویدادهای لوکال |
 | `GET` | `/locations` | — |
 | `GET` | `/compare/templates/:category` | — |
+| `GET` | `/site` | — | تنظیمات هویت سایت |
 | `GET` | `/footer` | — |
 | `GET` | `/discount-codes` | — |
 | `GET` | `/blog` | — |
@@ -76,12 +77,35 @@
 | `POST` | `/notifications/:id/read` |
 | `POST` | `/notifications/read-all` |
 | `GET\|PUT` | `/seller/shop` | ✅ admin | تنظیمات سایت (نه فروشگاه چندمستاجره) |
+| `GET\|PUT` | `/seller/footer` | ✅ admin | محتوای فوتر سایت |
 | `GET\|POST` | `/seller/listings` | ✅ admin | لیست / افزودن محصول |
-| `PATCH` | `/seller/listings/:productId` | ✅ admin | وضعیت محصول |
+| `GET` | `/seller/listings/:productId` | ✅ admin | جزئیات listing + محصول |
+| `PATCH` | `/seller/listings/:productId` | ✅ admin | وضعیت / موجودی / ویرایش محصول |
+| `GET\|POST` | `/seller/categories` | ✅ admin | لیست کامل / ایجاد دسته |
+| `GET\|PUT\|DELETE` | `/seller/categories/:id` | ✅ admin | جزئیات / ویرایش / حذف دسته |
+| `GET\|POST` | `/seller/deals` | ✅ admin | لیست / ایجاد شگفت‌انگیز |
+| `GET\|PUT\|DELETE` | `/seller/deals/:id` | ✅ admin | جزئیات / ویرایش / حذف شگفت‌انگیز |
+| `PATCH` | `/seller/deals/:id/active` | ✅ admin | فعال/غیرفعال کردن |
+| `GET\|POST` | `/seller/notifications` | ✅ admin | لیست کمپین / ارسال اعلان |
+| `POST` | `/seller/notifications/preview` | ✅ admin | شمارش مخاطب |
+| `GET` | `/seller/notification-users` | ✅ admin | لیست کاربران برای انتخاب |
+| `DELETE` | `/seller/notifications/:id` | ✅ admin | حذف کمپین (+ اعلان‌های کاربران) |
+| `GET\|POST` | `/seller/discount-codes` | ✅ admin | لیست / ایجاد کد تخفیف |
+| `GET\|PUT\|DELETE` | `/seller/discount-codes/:code` | ✅ admin | جزئیات / ویرایش / حذف کد |
+| `PATCH` | `/seller/discount-codes/:code/active` | ✅ admin | فعال/غیرفعال کردن کد |
+| `GET\|POST` | `/seller/content-promos` | ✅ admin | لیست / ایجاد پروموی محتوایی |
+| `GET\|PUT\|DELETE` | `/seller/content-promos/:id` | ✅ admin | جزئیات / ویرایش / حذف پرومو |
+| `PATCH` | `/seller/content-promos/:id/active` | ✅ admin | فعال/غیرفعال کردن پرومو |
 | `GET` | `/seller/orders` | ✅ admin | سفارش‌ها |
 | `GET` | `/seller/orders/:id` | ✅ admin | جزئیات سفارش |
 | `PATCH` | `/seller/orders/:id/status` | ✅ admin | تغییر وضعیت سفارش |
 | `GET` | `/seller/reviews` | ✅ admin | نظرات |
 | `POST` | `/seller/reviews/:id/reply` | ✅ admin | پاسخ به نظر |
+| `GET` | `/seller/questions` | ✅ admin | پرسش‌های محصولات |
+| `POST` | `/seller/questions/:id/reply` | ✅ admin | پاسخ به پرسش — body: `{ text, author? }` |
+| `DELETE` | `/seller/questions/:id/answer` | ✅ admin | حذف پاسخ |
+| `PATCH` | `/seller/questions/:id/verified` | ✅ admin | تأیید خریدار — body: `{ verified }` |
+| `DELETE` | `/seller/questions/:id` | ✅ admin | حذف پرسش |
 | `GET` | `/seller/payouts` | ✅ admin | تسویه‌ها |
+| `POST` | `/seller/payouts` | ✅ admin | درخواست تسویه |
 | `GET` | `/seller/sales` | ✅ admin | نمودار فروش |
