@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Product from '#models/product'
+import User from '#models/user'
 
 export type ProductQuestionAnswer = {
   author: string
@@ -9,6 +10,7 @@ export type ProductQuestionAnswer = {
   text: string
   helpfulYes: number
   helpfulNo: number
+  role?: 'seller' | 'support'
 }
 
 export default class ProductQuestion extends BaseModel {
@@ -20,6 +22,9 @@ export default class ProductQuestion extends BaseModel {
 
   @column()
   declare productId: string
+
+  @column()
+  declare userId: number | null
 
   @column()
   declare name: string
@@ -51,6 +56,9 @@ export default class ProductQuestion extends BaseModel {
   @belongsTo(() => Product)
   declare product: BelongsTo<typeof Product>
 
+  @belongsTo(() => User)
+  declare user: BelongsTo<typeof User>
+
   toJSON() {
     return {
       id: this.id,
@@ -59,6 +67,29 @@ export default class ProductQuestion extends BaseModel {
       verified: this.verified,
       question: this.question,
       ...(this.answer ? { answer: this.answer } : {}),
+    }
+  }
+
+  toAccountJSON(product?: Product | null) {
+    const p = product ?? this.product
+    return {
+      id: this.id,
+      productId: this.productId,
+      productTitle: p?.title ?? this.productId,
+      productImage: p?.image ?? '',
+      date: this.date,
+      question: this.question,
+      verified: this.verified,
+      ...(this.answer
+        ? {
+            answer: {
+              author: this.answer.author,
+              date: this.answer.date,
+              text: this.answer.text,
+              role: this.answer.role === 'seller' ? ('seller' as const) : ('support' as const),
+            },
+          }
+        : {}),
     }
   }
 }

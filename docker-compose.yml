@@ -30,13 +30,16 @@ services:
       PORT: 3333
       NODE_ENV: development
       APP_URL: http://localhost:3333
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:4000
+      ADMIN_URL: http://localhost:4001
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: digishop
       DB_PASSWORD: digishop
       DB_DATABASE: digishop
       ZARINPAL_CALLBACK_URL: http://localhost:3333/api/v1/payments/zarinpal/callback
+      ZARINPAL_SANDBOX: "true"
+      ZARINPAL_MERCHANT_ID: 00000000-0000-0000-0000-000000000000
     volumes:
       - ./app:/app/app
       - ./start:/app/start
@@ -44,6 +47,7 @@ services:
       - ./database:/app/database
       - ./providers:/app/providers
       - ./adonisrc.ts:/app/adonisrc.ts
+      - ./storage:/app/storage
     depends_on:
       postgres:
         condition: service_healthy

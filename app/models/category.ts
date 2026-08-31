@@ -40,6 +40,12 @@ export default class Category extends BaseModel {
   @column()
   declare icon: string
 
+  @column()
+  declare image: string | null
+
+  @column()
+  declare text: string | null
+
   @column({
     prepare: (value: CategorySub[]) => JSON.stringify(value),
     consume: (value: CategorySub[] | string) =>
@@ -80,6 +86,8 @@ export default class Category extends BaseModel {
       id: this.id,
       name: this.name,
       icon: this.icon,
+      image: this.image ?? null,
+      text: this.text ?? null,
       subs: this.subs ?? [],
     }
   }

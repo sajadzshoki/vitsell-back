@@ -35,7 +35,11 @@ export default class Profile extends BaseModel {
   declare user: BelongsTo<typeof User>
 
   /** Shape matches frontend AccountProfile */
-  toAccountProfile(phone: string) {
+  toAccountProfile(
+    phone: string,
+    hasPassword = false,
+    role: 'customer' | 'seller' | 'admin' = 'customer',
+  ) {
     return {
       firstName: this.firstName,
       lastName: this.lastName,
@@ -43,6 +47,8 @@ export default class Profile extends BaseModel {
       phone,
       birth: this.birth ?? '',
       gender: this.gender ?? '',
+      hasPassword,
+      role,
     }
   }
 }

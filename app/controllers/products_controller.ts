@@ -2,6 +2,7 @@ import Product from '#models/product'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
 import type { HttpContext } from '@adonisjs/core/http'
+import vine from '@vinejs/vine'
 
 const SORTS = [
   'relevant',
@@ -14,6 +15,57 @@ const SORTS = [
   'bestrated',
   'discount',
 ] as const
+
+const storeReviewValidator = vine.compile(
+  vine.object({
+    rating: vine.number().min(1).max(5),
+    text: vine.string().trim().minLength(10).maxLength(2000),
+    pros: vine.array(vine.string().trim().minLength(1).maxLength(80)).maxLength(10).optional(),
+    cons: vine.array(vine.string().trim().minLength(1).maxLength(80)).maxLength(10).optional(),
+    recommend: vine.boolean().optional(),
+  })
+)
+
+const storeQuestionValidator = vine.compile(
+  vine.object({
+    question: vine.string().trim().minLength(10).maxLength(1000),
+  })
+)
+
+function jalaliishDate() {
+  return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
+}
+
+function displayName(user: {
+  phone: string
+  profile?: { firstName?: string | null; lastName?: string | null } | null
+}) {
+  const full = [user.profile?.firstName, user.profile?.lastName]
+    .map((part) => (part ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+  if (full) return full
+  return `کاربر ${user.phone.slice(-4)}`
+}
+
+async function refreshProductRating(product: Product) {
+  const rows = await ProductReview.query().where('product_id', product.id)
+  const count = rows.length
+  if (!count) {
+    product.reviews = 0
+    product.rating = 0
+  } else {
+    const sum = rows.reduce((acc, row) => acc + row.rating, 0)
+    product.reviews = count
+    product.rating = Math.round((sum / count) * 10) / 10
+  }
+  await product.save()
+  return product
+}
 
 export default class ProductsController {
   async index({ request, response }: HttpContext) {
@@ -140,6 +192,43 @@ export default class ProductsController {
     return response.ok(reviews.map((r) => r.toJSON()))
   }
 
+  async storeReview({ auth, params, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const product = await Product.find(params.id)
+    if (!product) {
+      return response.notFound({ errors: [{ field: 'id', message: 'محصول یافت نشد' }] })
+    }
+
+    const payload = await request.validateUsing(storeReviewValidator)
+    await user.load('profile')
+
+    const review = await ProductReview.create({
+      id: `r${Date.now()}`,
+      productId: product.id,
+      userId: user.id,
+      name: displayName(user),
+      date: jalaliishDate(),
+      rating: payload.rating,
+      text: payload.text,
+      verified: false,
+      pros: payload.pros?.length ? payload.pros : null,
+      cons: payload.cons?.length ? payload.cons : null,
+      hasImage: false,
+      helpfulCount: 0,
+      recommend: payload.recommend ?? true,
+    })
+
+    await refreshProductRating(product)
+
+    return response.created({
+      ...review.toJSON(),
+      productStats: {
+        rating: product.rating,
+        reviews: product.reviews,
+      },
+    })
+  }
+
   async questions({ params, response }: HttpContext) {
     const product = await Product.find(params.id)
     if (!product) {
@@ -149,5 +238,29 @@ export default class ProductsController {
       .where('product_id', product.id)
       .orderBy('created_at', 'desc')
     return response.ok(questions.map((q) => q.toJSON()))
+  }
+
+  async storeQuestion({ auth, params, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const product = await Product.find(params.id)
+    if (!product) {
+      return response.notFound({ errors: [{ field: 'id', message: 'محصول یافت نشد' }] })
+    }
+
+    const payload = await request.validateUsing(storeQuestionValidator)
+    await user.load('profile')
+
+    const question = await ProductQuestion.create({
+      id: `q${Date.now()}`,
+      productId: product.id,
+      userId: user.id,
+      name: displayName(user),
+      date: jalaliishDate(),
+      verified: false,
+      question: payload.question,
+      answer: null,
+    })
+
+    return response.created(question.toJSON())
   }
 }

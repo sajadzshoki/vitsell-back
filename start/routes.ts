@@ -11,10 +11,15 @@ const CheckoutController = () => import('#controllers/checkout_controller')
 const NotificationsController = () => import('#controllers/notifications_controller')
 const ContentController = () => import('#controllers/content_controller')
 const SellerController = () => import('#controllers/seller_controller')
+const WalletController = () => import('#controllers/wallet_controller')
+const UploadController = () => import('#controllers/upload_controller')
+const ActivityController = () => import('#controllers/activity_controller')
 
 router.get('/', () => {
   return { name: 'digishop-api', version: '1' }
 })
+
+router.get('/uploads/:file', [UploadController, 'show'])
 
 router
   .group(() => {
@@ -22,6 +27,11 @@ router
       .group(() => {
         router.post('otp/request', [AuthController, 'requestOtp'])
         router.post('otp/verify', [AuthController, 'verifyOtp'])
+        router.post('check', [AuthController, 'checkPhone'])
+        router.post('login', [AuthController, 'loginWithPassword'])
+        router.post('password/reset', [AuthController, 'resetPassword'])
+        router.post('admin/check', [AuthController, 'adminCheckPhone'])
+        router.post('admin/login', [AuthController, 'adminLogin'])
         router.get('me', [AuthController, 'me']).use(middleware.auth())
         router.post('logout', [AuthController, 'logout']).use(middleware.auth())
       })
@@ -34,9 +44,23 @@ router
     router.get('products', [ProductsController, 'index'])
     router.get('products/:id', [ProductsController, 'show'])
     router.get('products/:id/reviews', [ProductsController, 'reviews'])
+    router.post('products/:id/reviews', [ProductsController, 'storeReview']).use(middleware.auth())
     router.get('products/:id/questions', [ProductsController, 'questions'])
+    router
+      .post('products/:id/questions', [ProductsController, 'storeQuestion'])
+      .use(middleware.auth())
+
+    router.post('upload', [UploadController, 'store']).use(middleware.auth())
 
     router.get('home', [ContentController, 'home'])
+    router.get('recommendations', [ActivityController, 'recommendations'])
+    router
+      .group(() => {
+        router.post('/', [ActivityController, 'store'])
+        router.post('/sync', [ActivityController, 'sync'])
+      })
+      .prefix('activity')
+      .use(middleware.auth())
     router.get('locations', [ContentController, 'locations'])
     router.get('compare/templates/:category', [ContentController, 'compareTemplates'])
     router.get('footer', [ContentController, 'footer'])
@@ -46,6 +70,7 @@ router
     router.get('static-pages/:id', [ContentController, 'staticPage'])
 
     router.get('payments/zarinpal/callback', [CheckoutController, 'zarinpalCallback'])
+    router.get('payments/zarinpal/wallet-callback', [WalletController, 'zarinpalCallback'])
 
     router
       .group(() => {
@@ -71,12 +96,17 @@ router
       .group(() => {
         router.get('profile', [AccountController, 'showProfile'])
         router.put('profile', [AccountController, 'updateProfile'])
+        router.put('password', [AccountController, 'setPassword'])
         router.get('addresses', [AccountController, 'addresses'])
         router.post('addresses', [AccountController, 'storeAddress'])
         router.put('addresses/:id', [AccountController, 'updateAddress'])
         router.delete('addresses/:id', [AccountController, 'destroyAddress'])
         router.get('orders', [AccountController, 'orders'])
         router.get('orders/:id', [AccountController, 'showOrder'])
+        router.get('reviews', [AccountController, 'reviews'])
+        router.get('wallet', [WalletController, 'show'])
+        router.post('wallet/topup', [WalletController, 'topUp'])
+        router.post('wallet/withdraw', [WalletController, 'withdraw'])
       })
       .prefix('account')
       .use(middleware.auth())
@@ -97,6 +127,8 @@ router
         router.get('shop', [SellerController, 'shop'])
         router.put('shop', [SellerController, 'updateShop'])
         router.get('listings', [SellerController, 'listings'])
+        router.post('listings', [SellerController, 'storeListing'])
+        router.patch('listings/:productId', [SellerController, 'updateListing'])
         router.get('orders', [SellerController, 'orders'])
         router.get('orders/:id', [SellerController, 'showOrder'])
         router.patch('orders/:id/status', [SellerController, 'updateOrderStatus'])
@@ -107,5 +139,6 @@ router
       })
       .prefix('seller')
       .use(middleware.auth())
+      .use(middleware.admin())
   })
   .prefix('/api/v1')

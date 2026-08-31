@@ -32,6 +32,8 @@ export default class extends BaseSeeder {
         id: string
         name: string
         icon: string
+        image?: string | null
+        text?: string | null
         subs: { name: string; items: string[] }[]
         pageMeta: unknown
       }[]
@@ -44,6 +46,8 @@ export default class extends BaseSeeder {
           id: c.id,
           name: c.name,
           icon: c.icon,
+          image: c.image ?? null,
+          text: c.text ?? null,
           subs: c.subs ?? [],
           pageMeta: (c.pageMeta as any) ?? null,
           suggested: null,
@@ -207,17 +211,24 @@ export default class extends BaseSeeder {
 
     let sellerUser = await User.findBy('phone', '09121234567')
     if (!sellerUser) {
-      sellerUser = await User.create({ phone: '09121234567', role: 'seller' })
+      sellerUser = await User.create({
+        phone: '09121234567',
+        role: 'admin',
+        password: 'Admin@1234',
+      })
       await Profile.create({
         userId: sellerUser.id,
-        firstName: 'فروشنده',
-        lastName: 'آریا',
+        firstName: 'مدیر',
+        lastName: 'سایت',
         email: seller.shop.email,
         birth: null,
         gender: null,
       })
     } else {
-      sellerUser.role = 'seller'
+      sellerUser.role = 'admin'
+      if (!sellerUser.password) {
+        sellerUser.password = 'Admin@1234'
+      }
       await sellerUser.save()
     }
 
@@ -309,6 +320,27 @@ export default class extends BaseSeeder {
     await ContentBlock.updateOrCreate(
       { key: `sellerSales:${shop.id}` },
       { key: `sellerSales:${shop.id}`, value: seller.sales }
+    )
+    await ContentBlock.updateOrCreate(
+      { key: 'siteSales' },
+      { key: 'siteSales', value: seller.sales }
+    )
+    await ContentBlock.updateOrCreate(
+      { key: 'siteSettings' },
+      {
+        key: 'siteSettings',
+        value: {
+          name: seller.shop.name,
+          slug: seller.shop.slug,
+          phone: seller.shop.phone,
+          email: seller.shop.email,
+          city: seller.shop.city,
+          about: seller.shop.about,
+          rating: seller.shop.rating,
+          reviewCount: seller.shop.reviewCount,
+          joinDate: seller.shop.joinDate,
+        },
+      }
     )
   }
 }

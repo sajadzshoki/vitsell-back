@@ -14,17 +14,26 @@ type ZarinpalVerifyResult = {
   message?: string
 }
 
+/** Official sandbox accepts any 36-char merchant code. */
+const SANDBOX_MERCHANT_FALLBACK = '00000000-0000-0000-0000-000000000000'
+
 /**
  * Zarinpal payment gateway v4.
  * Amounts stored/passed here are Rials (frontend toman × 10).
+ *
+ * When ZARINPAL_SANDBOX=true, requests go to sandbox.zarinpal.com
+ * (real sandbox UI). Merchant may be any 36-char id in sandbox.
  */
 export default class ZarinpalService {
-  private merchantId() {
-    return env.get('ZARINPAL_MERCHANT_ID') || ''
-  }
-
   private sandbox() {
     return env.get('ZARINPAL_SANDBOX') !== false
+  }
+
+  private merchantId() {
+    const configured = (env.get('ZARINPAL_MERCHANT_ID') || '').trim()
+    if (configured) return configured
+    if (this.sandbox()) return SANDBOX_MERCHANT_FALLBACK
+    return ''
   }
 
   private baseApi() {
@@ -39,6 +48,14 @@ export default class ZarinpalService {
       : 'https://www.zarinpal.com/pg/StartPay'
   }
 
+  /** Avoid 0.0.0.0 in browser-facing callback URLs. */
+  private publicAppUrl() {
+    return env
+      .get('APP_URL')
+      .replace(/\/\/0\.0\.0\.0(?=[:/]|$)/, '//localhost')
+      .replace(/\/\/\[::\](?=[:/]|$)/, '//localhost')
+  }
+
   async requestPayment(input: {
     amountRial: number
     description: string
@@ -49,19 +66,30 @@ export default class ZarinpalService {
     const callbackUrl =
       input.callbackUrl ||
       env.get('ZARINPAL_CALLBACK_URL') ||
-      `${env.get('APP_URL')}/api/v1/payments/zarinpal/callback`
+      `${this.publicAppUrl()}/api/v1/payments/zarinpal/callback`
 
+    // Local mock only when not in sandbox and merchant is missing.
     if (!merchantId) {
-      const authority = `SANDBOX${Date.now()}${Math.floor(Math.random() * 1e6)}`
+      const authority = `MOCK${Date.now()}${Math.floor(Math.random() * 1e6)}`
       logger.info(
         { authority, amountRial: input.amountRial },
-        '[Zarinpal] merchant missing — mock authority for local dev'
+        '[Zarinpal] merchant missing (production) — mock authority for local dev'
       )
       return {
         authority,
-        paymentUrl: `${env.get('APP_URL')}/api/v1/payments/zarinpal/callback?Authority=${authority}&Status=OK&mock=1`,
+        paymentUrl: `${callbackUrl}${callbackUrl.includes('?') ? '&' : '?'}Authority=${authority}&Status=OK&mock=1`,
       }
     }
+
+    logger.info(
+      {
+        sandbox: this.sandbox(),
+        amountRial: input.amountRial,
+        callbackUrl,
+        merchant: `${merchantId.slice(0, 8)}…`,
+      },
+      '[Zarinpal] payment request'
+    )
 
     const response = await fetch(`${this.baseApi()}/request.json`, {
       method: 'POST',
@@ -100,7 +128,7 @@ export default class ZarinpalService {
   }): Promise<ZarinpalVerifyResult> {
     const merchantId = this.merchantId()
 
-    if (!merchantId) {
+    if (!merchantId || input.authority.startsWith('MOCK')) {
       logger.info({ authority: input.authority }, '[Zarinpal] mock verify OK')
       return {
         ok: true,

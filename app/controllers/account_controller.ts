@@ -1,6 +1,8 @@
 import Profile from '#models/profile'
 import Address from '#models/address'
 import Order from '#models/order'
+import ProductReview from '#models/product_review'
+import ProductQuestion from '#models/product_question'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 
@@ -11,6 +13,14 @@ const profileValidator = vine.compile(
     email: vine.string().email().optional(),
     birth: vine.string().trim().optional(),
     gender: vine.string().trim().optional(),
+  })
+)
+
+const passwordValidator = vine.compile(
+  vine.object({
+    currentPassword: vine.string().minLength(1).maxLength(72).optional(),
+    password: vine.string().minLength(8).maxLength(72),
+    passwordConfirmation: vine.string().minLength(8).maxLength(72).sameAs('password'),
   })
 )
 
@@ -34,7 +44,7 @@ export default class AccountController {
     if (!user.profile) {
       return response.notFound({ errors: [{ field: 'profile', message: 'پروفایل یافت نشد' }] })
     }
-    return response.ok(user.profile.toAccountProfile(user.phone))
+    return response.ok(user.profile.toAccountProfile(user.phone, user.hasPassword, user.role))
   }
 
   async updateProfile({ auth, request, response }: HttpContext) {
@@ -60,7 +70,35 @@ export default class AccountController {
       })
       await profile.save()
     }
-    return response.ok(profile.toAccountProfile(user.phone))
+    return response.ok(profile.toAccountProfile(user.phone, user.hasPassword, user.role))
+  }
+
+  async setPassword({ auth, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const payload = await request.validateUsing(passwordValidator)
+
+    if (user.hasPassword) {
+      if (!payload.currentPassword) {
+        return response.unprocessableEntity({
+          errors: [{ field: 'currentPassword', message: 'رمز عبور فعلی را وارد کنید.' }],
+        })
+      }
+      const valid = await user.verifyPassword(payload.currentPassword)
+      if (!valid) {
+        return response.unprocessableEntity({
+          errors: [{ field: 'currentPassword', message: 'رمز عبور فعلی نادرست است.' }],
+        })
+      }
+    }
+
+    const hadPassword = user.hasPassword
+    user.password = payload.password
+    await user.save()
+
+    return response.ok({
+      message: hadPassword ? 'رمز عبور به‌روز شد' : 'رمز عبور تنظیم شد',
+      hasPassword: true,
+    })
   }
 
   async addresses({ auth, response }: HttpContext) {
@@ -155,5 +193,25 @@ export default class AccountController {
       return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
     }
     return response.ok(order.toShopOrderJSON())
+  }
+
+  async reviews({ auth, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    const [reviews, questions] = await Promise.all([
+      ProductReview.query()
+        .where('user_id', user.id)
+        .preload('product')
+        .orderBy('created_at', 'desc'),
+      ProductQuestion.query()
+        .where('user_id', user.id)
+        .preload('product')
+        .orderBy('created_at', 'desc'),
+    ])
+
+    return response.ok({
+      reviews: reviews.map((r) => r.toAccountJSON(r.product)),
+      questions: questions.map((q) => q.toAccountJSON(q.product)),
+    })
   }
 }

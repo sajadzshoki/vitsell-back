@@ -15,6 +15,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   APP_KEY: Env.schema.secret(),
   APP_URL: Env.schema.string({ format: 'url', tld: false }),
   FRONTEND_URL: Env.schema.string({ format: 'url', tld: false }),
+  /** Admin panel origin (e.g. https://admin.digishop.ir). Set in production. */
+  ADMIN_URL: Env.schema.string.optional({ format: 'url', tld: false }),
 
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
 

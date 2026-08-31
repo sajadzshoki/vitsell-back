@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Product from '#models/product'
+import User from '#models/user'
 
 export default class ProductReview extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -12,6 +13,9 @@ export default class ProductReview extends BaseModel {
 
   @column()
   declare productId: string
+
+  @column()
+  declare userId: number | null
 
   @column()
   declare name: string
@@ -52,6 +56,9 @@ export default class ProductReview extends BaseModel {
   @column()
   declare helpfulCount: number
 
+  @column()
+  declare recommend: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -60,6 +67,9 @@ export default class ProductReview extends BaseModel {
 
   @belongsTo(() => Product)
   declare product: BelongsTo<typeof Product>
+
+  @belongsTo(() => User)
+  declare user: BelongsTo<typeof User>
 
   toJSON() {
     return {
@@ -73,6 +83,31 @@ export default class ProductReview extends BaseModel {
       ...(this.cons?.length ? { cons: this.cons } : {}),
       ...(this.hasImage ? { hasImage: true } : {}),
       helpfulCount: this.helpfulCount,
+      recommend: this.recommend,
+    }
+  }
+
+  toAccountJSON(product?: Product | null) {
+    const p = product ?? this.product
+    return {
+      id: this.id,
+      productId: this.productId,
+      productTitle: p?.title ?? this.productId,
+      productImage: p?.image ?? '',
+      date: this.date,
+      rating: this.rating,
+      text: this.text,
+      verified: this.verified,
+      ...(this.pros?.length ? { pros: this.pros } : {}),
+      ...(this.cons?.length ? { cons: this.cons } : {}),
+      helpfulCount: this.helpfulCount,
+      replies: [] as {
+        id: string
+        author: string
+        date: string
+        text: string
+        role: 'seller' | 'support'
+      }[],
     }
   }
 }

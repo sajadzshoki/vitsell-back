@@ -41,6 +41,9 @@ export default class Product extends BaseModel {
   @column()
   declare image: string
 
+  @column()
+  declare imageDark: string | null
+
   @column({
     prepare: (value: string[] | null) => (value ? JSON.stringify(value) : null),
     consume: (value: string[] | string | null) => {
@@ -126,6 +129,7 @@ export default class Product extends BaseModel {
       rating: this.rating,
       reviews: this.reviews,
       image: this.image,
+      ...(this.imageDark ? { imageDark: this.imageDark } : {}),
       ...(this.gallery?.length ? { gallery: this.gallery } : {}),
       ...(this.badge ? { badge: this.badge } : {}),
       ...(this.colors?.length ? { colors: this.colors } : {}),

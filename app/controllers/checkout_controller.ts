@@ -177,15 +177,19 @@ export default class CheckoutController {
   async zarinpalCallback({ request, response }: HttpContext) {
     const authority = String(request.input('Authority', ''))
     const status = String(request.input('Status', ''))
-    const frontend = env.get('FRONTEND_URL')
+    const frontend = env.get('FRONTEND_URL').replace(/\/$/, '')
+    const redirectCart = (payment: string) =>
+      response.redirect().withQs(false).toPath(`${frontend}/cart?payment=${payment}`)
+    const redirectOrder = (orderId: string) =>
+      response.redirect().withQs(false).toPath(`${frontend}/order/${orderId}?payment=ok`)
 
     if (!authority) {
-      return response.redirect(`${frontend}/cart?payment=failed`)
+      return redirectCart('failed')
     }
 
     const payment = await Payment.query().where('authority', authority).preload('order').first()
     if (!payment || !payment.order) {
-      return response.redirect(`${frontend}/cart?payment=failed`)
+      return redirectCart('failed')
     }
 
     if (status !== 'OK') {
@@ -193,7 +197,7 @@ export default class CheckoutController {
       await payment.save()
       payment.order.status = 'cancelled'
       await payment.order.save()
-      return response.redirect(`${frontend}/cart?payment=cancelled`)
+      return redirectCart('cancelled')
     }
 
     const zarinpal = new ZarinpalService()
@@ -207,7 +211,7 @@ export default class CheckoutController {
       await payment.save()
       payment.order.status = 'cancelled'
       await payment.order.save()
-      return response.redirect(`${frontend}/cart?payment=failed`)
+      return redirectCart('failed')
     }
 
     payment.status = 'paid'
@@ -231,6 +235,6 @@ export default class CheckoutController {
       to: `/order/${payment.order.id}`,
     })
 
-    return response.redirect(`${frontend}/order/${payment.order.id}?payment=ok`)
+    return redirectOrder(payment.order.id)
   }
 }

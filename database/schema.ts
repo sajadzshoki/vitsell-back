@@ -110,7 +110,7 @@ export class CartItemSchema extends BaseModel {
 }
 
 export class CategorySchema extends BaseModel {
-  static $columns = ['createdAt', 'icon', 'id', 'name', 'pageMeta', 'subs', 'suggested', 'updatedAt'] as const
+  static $columns = ['createdAt', 'icon', 'id', 'image', 'name', 'pageMeta', 'subs', 'suggested', 'text', 'updatedAt'] as const
   $columns = CategorySchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -119,6 +119,8 @@ export class CategorySchema extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare image: string | null
+  @column()
   declare name: string
   @column()
   declare pageMeta: any | null
@@ -126,6 +128,8 @@ export class CategorySchema extends BaseModel {
   declare subs: any
   @column()
   declare suggested: any | null
+  @column()
+  declare text: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -259,7 +263,7 @@ export class PaymentSchema extends BaseModel {
 }
 
 export class ProductQuestionSchema extends BaseModel {
-  static $columns = ['answer', 'createdAt', 'date', 'id', 'name', 'productId', 'question', 'updatedAt', 'verified'] as const
+  static $columns = ['answer', 'createdAt', 'date', 'id', 'name', 'productId', 'question', 'updatedAt', 'userId', 'verified'] as const
   $columns = ProductQuestionSchema.$columns
   @column()
   declare answer: any | null
@@ -278,11 +282,13 @@ export class ProductQuestionSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
+  declare userId: number | null
+  @column()
   declare verified: boolean
 }
 
 export class ProductReviewSchema extends BaseModel {
-  static $columns = ['cons', 'createdAt', 'date', 'hasImage', 'helpfulCount', 'id', 'name', 'productId', 'pros', 'rating', 'text', 'updatedAt', 'verified'] as const
+  static $columns = ['cons', 'createdAt', 'date', 'hasImage', 'helpfulCount', 'id', 'name', 'productId', 'pros', 'rating', 'recommend', 'text', 'updatedAt', 'userId', 'verified'] as const
   $columns = ProductReviewSchema.$columns
   @column()
   declare cons: any | null
@@ -305,15 +311,19 @@ export class ProductReviewSchema extends BaseModel {
   @column()
   declare rating: number
   @column()
+  declare recommend: boolean
+  @column()
   declare text: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
   @column()
   declare verified: boolean
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['badge', 'brand', 'category', 'categoryLabel', 'colors', 'createdAt', 'fastDelivery', 'gallery', 'id', 'image', 'inStock', 'oldPrice', 'price', 'rating', 'reviews', 'scores', 'shortDesc', 'shortName', 'soldCount', 'specs', 'title', 'updatedAt', 'viewCount'] as const
+  static $columns = ['badge', 'brand', 'category', 'categoryLabel', 'colors', 'createdAt', 'fastDelivery', 'gallery', 'id', 'image', 'imageDark', 'inStock', 'oldPrice', 'price', 'rating', 'reviews', 'scores', 'shortDesc', 'shortName', 'soldCount', 'specs', 'title', 'updatedAt', 'viewCount'] as const
   $columns = ProductSchema.$columns
   @column()
   declare badge: string | null
@@ -335,6 +345,8 @@ export class ProductSchema extends BaseModel {
   declare id: string
   @column()
   declare image: string
+  @column()
+  declare imageDark: string | null
   @column()
   declare inStock: boolean
   @column()
@@ -542,19 +554,92 @@ export class StaticPageSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class UserActivitySchema extends BaseModel {
+  static $columns = ['category', 'createdAt', 'eventType', 'id', 'occurredAt', 'productId', 'query', 'userId'] as const
+  $columns = UserActivitySchema.$columns
+  @column()
+  declare category: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare eventType: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare occurredAt: DateTime
+  @column()
+  declare productId: string | null
+  @column()
+  declare query: string | null
+  @column()
+  declare userId: number
+}
+
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'phone', 'role', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'password', 'phone', 'role', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: number
+  @column({ serializeAs: null })
+  declare password: string | null
   @column()
   declare phone: string
   @column()
   declare role: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class WalletTransactionSchema extends BaseModel {
+  static $columns = ['amount', 'authority', 'createdAt', 'date', 'description', 'id', 'refId', 'signedAmount', 'status', 'time', 'title', 'type', 'updatedAt', 'userId', 'walletId'] as const
+  $columns = WalletTransactionSchema.$columns
+  @column()
+  declare amount: bigint | number
+  @column()
+  declare authority: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare date: string
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare refId: string | null
+  @column()
+  declare signedAmount: bigint | number
+  @column()
+  declare status: string
+  @column()
+  declare time: string
+  @column()
+  declare title: string
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+  @column()
+  declare walletId: number
+}
+
+export class WalletSchema extends BaseModel {
+  static $columns = ['balance', 'createdAt', 'id', 'updatedAt', 'userId'] as const
+  $columns = WalletSchema.$columns
+  @column()
+  declare balance: bigint | number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
 }
 
 export class WishlistItemSchema extends BaseModel {

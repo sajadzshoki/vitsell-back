@@ -41,8 +41,11 @@ export const http = defineConfig({
      * When enabled, all redirects automatically carry over the current
      * request's query string parameters to the redirect destination.
      * Use withQs(false) to opt out for a specific redirect.
+     *
+     * Disabled: payment gateway callbacks (Zarinpal) send Authority/Status
+     * query params that must NOT be forwarded to the frontend URL.
      */
-    forwardQueryString: true,
+    forwardQueryString: false,
   },
 
   /**
