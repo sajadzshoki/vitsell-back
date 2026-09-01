@@ -12,7 +12,6 @@ import ContentPromo from '#models/content_promo'
 import BlogPost from '#models/blog_post'
 import StaticPage from '#models/static_page'
 import User from '#models/user'
-import Profile from '#models/profile'
 import SellerShop from '#models/seller_shop'
 import SellerListing from '#models/seller_listing'
 import SellerOrder from '#models/seller_order'
@@ -297,44 +296,28 @@ export default class extends BaseSeeder {
       sales: any[]
     }>('seller.json')
 
-    let sellerUser = await User.findBy('phone', '09121234567')
-    if (!sellerUser) {
-      sellerUser = await User.create({
-        phone: '09121234567',
-        role: 'admin',
-        password: 'Admin@1234',
-      })
-      await Profile.create({
-        userId: sellerUser.id,
-        firstName: 'مدیر',
-        lastName: 'سایت',
-        email: seller.shop.email,
-        birth: null,
-        gender: null,
-      })
-    } else {
-      sellerUser.role = 'admin'
-      if (!sellerUser.password) {
-        sellerUser.password = 'Admin@1234'
-      }
-      await sellerUser.save()
+    const admin = await User.query().where('role', 'admin').orderBy('id', 'asc').first()
+    if (!admin) {
+      console.warn(
+        '[seed] No admin user — skipping seller demo data. Create an admin account manually (role=admin).'
+      )
     }
-
-    const shop = await SellerShop.updateOrCreate(
-      { userId: sellerUser.id },
-      {
-        userId: sellerUser.id,
-        name: seller.shop.name,
-        slug: seller.shop.slug,
-        phone: seller.shop.phone,
-        email: seller.shop.email,
-        city: seller.shop.city,
-        about: seller.shop.about,
-        rating: seller.shop.rating,
-        reviewCount: seller.shop.reviewCount,
-        joinDate: seller.shop.joinDate,
-      }
-    )
+    else {
+      const shop = await SellerShop.updateOrCreate(
+        { slug: 'digishop' },
+        {
+          userId: admin.id,
+          name: seller.shop.name,
+          slug: 'digishop',
+          phone: seller.shop.phone,
+          email: seller.shop.email,
+          city: seller.shop.city,
+          about: seller.shop.about,
+          rating: seller.shop.rating,
+          reviewCount: seller.shop.reviewCount,
+          joinDate: seller.shop.joinDate,
+        }
+      )
 
     for (const listing of seller.listings) {
       const exists = await Product.find(listing.productId)
@@ -413,14 +396,16 @@ export default class extends BaseSeeder {
       { key: 'siteSales' },
       { key: 'siteSales', value: seller.sales }
     )
-    await ContentBlock.updateOrCreate(
-      { key: 'siteSettings' },
-      {
+    }
+
+    const siteSettingsRow = await ContentBlock.find('siteSettings')
+    if (!siteSettingsRow) {
+      await ContentBlock.create({
         key: 'siteSettings',
         value: {
           name: 'دیجی‌شاپ',
           slug: 'digishop',
-          phone: '09121234567',
+          phone: '',
           email: 'info@digishop.ir',
           city: 'تهران',
           about:
@@ -429,7 +414,7 @@ export default class extends BaseSeeder {
           reviewCount: seller.shop.reviewCount,
           joinDate: seller.shop.joinDate,
         },
-      }
-    )
+      })
+    }
   }
 }

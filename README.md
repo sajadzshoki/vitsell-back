@@ -71,7 +71,7 @@ node ace db:seed
 - Cart / wishlist / account / checkout (auth)
 - `POST /checkout/place` → for `online`: `{ orderId, paymentUrl }`
 - `GET /payments/zarinpal/callback`
-- `GET|PUT /seller/*` (auth; seed seller phone `09121234567`)
+- `GET|PUT /seller/*` (auth; requires `role=admin`)
 
 ## Frontend
 

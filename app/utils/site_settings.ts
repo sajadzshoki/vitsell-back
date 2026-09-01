@@ -19,8 +19,7 @@ export type SiteSettings = {
 export const defaultSiteSettings: SiteSettings = {
   name: 'دیجی‌شاپ',
   slug: 'digishop',
-  /** Same as seeded admin login phone */
-  phone: '09121234567',
+  phone: '',
   email: 'info@digishop.ir',
   city: 'تهران',
   about:
