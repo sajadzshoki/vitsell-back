@@ -32,6 +32,9 @@ export default class SellerReview extends BaseModel {
   @column()
   declare reply: string | null
 
+  @column()
+  declare moderation: 'pending' | 'approved' | 'rejected' | 'hidden'
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -45,6 +48,10 @@ export default class SellerReview extends BaseModel {
   declare product: BelongsTo<typeof Product>
 
   toJSON() {
+    return this.toAdminJSON()
+  }
+
+  toAdminJSON() {
     return {
       id: this.id,
       productId: this.productId,
@@ -52,7 +59,8 @@ export default class SellerReview extends BaseModel {
       rating: this.rating,
       text: this.text,
       date: this.date,
-      ...(this.reply ? { reply: this.reply } : {}),
+      reply: this.reply || undefined,
+      moderation: this.moderation || 'approved',
     }
   }
 }

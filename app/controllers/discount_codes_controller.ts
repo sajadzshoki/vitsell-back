@@ -1,5 +1,8 @@
 import DiscountCode from '#models/discount_code'
 import Order from '#models/order'
+import { discountCodesQueryValidator } from '#validators/promotions_query'
+import { querySellerDiscountCodes } from '#utils/seller_promotions_query'
+import { parseListQs } from '#utils/seller_schedule_filters'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
@@ -42,9 +45,9 @@ function parseDate(value: string) {
 }
 
 export default class DiscountCodesController {
-  async index({ response }: HttpContext) {
-    const rows = await DiscountCode.query().orderBy('created_at', 'desc')
-    return response.ok(rows.map((r) => r.toAdminJSON()))
+  async index({ request, response }: HttpContext) {
+    const filters = await discountCodesQueryValidator.validate(parseListQs({ ...request.qs() }))
+    return response.ok(await querySellerDiscountCodes(filters))
   }
 
   async show({ params, response }: HttpContext) {

@@ -28,6 +28,12 @@ export default class SellerListing extends BaseModel {
   @column()
   declare status: 'active' | 'pending' | 'inactive' | 'out_of_stock'
 
+  @column()
+  declare warehouseId: string | null
+
+  @column()
+  declare reserved: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -47,6 +53,8 @@ export default class SellerListing extends BaseModel {
       sold: this.sold,
       views: this.views,
       status: this.status,
+      warehouseId: this.warehouseId,
+      reserved: Number(this.reserved) || 0,
     }
   }
 }

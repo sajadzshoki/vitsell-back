@@ -1,5 +1,8 @@
 import AmazingDeal from '#models/amazing_deal'
 import Product from '#models/product'
+import { dealsQueryValidator } from '#validators/deals_query'
+import { querySellerDeals } from '#utils/seller_deals_query'
+import { parseListQs } from '#utils/seller_schedule_filters'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
@@ -40,9 +43,9 @@ function parseDate(value: string) {
 }
 
 export default class DealsController {
-  async index({ response }: HttpContext) {
-    const deals = await AmazingDeal.query().orderBy('created_at', 'desc')
-    return response.ok(deals.map((d) => d.toAdminJSON()))
+  async index({ request, response }: HttpContext) {
+    const filters = await dealsQueryValidator.validate(parseListQs({ ...request.qs() }))
+    return response.ok(await querySellerDeals(filters))
   }
 
   async show({ params, response }: HttpContext) {

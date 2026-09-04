@@ -4,7 +4,8 @@ services:
     container_name: digishop-postgres
     restart: unless-stopped
     ports:
-      - '5433:5432'
+      # Host 5433–5532 often blocked by Windows Hyper-V reserved ranges; use 15432 instead.
+      - '15432:5432'
     environment:
       POSTGRES_USER: digishop
       POSTGRES_PASSWORD: digishop

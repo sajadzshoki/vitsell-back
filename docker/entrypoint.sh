@@ -27,7 +27,14 @@ echo "[digishop-api] postgres is up"
 
 node ace migration:run
 
+# Seed may fail on restarts (duplicates); do not block the API
+set +e
 node ace db:seed
+SEED_STATUS=$?
+set -e
+if [ "$SEED_STATUS" -ne 0 ]; then
+  echo "[digishop-api] seed skipped/failed (non-fatal, exit=$SEED_STATUS)"
+fi
 
 echo "[digishop-api] starting server on ${HOST:-0.0.0.0}:${PORT:-3333}..."
 

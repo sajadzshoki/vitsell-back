@@ -42,5 +42,5 @@ Dev با Docker:
 
 ```bash
 docker compose up -d --build
-# API http://localhost:3333  |  Postgres host port 5433
+# API http://localhost:3333  |  Postgres host port 15432
 ```

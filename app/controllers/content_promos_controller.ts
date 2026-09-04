@@ -1,4 +1,7 @@
 import ContentPromo from '#models/content_promo'
+import { contentPromosQueryValidator } from '#validators/promotions_query'
+import { querySellerContentPromos } from '#utils/seller_promotions_query'
+import { parseListQs } from '#utils/seller_schedule_filters'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 
@@ -69,9 +72,9 @@ function applyFields(
 }
 
 export default class ContentPromosController {
-  async index({ response }: HttpContext) {
-    const rows = await ContentPromo.query().orderBy('created_at', 'desc')
-    return response.ok(rows.map((r) => r.toAdminJSON()))
+  async index({ request, response }: HttpContext) {
+    const filters = await contentPromosQueryValidator.validate(parseListQs({ ...request.qs() }))
+    return response.ok(await querySellerContentPromos(filters))
   }
 
   async show({ params, response }: HttpContext) {

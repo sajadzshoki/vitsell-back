@@ -90,6 +90,58 @@ export default class SellerOrder extends BaseModel {
   @column()
   declare note: string | null
 
+  @column()
+  declare trackingCode: string
+
+  @column()
+  declare carrier: string
+
+  @column()
+  declare estimatedDelivery: string
+
+  @column({
+    prepare: (value: unknown) => JSON.stringify(value ?? []),
+    consume: (value: unknown) =>
+      typeof value === 'string' ? JSON.parse(value) : Array.isArray(value) ? value : [],
+  })
+  declare timeline: Array<{
+    id: string
+    event: string
+    at: string
+    actor: string
+    detail?: string
+  }>
+
+  @column({
+    prepare: (value: unknown) => JSON.stringify(value ?? []),
+    consume: (value: unknown) =>
+      typeof value === 'string' ? JSON.parse(value) : Array.isArray(value) ? value : [],
+  })
+  declare internalNotes: Array<{
+    id: string
+    text: string
+    author: string
+    createdAt: string
+  }>
+
+  @column({
+    prepare: (value: unknown) => JSON.stringify(value ?? []),
+    consume: (value: unknown) =>
+      typeof value === 'string' ? JSON.parse(value) : Array.isArray(value) ? value : [],
+  })
+  declare refunds: Array<{
+    id: string
+    amount: number
+    reason: string
+    status: string
+    transactionId: string
+    createdAt: string
+    actorName: string
+  }>
+
+  @column()
+  declare refundedAmount: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -121,6 +173,13 @@ export default class SellerOrder extends BaseModel {
       shippingMethod: this.shippingMethod,
       paymentMethod: this.paymentMethod,
       ...(this.note ? { note: this.note } : {}),
+      trackingCode: this.trackingCode ?? '',
+      carrier: this.carrier ?? '',
+      estimatedDelivery: this.estimatedDelivery ?? '',
+      timeline: Array.isArray(this.timeline) ? this.timeline : [],
+      internalNotes: Array.isArray(this.internalNotes) ? this.internalNotes : [],
+      refunds: Array.isArray(this.refunds) ? this.refunds : [],
+      refundedAmount: Number(this.refundedAmount) || 0,
     }
   }
 }

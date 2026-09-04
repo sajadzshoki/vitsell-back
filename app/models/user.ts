@@ -1,10 +1,11 @@
 import { DateTime } from 'luxon'
-import { BaseModel, beforeSave, column, hasOne } from '@adonisjs/lucid/orm'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
+import { BaseModel, beforeSave, column, hasOne, manyToMany } from '@adonisjs/lucid/orm'
+import type { HasOne, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import type { AccessToken } from '@adonisjs/auth/access_tokens'
 import hash from '@adonisjs/core/services/hash'
 import Profile from '#models/profile'
+import AdminRole from '#models/admin_role'
 
 export default class User extends BaseModel {
   static accessTokens = DbAccessTokensProvider.forModel(User)
@@ -22,6 +23,12 @@ export default class User extends BaseModel {
   @column()
   declare role: 'customer' | 'seller' | 'admin'
 
+  @column()
+  declare status: 'active' | 'inactive' | 'blocked'
+
+  @column.dateTime()
+  declare lastLoginAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -30,6 +37,13 @@ export default class User extends BaseModel {
 
   @hasOne(() => Profile)
   declare profile: HasOne<typeof Profile>
+
+  @manyToMany(() => AdminRole, {
+    pivotTable: 'admin_user_roles',
+    pivotForeignKey: 'user_id',
+    pivotRelatedForeignKey: 'role_id',
+  })
+  declare adminRoles: ManyToMany<typeof AdminRole>
 
   get hasPassword() {
     return Boolean(this.password)

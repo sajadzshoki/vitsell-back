@@ -6,6 +6,15 @@ import vine from '@vinejs/vine'
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { assertAdminPanelRequest, assertStorefrontRequest } from '#utils/auth_origins'
+import {
+  ensureSystemAdminRoles,
+  expandRolePermissions,
+  loadUserAdminRoles,
+  syncUserAdminRoles,
+} from '#utils/seller_admins'
+import AdminRole from '#models/admin_role'
+import { mapUserStatusToAdmin, publicRoleId } from '#utils/admin_rbac'
+import { DateTime } from 'luxon'
 
 const phoneRule = vine.string().regex(/^09\d{9}$/)
 
@@ -48,10 +57,38 @@ async function ensureProfile(user: User) {
       email: null,
       birth: null,
       gender: null,
+      avatar: null,
     })
     await user.load('profile')
   }
   return user.profile!
+}
+
+async function adminProfilePayload(user: User) {
+  const profile = await ensureProfile(user)
+  if (user.role !== 'admin') {
+    return profile.toAccountProfile(user.phone, user.hasPassword, user.role)
+  }
+
+  await ensureSystemAdminRoles()
+  let roles = await loadUserAdminRoles(user)
+  if (!roles.length) {
+    const superRole = await AdminRole.findBy('key', 'SUPER_ADMIN')
+    if (superRole) {
+      await syncUserAdminRoles(user, [superRole])
+      roles = await loadUserAdminRoles(user)
+    }
+  }
+
+  const abilities = await expandRolePermissions(roles)
+  const roleIds = roles.map((r) => publicRoleId(r.key))
+  return profile.toAccountProfile(user.phone, user.hasPassword, user.role, {
+    adminId: String(user.id),
+    adminStatus: mapUserStatusToAdmin(user.status),
+    roleIds,
+    abilities,
+    primaryRoleKey: roles[0]?.key || 'SUPER_ADMIN',
+  })
 }
 
 function rejectAdminOnStore(user: User, response: HttpContext['response']) {
@@ -231,6 +268,12 @@ export default class AuthController {
       })
     }
 
+    if (user.status !== 'active') {
+      return ctx.response.forbidden({
+        errors: [{ message: 'حساب مدیر غیرفعال یا معلق است' }],
+      })
+    }
+
     const valid = await user.verifyPassword(password)
     if (!valid) {
       return ctx.response.unauthorized({
@@ -238,19 +281,25 @@ export default class AuthController {
       })
     }
 
-    const profile = await ensureProfile(user)
+    user.lastLoginAt = DateTime.utc()
+    await user.save()
+
     const token = await User.accessTokens.create(user)
 
     return ctx.response.ok({
       token: token.value!.release(),
-      profile: profile.toAccountProfile(user.phone, user.hasPassword, user.role),
+      profile: await adminProfilePayload(user),
     })
   }
 
   async me({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const profile = await ensureProfile(user)
-    return response.ok(profile.toAccountProfile(user.phone, user.hasPassword, user.role))
+    if (user.role === 'admin' && user.status !== 'active') {
+      return response.forbidden({
+        errors: [{ message: 'حساب مدیر غیرفعال یا معلق است' }],
+      })
+    }
+    return response.ok(await adminProfilePayload(user))
   }
 
   async logout({ auth, response }: HttpContext) {

@@ -8,6 +8,21 @@ export type NotificationAudienceGroup =
   | 'new_users'
   | 'inactive'
 
+export type NotificationCampaignStatus =
+  | 'draft'
+  | 'scheduled'
+  | 'sent'
+  | 'failed'
+  | 'cancelled'
+
+export type NotificationCampaignType =
+  | 'promotional'
+  | 'order'
+  | 'system'
+  | 'inventory'
+  | 'marketing'
+  | 'announcement'
+
 export default class NotificationCampaign extends BaseModel {
   static selfAssignPrimaryKey = true
   static table = 'notification_campaigns'
@@ -28,6 +43,9 @@ export default class NotificationCampaign extends BaseModel {
   declare icon: string
 
   @column()
+  declare type: NotificationCampaignType
+
+  @column()
   declare audienceType: NotificationAudienceType
 
   @column()
@@ -44,7 +62,30 @@ export default class NotificationCampaign extends BaseModel {
   declare recipientCount: number
 
   @column()
-  declare status: 'sent' | 'draft'
+  declare status: NotificationCampaignStatus
+
+  @column.dateTime()
+  declare scheduledAt: DateTime | null
+
+  @column()
+  declare image: string | null
+
+  @column({
+    prepare: (value: { type: string; id: string } | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: unknown) => {
+      if (!value) return null
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value)
+        } catch {
+          return null
+        }
+      }
+      return value as { type: string; id: string }
+    },
+  })
+  declare relatedEntity: { type: string; id: string } | null
 
   @column.dateTime()
   declare sentAt: DateTime | null
@@ -62,11 +103,15 @@ export default class NotificationCampaign extends BaseModel {
       description: this.description,
       link: this.link ?? null,
       icon: this.icon,
+      type: this.type || 'announcement',
       audienceType: this.audienceType,
       audienceGroup: this.audienceGroup ?? null,
       userIds: this.userIds ?? [],
       recipientCount: this.recipientCount,
       status: this.status,
+      scheduledAt: this.scheduledAt?.toISO() ?? null,
+      image: this.image ?? null,
+      relatedEntity: this.relatedEntity ?? null,
       createdAt: this.createdAt?.toISO() ?? null,
       sentAt: this.sentAt?.toISO() ?? null,
     }

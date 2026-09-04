@@ -1,74 +1,16 @@
 import Category from '#models/category'
 import Product from '#models/product'
+import {
+  storeCategoryValidator,
+  updateCategoryValidator,
+} from '#validators/category'
+import { categoriesQueryValidator } from '#validators/categories'
+import { querySellerCategories } from '#utils/seller_categories_query'
 import type { HttpContext } from '@adonisjs/core/http'
-import vine from '@vinejs/vine'
-
-const idRule = vine.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-
-const subSchema = vine.object({
-  name: vine.string().trim(),
-  items: vine.array(vine.string().trim()).optional(),
-  image: vine.string().trim().nullable().optional(),
-})
-
-/** Empty strings become null via bodyparser `convertEmptyStringsToNull`. */
-const emptyableString = () => vine.string().trim().nullable()
-
-const pageMetaSchema = vine
-  .object({
-    hero: vine.object({
-      image: emptyableString(),
-      eyebrow: emptyableString(),
-      title: emptyableString(),
-      subtitle: emptyableString(),
-    }),
-    seo: vine.object({
-      heading: emptyableString(),
-      paragraphs: vine.array(emptyableString()),
-    }),
-  })
-  .nullable()
-  .optional()
-
-const suggestedSchema = vine
-  .array(
-    vine.object({
-      id: vine.string().trim(),
-      title: vine.string().trim(),
-      image: emptyableString(),
-      query: vine.string().trim(),
-    })
-  )
-  .nullable()
-  .optional()
-
-const storeValidator = vine.compile(
-  vine.object({
-    id: idRule.clone(),
-    name: vine.string().trim().minLength(1),
-    icon: vine.string().trim().minLength(1),
-    image: vine.string().trim().nullable().optional(),
-    text: vine.string().trim().nullable().optional(),
-    subs: vine.array(subSchema).optional(),
-    pageMeta: pageMetaSchema,
-    suggested: suggestedSchema,
-  })
-)
-
-const updateValidator = vine.compile(
-  vine.object({
-    name: vine.string().trim().minLength(1),
-    icon: vine.string().trim().minLength(1),
-    image: vine.string().trim().nullable().optional(),
-    text: vine.string().trim().nullable().optional(),
-    subs: vine.array(subSchema).optional(),
-    pageMeta: pageMetaSchema,
-    suggested: suggestedSchema,
-  })
-)
+import type { SeoMeta } from '#models/blog_post'
 
 function normalizeSubs(
-  subs?: Array<{ name: string; items?: string[]; image?: string }> | null
+  subs?: Array<{ name: string; items?: string[]; image?: string | null }> | null
 ) {
   if (!subs?.length) return []
   return subs
@@ -146,15 +88,90 @@ function normalizeSuggested(
   return next.length ? next : null
 }
 
+function emptySeo(): SeoMeta {
+  return {
+    metaTitle: '',
+    metaDescription: '',
+    metaKeywords: '',
+    canonicalUrl: '',
+    robots: 'index,follow',
+    ogTitle: '',
+    ogDescription: '',
+    ogImage: '',
+    twitterTitle: '',
+    twitterDescription: '',
+    twitterImage: '',
+  }
+}
+
+function normalizeSeo(seo?: Partial<SeoMeta> | null) {
+  if (!seo) return null
+  const next: SeoMeta = {
+    ...emptySeo(),
+    metaTitle: asText(seo.metaTitle),
+    metaDescription: asText(seo.metaDescription),
+    metaKeywords: asText(seo.metaKeywords),
+    canonicalUrl: asText(seo.canonicalUrl),
+    robots: asText(seo.robots) || 'index,follow',
+    ogTitle: asText(seo.ogTitle),
+    ogDescription: asText(seo.ogDescription),
+    ogImage: asText(seo.ogImage),
+    twitterTitle: asText(seo.twitterTitle),
+    twitterDescription: asText(seo.twitterDescription),
+    twitterImage: asText(seo.twitterImage),
+  }
+  const hasAny = Object.entries(next).some(([key, value]) => {
+    if (key === 'robots') return value !== 'index,follow'
+    return Boolean(value)
+  })
+  return hasAny ? next : null
+}
+
+async function resolveParentId(
+  parentId: string | null | undefined,
+  selfId?: string
+): Promise<{ ok: true; parentId: string | null } | { ok: false; message: string }> {
+  const raw = (parentId ?? '').toString().trim()
+  if (!raw) return { ok: true, parentId: null }
+
+  if (selfId && raw === selfId) {
+    return { ok: false, message: 'دسته نمی‌تواند والد خودش باشد' }
+  }
+
+  const parent = await Category.find(raw)
+  if (!parent) {
+    return { ok: false, message: 'دسته والد یافت نشد' }
+  }
+
+  if (selfId) {
+    let current: string | null = raw
+    const seen = new Set<string>()
+    while (current) {
+      if (current === selfId) {
+        return { ok: false, message: 'انتخاب این والد چرخه ایجاد می‌کند' }
+      }
+      if (seen.has(current)) break
+      seen.add(current)
+      const row = await Category.find(current)
+      current = row?.parentId ?? null
+    }
+  }
+
+  return { ok: true, parentId: raw }
+}
+
 export default class CategoriesController {
   async index({ response }: HttpContext) {
-    const categories = await Category.query().orderBy('id', 'asc')
+    const categories = await Category.query()
+      .where('status', 'active')
+      .orderBy('sort_order', 'asc')
+      .orderBy('name', 'asc')
     return response.ok(categories.map((c) => c.toJSON()))
   }
 
   async show({ params, response }: HttpContext) {
     const category = await Category.find(params.id)
-    if (!category) {
+    if (!category || category.status === 'inactive') {
       return response.notFound({ errors: [{ field: 'id', message: 'دسته‌بندی یافت نشد' }] })
     }
     return response.ok(category.toJSON())
@@ -162,7 +179,7 @@ export default class CategoriesController {
 
   async pageMeta({ params, response }: HttpContext) {
     const category = await Category.find(params.id)
-    if (!category) {
+    if (!category || category.status === 'inactive') {
       return response.notFound({ errors: [{ field: 'id', message: 'دسته‌بندی یافت نشد' }] })
     }
     return response.ok({
@@ -171,10 +188,16 @@ export default class CategoriesController {
     })
   }
 
-  /** Admin: full payload including pageMeta / suggested / timestamps */
-  async adminIndex({ response }: HttpContext) {
-    const categories = await Category.query().orderBy('id', 'asc')
-    return response.ok(categories.map((c) => c.toAdminJSON()))
+  /** Admin: full payload including pageMeta / suggested / timestamps + filters */
+  async adminIndex({ request, response }: HttpContext) {
+    const qs = { ...request.qs() }
+    if (qs.status === 'all' || qs.status === '') delete qs.status
+    if (qs.parentId === 'all' || qs.parentId === '') delete qs.parentId
+    if (qs.q === '') delete qs.q
+
+    const filters = await categoriesQueryValidator.validate(qs)
+    const result = await querySellerCategories(filters)
+    return response.ok(result)
   }
 
   async adminShow({ params, response }: HttpContext) {
@@ -186,11 +209,18 @@ export default class CategoriesController {
   }
 
   async store({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(storeValidator)
+    const payload = await request.validateUsing(storeCategoryValidator)
     const existing = await Category.find(payload.id)
     if (existing) {
       return response.conflict({
         errors: [{ field: 'id', message: 'شناسه دسته‌بندی تکراری است' }],
+      })
+    }
+
+    const parent = await resolveParentId(payload.parentId)
+    if (!parent.ok) {
+      return response.badRequest({
+        errors: [{ field: 'parentId', message: parent.message }],
       })
     }
 
@@ -200,6 +230,10 @@ export default class CategoriesController {
       icon: payload.icon,
       image: (payload.image ?? '').toString().trim() || null,
       text: (payload.text ?? '').toString().trim() || null,
+      parentId: parent.parentId,
+      status: payload.status === 'inactive' ? 'inactive' : 'active',
+      sortOrder: Math.max(0, Math.round(Number(payload.sortOrder) || 0)),
+      seo: normalizeSeo(payload.seo),
       subs: normalizeSubs(payload.subs),
       pageMeta: normalizePageMeta(payload.pageMeta),
       suggested: normalizeSuggested(payload.suggested),
@@ -214,11 +248,22 @@ export default class CategoriesController {
       return response.notFound({ errors: [{ field: 'id', message: 'دسته‌بندی یافت نشد' }] })
     }
 
-    const payload = await request.validateUsing(updateValidator)
+    const payload = await request.validateUsing(updateCategoryValidator)
+    const parent = await resolveParentId(payload.parentId, category.id)
+    if (!parent.ok) {
+      return response.badRequest({
+        errors: [{ field: 'parentId', message: parent.message }],
+      })
+    }
+
     category.name = payload.name
     category.icon = payload.icon
     category.image = (payload.image ?? '').toString().trim() || null
     category.text = (payload.text ?? '').toString().trim() || null
+    category.parentId = parent.parentId
+    category.status = payload.status === 'inactive' ? 'inactive' : 'active'
+    category.sortOrder = Math.max(0, Math.round(Number(payload.sortOrder) || 0))
+    category.seo = normalizeSeo(payload.seo)
     category.subs = normalizeSubs(payload.subs)
     category.pageMeta = normalizePageMeta(payload.pageMeta)
     category.suggested = normalizeSuggested(payload.suggested)
@@ -231,6 +276,22 @@ export default class CategoriesController {
     const category = await Category.find(params.id)
     if (!category) {
       return response.notFound({ errors: [{ field: 'id', message: 'دسته‌بندی یافت نشد' }] })
+    }
+
+    const childRow = await Category.query()
+      .where('parent_id', category.id)
+      .count('* as total')
+      .first()
+    const childTotal = Number((childRow as any)?.$extras?.total ?? (childRow as any)?.total ?? 0)
+    if (childTotal > 0) {
+      return response.conflict({
+        errors: [
+          {
+            field: 'id',
+            message: `این دسته ${childTotal} زیردسته دارد و قابل حذف نیست`,
+          },
+        ],
+      })
     }
 
     const totalRow = await Product.query().where('category', category.id).count('* as total').first()

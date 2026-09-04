@@ -25,6 +25,9 @@ export default class Profile extends BaseModel {
   @column()
   declare gender: string | null
 
+  @column()
+  declare avatar: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -34,11 +37,18 @@ export default class Profile extends BaseModel {
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
 
-  /** Shape matches frontend AccountProfile */
+  /** Shape matches frontend AccountProfile (+ admin RBAC fields when provided) */
   toAccountProfile(
     phone: string,
     hasPassword = false,
     role: 'customer' | 'seller' | 'admin' = 'customer',
+    extras?: {
+      adminId?: string
+      adminStatus?: string
+      roleIds?: string[]
+      abilities?: string[]
+      primaryRoleKey?: string | null
+    },
   ) {
     return {
       firstName: this.firstName,
@@ -47,8 +57,14 @@ export default class Profile extends BaseModel {
       phone,
       birth: this.birth ?? '',
       gender: this.gender ?? '',
+      avatar: this.avatar ?? '',
       hasPassword,
       role,
+      ...(extras?.adminId != null ? { adminId: extras.adminId } : {}),
+      ...(extras?.adminStatus != null ? { adminStatus: extras.adminStatus } : {}),
+      ...(extras?.roleIds != null ? { roleIds: extras.roleIds } : {}),
+      ...(extras?.abilities != null ? { abilities: extras.abilities } : {}),
+      ...(extras?.primaryRoleKey !== undefined ? { primaryRoleKey: extras.primaryRoleKey } : {}),
     }
   }
 }

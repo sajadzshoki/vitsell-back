@@ -102,6 +102,21 @@ export default class Product extends BaseModel {
   declare viewCount: number
 
   @column()
+  declare featured: boolean
+
+  @column()
+  declare published: boolean
+
+  @column()
+  declare hasVariants: boolean
+
+  @column()
+  declare sku: string | null
+
+  @column()
+  declare lowStockThreshold: number
+
+  @column()
   declare description: string | null
 
   @column({
@@ -157,6 +172,11 @@ export default class Product extends BaseModel {
       ...(this.colors?.length ? { colors: this.colors } : {}),
       inStock: this.inStock,
       fastDelivery: this.fastDelivery,
+      featured: Boolean(this.featured),
+      published: this.published !== false,
+      hasVariants: Boolean(this.hasVariants),
+      ...(this.sku ? { sku: this.sku } : {}),
+      lowStockThreshold: Number(this.lowStockThreshold) || 5,
       ...(this.shortDesc ? { shortDesc: this.shortDesc } : {}),
       ...(this.shortName ? { shortName: this.shortName } : {}),
       ...(this.scores ? { scores: this.scores } : {}),

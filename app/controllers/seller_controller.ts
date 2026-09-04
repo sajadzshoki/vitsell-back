@@ -8,6 +8,22 @@ import SellerPayout from '#models/seller_payout'
 import SellerShop from '#models/seller_shop'
 import User from '#models/user'
 import { saveFooterPayload } from '#utils/footer'
+import { computeSellerSalesPoints } from '#utils/seller_sales'
+import { querySellerListings } from '#utils/seller_listings_query'
+import { querySellerOrders } from '#utils/seller_orders_query'
+import {
+  buildSellerOrderDetail,
+  pushTimeline,
+  type OrderInternalNote,
+  type OrderRefundRecord,
+} from '#utils/seller_order_detail'
+import { listingsQueryValidator } from '#validators/listings'
+import { ordersQueryValidator } from '#validators/orders'
+import {
+  orderNoteValidator,
+  orderRefundValidator,
+  orderTrackingValidator,
+} from '#validators/order_detail'
 import {
   defaultSiteSettings,
   loadFooterWithSiteOverlay,
@@ -129,6 +145,11 @@ const listingProductFields = {
   badge: vine.string().trim().optional(),
   inStock: vine.boolean().optional(),
   fastDelivery: vine.boolean().optional(),
+  featured: vine.boolean().optional(),
+  published: vine.boolean().optional(),
+  hasVariants: vine.boolean().optional(),
+  sku: vine.string().trim().optional(),
+  lowStockThreshold: vine.number().min(0).optional(),
 }
 
 const storeListingValidator = vine.compile(
@@ -234,16 +255,24 @@ export default class SellerController {
     return response.ok(await loadFooterWithSiteOverlay())
   }
 
-  async listings({ response }: HttpContext) {
-    const listings = await SellerListing.query()
-      .preload('product')
-      .orderBy('updated_at', 'desc')
-    return response.ok(
-      listings.map((l) => ({
-        ...l.toJSON(),
-        ...(l.product ? { product: l.product.toCatalogJSON() } : {}),
-      }))
-    )
+  async listings({ request, response }: HttpContext) {
+    const qs = { ...request.qs() }
+    for (const key of ['hasDiscount', 'hasVariants', 'featured', 'published', 'all'] as const) {
+      const raw = qs[key]
+      if (raw === '1' || raw === 'true') qs[key] = true
+      else if (raw === '0' || raw === 'false') qs[key] = false
+      else if (raw === '' || raw == null) delete qs[key]
+    }
+    for (const key of ['priceMin', 'priceMax', 'page', 'pageSize'] as const) {
+      if (qs[key] === '' || qs[key] == null) delete qs[key]
+      else if (qs[key] != null) qs[key] = Number(qs[key])
+    }
+    if (qs.status === 'all') delete qs.status
+    if (qs.stock === 'all') delete qs.stock
+
+    const filters = await listingsQueryValidator.validate(qs)
+    const result = await querySellerListings(filters)
+    return response.ok(result)
   }
 
   async showListing({ params, response }: HttpContext) {
@@ -286,7 +315,14 @@ export default class SellerController {
         fastDelivery: p.fastDelivery ?? false,
         shortDesc: p.shortDesc ?? null,
         shortName: p.shortName ?? null,
+        description: p.description ?? null,
+        features: p.features?.length ? p.features : null,
         specs: p.specs?.length ? p.specs : null,
+        featured: p.featured ?? false,
+        published: p.published ?? true,
+        hasVariants: p.hasVariants ?? false,
+        sku: p.sku?.trim() || null,
+        lowStockThreshold: p.lowStockThreshold ?? 5,
         scores: null,
         soldCount: 0,
         viewCount: 0,
@@ -363,6 +399,11 @@ export default class SellerController {
           description: p.description ?? product?.description ?? null,
           features: p.features?.length ? p.features : product?.features ?? null,
           specs: p.specs?.length ? p.specs : null,
+          featured: p.featured ?? product?.featured ?? false,
+          published: p.published ?? product?.published ?? true,
+          hasVariants: p.hasVariants ?? product?.hasVariants ?? false,
+          sku: p.sku !== undefined ? p.sku?.trim() || null : product?.sku ?? null,
+          lowStockThreshold: p.lowStockThreshold ?? product?.lowStockThreshold ?? 5,
           scores: product?.scores ?? null,
           soldCount: product?.soldCount ?? 0,
           viewCount: product?.viewCount ?? 0,
@@ -403,23 +444,23 @@ export default class SellerController {
   }
 
   async orders({ request, response }: HttpContext) {
-    const sort = String(request.input('sort', 'newest'))
-    let query = SellerOrder.query()
-    switch (sort) {
-      case 'oldest':
-        query = query.orderBy('date_key', 'asc')
-        break
-      case 'amount_desc':
-        query = query.orderBy('total', 'desc')
-        break
-      case 'amount_asc':
-        query = query.orderBy('total', 'asc')
-        break
-      default:
-        query = query.orderBy('date_key', 'desc')
+    const qs = { ...request.qs() }
+    for (const key of ['status', 'payment', 'shipping', 'paymentMethod', 'q', 'sort'] as const) {
+      if (qs[key] === 'all' || qs[key] === '') delete qs[key]
     }
-    const orders = await query
-    return response.ok(orders.map((o) => o.toJSON()))
+    for (const key of ['page', 'pageSize', 'amountMin', 'amountMax'] as const) {
+      if (qs[key] === '' || qs[key] == null) delete qs[key]
+      else if (qs[key] != null) qs[key] = Number(qs[key])
+    }
+    for (const key of ['hasDiscount', 'hasRefund', 'hasReturn', 'needsTracking', 'all'] as const) {
+      if (qs[key] === '1' || qs[key] === 'true') qs[key] = true
+      else if (qs[key] === '0' || qs[key] === 'false' || qs[key] === '') delete qs[key]
+    }
+    if (qs.dateFrom === '') delete qs.dateFrom
+    if (qs.dateTo === '') delete qs.dateTo
+
+    const filters = await ordersQueryValidator.validate(qs)
+    return response.ok(await querySellerOrders(filters))
   }
 
   async showOrder({ params, response }: HttpContext) {
@@ -427,7 +468,7 @@ export default class SellerController {
     if (!order) {
       return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
     }
-    return response.ok(order.toJSON())
+    return response.ok(await buildSellerOrderDetail(order))
   }
 
   async updateOrderStatus({ params, request, response }: HttpContext) {
@@ -462,9 +503,105 @@ export default class SellerController {
       })
     }
 
+    const previous = order.status
     order.status = status
+    if (!isSame) {
+      pushTimeline(order, 'تغییر وضعیت', 'ادمین', `${previous} → ${status}`)
+    }
     await order.save()
-    return response.ok(order.toJSON())
+    return response.ok(await buildSellerOrderDetail(order))
+  }
+
+  async updateOrderTracking({ params, request, response }: HttpContext) {
+    const order = await SellerOrder.find(params.id)
+    if (!order) {
+      return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
+    }
+    const payload = await request.validateUsing(orderTrackingValidator)
+    if (payload.trackingCode != null) order.trackingCode = payload.trackingCode.trim()
+    if (payload.carrier != null) order.carrier = payload.carrier.trim()
+    if (payload.estimatedDelivery != null) {
+      order.estimatedDelivery = payload.estimatedDelivery.trim()
+    }
+    pushTimeline(
+      order,
+      'ثبت کد پیگیری',
+      'ادمین',
+      order.trackingCode || undefined,
+    )
+    await order.save()
+    return response.ok(await buildSellerOrderDetail(order))
+  }
+
+  async addOrderNote({ params, request, response }: HttpContext) {
+    const order = await SellerOrder.find(params.id)
+    if (!order) {
+      return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
+    }
+    const payload = await request.validateUsing(orderNoteValidator)
+    const note: OrderInternalNote = {
+      id: `note-${Date.now().toString(36)}`,
+      text: payload.text.trim(),
+      author: (payload.author ?? 'ادمین').trim() || 'ادمین',
+      createdAt: new Date().toISOString(),
+    }
+    const notes = Array.isArray(order.internalNotes) ? [...order.internalNotes] : []
+    order.internalNotes = [note, ...notes]
+    pushTimeline(order, 'یادداشت داخلی', note.author)
+    await order.save()
+    return response.ok(await buildSellerOrderDetail(order))
+  }
+
+  async createOrderRefund({ params, request, response }: HttpContext) {
+    const order = await SellerOrder.find(params.id)
+    if (!order) {
+      return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
+    }
+    const payload = await request.validateUsing(orderRefundValidator)
+    const amount = Math.round(payload.amount)
+    const { sumActiveRefundsForOrder } = await import('#utils/seller_refunds_query')
+    const { completed, reserved } = await sumActiveRefundsForOrder(order.id)
+    const remaining = Math.max(0, Number(order.total) - completed - reserved)
+    if (amount <= 0 || amount > remaining) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'amount', message: `مبلغ بازپرداخت باید بین ۱ و ${remaining} باشد` }],
+      })
+    }
+    const status = payload.status ?? 'completed'
+    const refundId = `RF-${Date.now().toString(36).toUpperCase()}`
+    const refund: OrderRefundRecord = {
+      id: refundId,
+      amount,
+      reason: (payload.reason ?? 'بازپرداخت سفارش').trim() || 'بازپرداخت سفارش',
+      status,
+      transactionId: (payload.transactionId ?? '').trim(),
+      createdAt: new Date().toISOString(),
+      actorName: 'ادمین',
+    }
+    const refunds = Array.isArray(order.refunds) ? [...order.refunds] : []
+    order.refunds = [refund, ...refunds]
+    if (status === 'completed') {
+      order.refundedAmount = completed + amount
+    }
+    pushTimeline(order, 'ثبت بازپرداخت', 'ادمین', `${amount.toLocaleString('fa-IR')} تومان`)
+    await order.save()
+
+    const { default: SellerRefundModel } = await import('#models/seller_refund')
+    await SellerRefundModel.create({
+      id: refundId,
+      orderId: order.id,
+      returnId: null,
+      customerName: order.customerName,
+      status: status as any,
+      amount,
+      orderTotal: Number(order.total) || 0,
+      alreadyRefunded: completed,
+      reason: refund.reason,
+      transactionId: refund.transactionId,
+      items: [],
+    })
+
+    return response.created(await buildSellerOrderDetail(order))
   }
 
   async reviews({ response }: HttpContext) {
@@ -577,13 +714,32 @@ export default class SellerController {
     return response.created(payout.toJSON())
   }
 
-  async sales({ response }: HttpContext) {
-    const block = await ContentBlock.find(SITE_SALES_KEY)
-    if (block?.value) {
-      return response.ok(block.value)
+  async destroyListing({ params, response }: HttpContext) {
+    const listing = await SellerListing.query().where('product_id', params.productId).first()
+    if (!listing) {
+      return response.notFound({ errors: [{ field: 'productId', message: 'محصول یافت نشد' }] })
     }
-    // legacy seed key fallback
-    const legacy = await ContentBlock.query().whereILike('key', 'sellerSales:%').first()
-    return response.ok((legacy?.value as { label: string; value: number }[]) ?? [])
+
+    const product = await Product.find(listing.productId)
+    await listing.delete()
+    if (product) {
+      product.inStock = false
+      await product.save()
+    }
+
+    return response.ok({
+      message: 'محصول حذف شد',
+      productId: params.productId,
+    })
+  }
+
+  async sales({ response }: HttpContext) {
+    const points = await computeSellerSalesPoints()
+    // Keep a cached snapshot for dashboards that still read content_blocks
+    await ContentBlock.updateOrCreate(
+      { key: SITE_SALES_KEY },
+      { key: SITE_SALES_KEY, value: points }
+    )
+    return response.ok(points)
   }
 }
