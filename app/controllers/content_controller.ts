@@ -2,6 +2,8 @@ import ContentBlock from '#models/content_block'
 import Product from '#models/product'
 import BlogPost from '#models/blog_post'
 import Banner from '#models/banner'
+import Brand from '#models/brand'
+import Category from '#models/category'
 import StaticPage from '#models/static_page'
 import AmazingDeal from '#models/amazing_deal'
 import ContentPromo from '#models/content_promo'
@@ -19,20 +21,40 @@ async function block<T>(key: string, fallback: T): Promise<T> {
   return (row?.value as T) ?? fallback
 }
 
+function chunkBannerRows(items: ReturnType<Banner['toHomeBannerJSON']>[], size = 3) {
+  const rows: { id: string; items: typeof items }[] = []
+  for (let i = 0; i < items.length; i += size) {
+    rows.push({
+      id: `promo-row-${Math.floor(i / size) + 1}`,
+      items: items.slice(i, i + size),
+    })
+  }
+  return rows
+}
+
 export default class ContentController {
   async home({ response }: HttpContext) {
     const now = DateTime.utc()
-    const heroBanners = await Banner.query()
-      .where('placement', 'homepage_hero')
-      .where('active', true)
-      .orderBy('priority', 'asc')
-      .orderBy('sort_order', 'asc')
+    const [heroBanners, promoBanners] = await Promise.all([
+      Banner.query()
+        .where('placement', 'homepage_hero')
+        .where('active', true)
+        .orderBy('priority', 'asc')
+        .orderBy('sort_order', 'asc'),
+      Banner.query()
+        .where('placement', 'homepage_promo_strip')
+        .where('active', true)
+        .orderBy('priority', 'asc')
+        .orderBy('sort_order', 'asc'),
+    ])
 
     const liveHeroes = heroBanners.filter((b) => b.isLive(now))
-    const [legacyHeroSlides, heroFeatures, brands, circles, legacyPromos] = await Promise.all([
+    const livePromoBanners = promoBanners.filter((b) => b.isLive(now))
+
+    const [legacyHeroSlides, heroFeatures, legacyBrands, circles, legacyPromos] = await Promise.all([
       block('heroSlides', []),
       block('heroFeatures', []),
-      block('homeBrands', []),
+      block<string[]>('homeBrands', []),
       block('homeCircles', []),
       block('homePromos', []),
     ])
@@ -41,10 +63,21 @@ export default class ContentController {
       ? liveHeroes.map((b) => b.toHeroSlideJSON())
       : legacyHeroSlides
 
+    const bannerRows = chunkBannerRows(livePromoBanners.map((b) => b.toHomeBannerJSON()))
+
     const promoRows = await ContentPromo.query().where('active', true).orderBy('created_at', 'desc')
     const promos = promoRows.length
       ? promoRows.map((p) => p.toPublicJSON())
       : legacyPromos
+
+    const activeBrands = await Brand.query()
+      .where('status', 'active')
+      .orderBy('sort_order', 'asc')
+      .orderBy('name', 'asc')
+
+    const brands = activeBrands.length
+      ? activeBrands.map((b) => b.name)
+      : legacyBrands
 
     const liveDeals = await AmazingDeal.query()
       .where('active', true)
@@ -79,12 +112,78 @@ export default class ContentController {
     const bestSellers = await Product.query().orderBy('sold_count', 'desc').limit(8)
     const newArrivals = await Product.query().orderBy('created_at', 'desc').limit(8)
 
+    const rootCategories = await Category.query()
+      .where('status', 'active')
+      .whereNull('parent_id')
+      .orderBy('sort_order', 'asc')
+      .limit(20)
+
+    const categoryShelves: {
+      id: string
+      title: string
+      category: string
+      viewAllTo: string
+      products: ReturnType<Product['toCatalogJSON']>[]
+    }[] = []
+
+    for (const cat of rootCategories) {
+      const shelfProducts = await Product.query()
+        .where('category', cat.id)
+        .orderBy('sold_count', 'desc')
+        .limit(12)
+      if (shelfProducts.length < 1) continue
+      categoryShelves.push({
+        id: `shelf-${cat.id}`,
+        title: `پرفروش‌ترین‌های ${cat.name}`,
+        category: cat.id,
+        viewAllTo: `/search?category=${encodeURIComponent(cat.id)}`,
+        products: shelfProducts.map((p) => p.toCatalogJSON()),
+      })
+      if (categoryShelves.length >= 3) break
+    }
+
+    const brandByName = new Map(activeBrands.map((b) => [b.name.trim().toLowerCase(), b]))
+    const topMobileBrands: {
+      id: string
+      name: string
+      image: string
+      to: string
+    }[] = []
+
+    const mobileShelf =
+      categoryShelves.find((s) => /mobile|موبایل|گوشی/i.test(s.category) || /موبایل|گوشی/i.test(s.title))
+      || categoryShelves[0]
+
+    if (mobileShelf) {
+      const seen = new Set<string>()
+      for (const product of mobileShelf.products) {
+        const brandName = String(product.brand || '').trim()
+        if (!brandName) continue
+        const key = brandName.toLowerCase()
+        if (seen.has(key)) continue
+        seen.add(key)
+        const brand = brandByName.get(key)
+        const image = brand?.logo || String(product.image || '')
+        if (!image) continue
+        topMobileBrands.push({
+          id: brand?.id || key,
+          name: brand?.name || brandName,
+          image,
+          to: `/search?q=${encodeURIComponent(brandName)}&category=${encodeURIComponent(mobileShelf.category)}`,
+        })
+        if (topMobileBrands.length >= 5) break
+      }
+    }
+
     return response.ok({
       heroSlides,
       heroFeatures,
       brands,
       circles,
       promos,
+      bannerRows,
+      categoryShelves,
+      topMobileBrands,
       dealsOfTheDay,
       bestSellers: bestSellers.map((p) => p.toCatalogJSON()),
       newArrivals: newArrivals.map((p) => p.toCatalogJSON()),

@@ -130,4 +130,16 @@ export default class Banner extends BaseModel {
       tone: 'primary' as const,
     }
   }
+
+  /** Shape compatible with storefront HomeBanner for promo strips */
+  toHomeBannerJSON() {
+    return {
+      id: this.id,
+      title: this.title || this.alt || '',
+      subtitle: this.alt && this.alt !== this.title ? this.alt : '',
+      image: this.imageMobile || this.image,
+      to: this.link || '/',
+      tone: 'primary' as const,
+    }
+  }
 }

@@ -38,6 +38,9 @@ services:
       DB_USER: digishop
       DB_PASSWORD: digishop
       DB_DATABASE: digishop
+      # Local Docker: OTP/payment mock when provider keys are empty
+      ALLOW_OTP_MOCK: "true"
+      ALLOW_PAYMENT_MOCK: "true"
       ZARINPAL_CALLBACK_URL: http://localhost:3333/api/v1/payments/zarinpal/callback
       ZARINPAL_SANDBOX: "true"
       ZARINPAL_MERCHANT_ID: 00000000-0000-0000-0000-000000000000
