@@ -44,3 +44,11 @@ Dev با Docker:
 docker compose up -d --build
 # API http://localhost:3333  |  Postgres host port 15432
 ```
+
+
+
+
+docker rm -f digishop-api
+docker compose build --no-cache api
+docker compose up -d --force-recreate api
+docker network connect main digishop-api
