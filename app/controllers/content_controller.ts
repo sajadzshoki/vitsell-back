@@ -8,7 +8,9 @@ import ContentPromo from '#models/content_promo'
 import DiscountCode from '#models/discount_code'
 import { applyDealToCatalog } from '#utils/deals'
 import { loadAboutPage } from '#utils/about_page'
-import { loadFooterWithSiteOverlay, loadSiteSettings } from '#utils/site_settings'
+import { loadPublicSiteProfile } from '#utils/platform_settings'
+import { loadPublicNavigation } from '#utils/navigation_settings'
+import { loadFooterWithSiteOverlay } from '#utils/site_settings'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 
@@ -90,7 +92,7 @@ export default class ContentController {
   }
 
   async site({ response }: HttpContext) {
-    return response.ok(await loadSiteSettings())
+    return response.ok(await loadPublicSiteProfile())
   }
 
   async about({ response }: HttpContext) {
@@ -119,6 +121,10 @@ export default class ContentController {
 
   async footer({ response }: HttpContext) {
     return response.ok(await loadFooterWithSiteOverlay())
+  }
+
+  async navigation({ response }: HttpContext) {
+    return response.ok(await loadPublicNavigation())
   }
 
   async discountCodes({ response }: HttpContext) {

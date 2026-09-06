@@ -114,6 +114,92 @@ export function pushTimeline(
   return next
 }
 
+function buildCommerceSnapshot(
+  order: SellerOrder,
+  payment: Payment | null,
+  extras?: {
+    customerEmail?: string
+    customerId?: string | null
+    discountAmount?: number
+    shippingCost?: number
+  },
+) {
+  const refundedAmount = Number((order as any).refundedAmount) || 0
+  const refunds = asArray<OrderRefundRecord>((order as any).refunds)
+  const timeline = ensureTimeline(order)
+  const internalNotes = asArray<OrderInternalNote>((order as any).internalNotes)
+  const paymentStatus = mapPaymentStatus(order, payment, refundedAmount)
+
+  return {
+    orderId: order.id,
+    paymentStatus,
+    shippingStatus: mapShippingStatus(order.status),
+    returnStatus: mapReturnStatus(order.status),
+    refundStatus: mapRefundStatus(refundedAmount, order.status),
+    trackingCode: String((order as any).trackingCode || ''),
+    estimatedDelivery: String((order as any).estimatedDelivery || ''),
+    carrier: String((order as any).carrier || order.shippingMethod || ''),
+    transactionId: String(payment?.refId || payment?.authority || ''),
+    paymentAuthority: payment?.authority ? String(payment.authority) : null,
+    paymentRefId: payment?.refId ? String(payment.refId) : null,
+    paymentCardPan: payment?.cardPan ? String(payment.cardPan) : null,
+    paymentDate: payment?.createdAt?.toISO() || order.date,
+    discountAmount: Number(extras?.discountAmount) || 0,
+    shippingCost: Number(extras?.shippingCost) || 0,
+    taxAmount: 0,
+    customerEmail: extras?.customerEmail || '',
+    customerId: extras?.customerId ?? null,
+    timeline,
+    internalNotes,
+    refundedAmount,
+    refunds,
+  }
+}
+
+function paymentPayload(payment: Payment | null) {
+  if (!payment) return null
+  return {
+    id: payment.id,
+    status: payment.status,
+    amount: Number(payment.amount) || 0,
+    refId: payment.refId,
+    authority: payment.authority,
+    cardPan: payment.cardPan,
+    createdAt: payment.createdAt?.toISO() ?? null,
+  }
+}
+
+/** Batch-attach commerce + payment for order list / finance (avoids N+1). */
+export async function attachOrderListCommerce(orders: SellerOrder[]) {
+  const buyerIds = [
+    ...new Set(
+      orders
+        .map((o) => o.buyerOrderId)
+        .filter((id): id is string => Boolean(id && String(id).trim())),
+    ),
+  ]
+
+  const paymentByBuyerOrderId = new Map<string, Payment>()
+  if (buyerIds.length) {
+    const payments = await Payment.query().whereIn('order_id', buyerIds)
+    for (const p of payments) {
+      paymentByBuyerOrderId.set(String(p.orderId), p)
+    }
+  }
+
+  return orders.map((order) => {
+    const payment = order.buyerOrderId
+      ? paymentByBuyerOrderId.get(String(order.buyerOrderId)) || null
+      : null
+    const commerce = buildCommerceSnapshot(order, payment)
+    return {
+      ...order.toJSON(),
+      commerce,
+      payment: paymentPayload(payment),
+    }
+  })
+}
+
 export async function buildSellerOrderDetail(order: SellerOrder) {
   let buyerOrder: Order | null = null
   let payment: Payment | null = null
@@ -130,10 +216,6 @@ export async function buildSellerOrderDetail(order: SellerOrder) {
     }
   }
 
-  const refundedAmount = Number((order as any).refundedAmount) || 0
-  const refunds = asArray<OrderRefundRecord>((order as any).refunds)
-  const timeline = ensureTimeline(order)
-  const internalNotes = asArray<OrderInternalNote>((order as any).internalNotes)
   const discountAmount = Number(buyerOrder?.discountAmount) || 0
   const shippingCost = Number(buyerOrder?.shippingCost) || 0
   const items = Array.isArray(order.items) ? order.items : []
@@ -142,48 +224,19 @@ export async function buildSellerOrderDetail(order: SellerOrder) {
     0,
   )
 
-  const paymentStatus = mapPaymentStatus(order, payment, refundedAmount)
-  const shippingStatus = mapShippingStatus(order.status)
-  const returnStatus = mapReturnStatus(order.status)
-  const refundStatus = mapRefundStatus(refundedAmount, order.status)
-
-  const commerce = {
-    orderId: order.id,
-    paymentStatus,
-    shippingStatus,
-    returnStatus,
-    refundStatus,
-    trackingCode: String((order as any).trackingCode || ''),
-    estimatedDelivery: String((order as any).estimatedDelivery || ''),
-    carrier: String((order as any).carrier || order.shippingMethod || ''),
-    transactionId: String(payment?.refId || payment?.authority || ''),
-    paymentDate: payment?.createdAt?.toISO() || order.date,
-    discountAmount,
-    shippingCost,
-    taxAmount: 0,
+  const commerce = buildCommerceSnapshot(order, payment, {
     customerEmail,
     customerId,
-    timeline,
-    internalNotes,
-    refundedAmount,
-    refunds,
-  }
+    discountAmount,
+    shippingCost,
+  })
+  const refundedAmount = commerce.refundedAmount
 
   return {
     ...order.toJSON(),
     buyerOrderId: order.buyerOrderId,
     commerce,
-    payment: payment
-      ? {
-          id: payment.id,
-          status: payment.status,
-          amount: Number(payment.amount) || 0,
-          refId: payment.refId,
-          authority: payment.authority,
-          cardPan: payment.cardPan,
-          createdAt: payment.createdAt?.toISO() ?? null,
-        }
-      : null,
+    payment: paymentPayload(payment),
     buyerOrder: buyerOrder
       ? {
           id: buyerOrder.id,

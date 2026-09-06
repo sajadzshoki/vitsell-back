@@ -131,6 +131,13 @@ export async function querySystemOverview() {
       banners: { total: num(bannersAll) },
     },
     integrations: integrationStatus(),
+    security: {
+      twoFactorRequired: false,
+      twoFactorConfigured: false,
+      adminAuth: 'password',
+      otpMock: env.get('ALLOW_OTP_MOCK') === true,
+      hasSmsProvider: Boolean((env.get('KAVENEGAR_API_KEY') || '').trim()),
+    },
     recentEvents,
     generatedAt: new Date().toISOString(),
   }

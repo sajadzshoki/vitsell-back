@@ -1,4 +1,6 @@
 import ContentBlock from '#models/content_block'
+import { loadFooterPayload, saveFooterPayload } from '#utils/footer'
+import { loadSiteSettings } from '#utils/site_settings'
 
 export const PLATFORM_SETTINGS_KEY = 'platformSettings'
 
@@ -91,6 +93,15 @@ function asBool(value: unknown, fallback: boolean) {
   return fallback
 }
 
+function phoneHref(phone: string) {
+  const digits = phone.replace(/\D/g, '')
+  return digits ? `tel:${digits}` : `tel:${phone}`
+}
+
+function emailHref(email: string) {
+  return email.startsWith('mailto:') ? email : `mailto:${email}`
+}
+
 export function normalizePlatformSettings(raw: unknown): PlatformSettingsPayload {
   const src = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
   const stock = String(src.outOfStockBehavior || defaultPlatformSettings.outOfStockBehavior)
@@ -140,9 +151,59 @@ export function normalizePlatformSettings(raw: unknown): PlatformSettingsPayload
   }
 }
 
+/** Fill empty branding/contact from site identity + footer so admin UI is never blank. */
+async function hydrateFromSiteAndFooter(
+  base: PlatformSettingsPayload
+): Promise<PlatformSettingsPayload> {
+  const [site, footer] = await Promise.all([loadSiteSettings(), loadFooterPayload()])
+  const phones = Array.isArray(footer.contact?.phones) ? footer.contact.phones : []
+  const footerEmail = footer.contact?.email?.label || ''
+
+  return normalizePlatformSettings({
+    ...base,
+    brandName: base.brandName || site.name || '',
+    brandDescription: base.brandDescription || '',
+    supportPhone: base.supportPhone || site.phone || phones[0]?.label || '',
+    salesPhone: base.salesPhone || phones[1]?.label || '',
+    supportEmail: base.supportEmail || site.email || footerEmail || '',
+    address: base.address || '',
+    workingHours: base.workingHours || defaultPlatformSettings.workingHours,
+  })
+}
+
+/** Mirror contact tab into footer so storefront footer stays in sync. */
+async function syncFooterContact(settings: PlatformSettingsPayload) {
+  const footer = await loadFooterPayload()
+  const phones: { label: string; href: string }[] = []
+  if (settings.supportPhone.trim()) {
+    phones.push({
+      label: settings.supportPhone.trim(),
+      href: phoneHref(settings.supportPhone.trim()),
+    })
+  }
+  if (settings.salesPhone.trim()) {
+    phones.push({
+      label: settings.salesPhone.trim(),
+      href: phoneHref(settings.salesPhone.trim()),
+    })
+  }
+
+  const emailLabel = settings.supportEmail.trim()
+  await saveFooterPayload({
+    ...footer,
+    contact: {
+      phones: phones.length ? phones : footer.contact?.phones || [],
+      email: emailLabel
+        ? { label: emailLabel, href: emailHref(emailLabel) }
+        : footer.contact?.email || { label: '', href: '' },
+    },
+  })
+}
+
 export async function loadPlatformSettings(): Promise<PlatformSettingsPayload> {
   const block = await ContentBlock.find(PLATFORM_SETTINGS_KEY)
-  return normalizePlatformSettings(block?.value)
+  const base = normalizePlatformSettings(block?.value)
+  return hydrateFromSiteAndFooter(base)
 }
 
 export async function savePlatformSettings(payload: unknown) {
@@ -151,5 +212,24 @@ export async function savePlatformSettings(payload: unknown) {
     { key: PLATFORM_SETTINGS_KEY },
     { key: PLATFORM_SETTINGS_KEY, value: next },
   )
+  await syncFooterContact(next)
   return next
+}
+
+/** Public site payload overlay: identity + branding/contact from platform settings. */
+export async function loadPublicSiteProfile() {
+  const [site, platform] = await Promise.all([loadSiteSettings(), loadPlatformSettings()])
+  return {
+    ...site,
+    logoUrl: platform.logoUrl,
+    faviconUrl: platform.faviconUrl,
+    defaultOgImage: platform.defaultOgImage,
+    brandName: platform.brandName || site.name,
+    brandDescription: platform.brandDescription || site.about,
+    supportPhone: platform.supportPhone || site.phone,
+    salesPhone: platform.salesPhone,
+    supportEmail: platform.supportEmail || site.email,
+    address: platform.address,
+    workingHours: platform.workingHours,
+  }
 }

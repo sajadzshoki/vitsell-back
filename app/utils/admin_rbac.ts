@@ -23,7 +23,7 @@ export const SYSTEM_ROLE_META: Record<
       'attributes.view', 'attributes.create', 'attributes.update', 'attributes.delete',
       'inventory.view', 'inventory.update',
       'warehouses.view', 'warehouses.create', 'warehouses.update', 'warehouses.delete',
-      'orders.view', 'orders.create', 'orders.update', 'orders.cancel', 'orders.refund', 'orders.export',
+      'orders.view', 'orders.create', 'orders.update', 'orders.cancel', 'orders.delete', 'orders.refund', 'orders.export',
       'returns.view', 'returns.manage', 'shipping.view', 'shipping.manage',
       'customers.view', 'customers.create', 'customers.update', 'customers.export', 'customers.block',
       'refunds.view', 'refunds.create', 'refunds.manage',
@@ -76,7 +76,7 @@ export const SYSTEM_ROLE_META: Record<
     description: 'مدیریت سفارش‌ها، ارسال و مرجوعی',
     permissions: [
       'dashboard.view',
-      'orders.view', 'orders.create', 'orders.update', 'orders.cancel', 'orders.refund', 'orders.export',
+      'orders.view', 'orders.create', 'orders.update', 'orders.cancel', 'orders.delete', 'orders.refund', 'orders.export',
       'returns.view', 'returns.manage', 'shipping.view', 'shipping.manage',
       'refunds.view', 'refunds.create', 'refunds.manage',
       'customers.view', 'customers.create', 'customers.update', 'customers.export', 'customers.block',

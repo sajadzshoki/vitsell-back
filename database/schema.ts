@@ -886,7 +886,7 @@ export class SellerOrderSchema extends BaseModel {
 }
 
 export class SellerPayoutSchema extends BaseModel {
-  static $columns = ['amount', 'createdAt', 'date', 'id', 'shopId', 'status', 'updatedAt'] as const
+  static $columns = ['amount', 'createdAt', 'date', 'fees', 'gateway', 'id', 'note', 'reference', 'settlementStatus', 'shopId', 'source', 'status', 'updatedAt'] as const
   $columns = SellerPayoutSchema.$columns
   @column()
   declare amount: bigint | number
@@ -894,10 +894,22 @@ export class SellerPayoutSchema extends BaseModel {
   declare createdAt: DateTime
   @column()
   declare date: string
+  @column()
+  declare fees: bigint | number
+  @column()
+  declare gateway: string
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare note: string | null
+  @column()
+  declare reference: string
+  @column()
+  declare settlementStatus: string
+  @column()
   declare shopId: number
+  @column()
+  declare source: string
   @column()
   declare status: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })

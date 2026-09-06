@@ -1,9 +1,21 @@
 import SellerShippingMethod from '#models/seller_shipping_method'
 import {
+  createShippingMethodValidator,
   shippingMethodsQueryValidator,
   updateShippingMethodValidator,
 } from '#validators/shipping'
 import type { HttpContext } from '@adonisjs/core/http'
+import { randomBytes } from 'node:crypto'
+
+function slugifyIdPart(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\u0600-\u06FF]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 24) || 'method'
+}
 
 export default class SellerShippingController {
   async index({ request, response }: HttpContext) {
@@ -43,6 +55,29 @@ export default class SellerShippingController {
     return response.ok(row.toAdminJSON())
   }
 
+  async store({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(createShippingMethodValidator)
+    const name = payload.name.trim()
+    const id = `ship-${slugifyIdPart(name)}-${randomBytes(3).toString('hex')}`
+
+    const maxRow = await SellerShippingMethod.query()
+      .orderBy('sort_order', 'desc')
+      .first()
+    const nextSort = (maxRow ? Number(maxRow.sortOrder) || 0 : 0) + 1
+
+    const row = await SellerShippingMethod.create({
+      id,
+      name,
+      carrier: (payload.carrier ?? '').trim(),
+      estimatedDays: (payload.estimatedDays ?? '').trim(),
+      baseCost: Math.round(payload.baseCost ?? 0),
+      status: payload.status === 'inactive' ? 'inactive' : 'active',
+      sortOrder: payload.sortOrder != null ? Math.round(payload.sortOrder) : nextSort,
+    })
+
+    return response.created(row.toAdminJSON())
+  }
+
   async update({ params, request, response }: HttpContext) {
     const row = await SellerShippingMethod.find(params.id)
     if (!row) {
@@ -59,5 +94,14 @@ export default class SellerShippingController {
     await row.save()
 
     return response.ok(row.toAdminJSON())
+  }
+
+  async destroy({ params, response }: HttpContext) {
+    const row = await SellerShippingMethod.find(params.id)
+    if (!row) {
+      return response.notFound({ errors: [{ field: 'id', message: 'روش ارسال یافت نشد' }] })
+    }
+    await row.delete()
+    return response.ok({ id: params.id, deleted: true })
   }
 }

@@ -115,7 +115,7 @@ const listingProductFields = {
   id: vine.string().trim().optional(),
   title: vine.string().trim(),
   shortName: vine.string().trim().optional(),
-  brand: vine.string().trim(),
+  brand: vine.string().trim().optional(),
   category: vine.string().trim(),
   categoryLabel: vine.string().trim(),
   price: vine.number().min(1),
@@ -299,7 +299,7 @@ export default class SellerController {
       {
         id,
         title: p.title,
-        brand: p.brand,
+        brand: p.brand ?? '',
         category: p.category,
         categoryLabel: p.categoryLabel,
         price: p.price,
@@ -380,7 +380,7 @@ export default class SellerController {
         {
           id: listing.productId,
           title: p.title,
-          brand: p.brand,
+          brand: p.brand ?? '',
           category: p.category,
           categoryLabel: p.categoryLabel,
           price: p.price,
@@ -604,6 +604,24 @@ export default class SellerController {
     return response.created(await buildSellerOrderDetail(order))
   }
 
+  async destroyOrder({ params, response }: HttpContext) {
+    const order = await SellerOrder.find(params.id)
+    if (!order) {
+      return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
+    }
+
+    const SellerOrderItemRow = (await import('#models/seller_order_item_row')).default
+    const SellerReturn = (await import('#models/seller_return')).default
+    const SellerRefund = (await import('#models/seller_refund')).default
+
+    await SellerOrderItemRow.query().where('sellerOrderId', order.id).delete()
+    await SellerReturn.query().where('orderId', order.id).delete()
+    await SellerRefund.query().where('orderId', order.id).delete()
+    await order.delete()
+
+    return response.ok({ id: params.id, deleted: true })
+  }
+
   async reviews({ response }: HttpContext) {
     const reviews = await SellerReview.query().orderBy('created_at', 'desc')
     return response.ok(reviews.map((r) => r.toJSON()))
@@ -704,12 +722,19 @@ export default class SellerController {
 
     const siteShop = await resolveSiteShop()
     const id = `PO-${Math.floor(1000 + Math.random() * 9000)}`
+    const fees = Math.round(rounded * 0.01)
     const payout = await SellerPayout.create({
       id,
       shopId: siteShop.id,
       date: jalaliishDate(),
       amount: rounded,
       status: 'pending',
+      fees,
+      gateway: 'زرین‌پال',
+      source: 'gateway',
+      reference: '',
+      note: null,
+      settlementStatus: 'pending',
     })
     return response.created(payout.toJSON())
   }

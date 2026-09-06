@@ -1,5 +1,6 @@
 import SellerOrder from '#models/seller_order'
 import type { OrdersQuery } from '#validators/orders'
+import { attachOrderListCommerce } from '#utils/seller_order_detail'
 import db from '@adonisjs/lucid/services/db'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 
@@ -167,13 +168,14 @@ export async function querySellerOrders(filters: OrdersQuery) {
     ? await listQuery.limit(pageSize)
     : await listQuery.offset((page - 1) * pageSize).limit(pageSize)
 
-  const [counts, methods] = await Promise.all([
+  const [counts, methods, items] = await Promise.all([
     statusCounts(filters),
     paymentMethodOptions(),
+    attachOrderListCommerce(orders),
   ])
 
   return {
-    items: orders.map((o) => o.toJSON()),
+    items,
     total,
     page: wantAll ? 1 : page,
     pageSize: wantAll ? orders.length : pageSize,
