@@ -23,10 +23,13 @@ const bannerFields = {
   image: vine.string().trim().minLength(1),
   imageMobile: vine.string().trim().nullable().optional(),
   link: vine.string().trim().optional(),
-  linkType: vine.enum(['url', 'product', 'category', 'brand', 'campaign'] as const).optional(),
+  linkType: vine
+    .enum(['none', 'url', 'product', 'category', 'brand', 'campaign'] as const)
+    .optional(),
   productId: vine.string().trim().nullable().optional(),
   brandId: vine.string().trim().nullable().optional(),
   campaignId: vine.string().trim().nullable().optional(),
+  buttonText: vine.string().trim().nullable().optional(),
   type: vine.enum(['main', 'secondary'] as const).optional(),
   placement: vine.enum(placements).optional(),
   categoryId: vine.string().trim().nullable().optional(),

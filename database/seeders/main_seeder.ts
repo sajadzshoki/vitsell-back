@@ -167,7 +167,8 @@ export default class extends BaseSeeder {
           verified: !!r.verified,
           pros: r.pros ?? null,
           cons: r.cons ?? null,
-          hasImage: !!r.hasImage,
+          hasImage: !!(r.hasImage || r.images?.length),
+          images: Array.isArray(r.images) && r.images.length ? r.images : null,
           helpfulCount: r.helpfulCount ?? 0,
         }
       )

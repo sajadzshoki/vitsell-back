@@ -52,10 +52,10 @@ export default class StoreDiscount extends BaseModel {
   declare maxDiscount: number | null
 
   @column.dateTime()
-  declare startsAt: DateTime
+  declare startsAt: DateTime | null
 
   @column.dateTime()
-  declare endsAt: DateTime
+  declare endsAt: DateTime | null
 
   @column()
   declare status: StoreDiscountStatus

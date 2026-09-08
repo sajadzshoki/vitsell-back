@@ -11,7 +11,7 @@ const idRule = vine.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
 
 const storeValidator = vine.compile(
   vine.object({
-    id: idRule.clone(),
+    id: idRule.clone().optional(),
     productId: vine.string().trim().minLength(1),
     discountPercent: vine.number().min(1).max(99),
     startsAt: vine.string().trim(),
@@ -58,18 +58,24 @@ export default class DealsController {
 
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(storeValidator)
-    const existing = await AmazingDeal.find(payload.id)
-    if (existing) {
-      return response.conflict({
-        errors: [{ field: 'id', message: 'شناسه شگفت‌انگیز تکراری است' }],
-      })
-    }
-
     const product = await Product.find(payload.productId)
     if (!product) {
       return response.unprocessableEntity({
         errors: [{ field: 'productId', message: 'محصول یافت نشد' }],
       })
+    }
+
+    const productSlug = payload.productId
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'item'
+    let id =
+      payload.id?.trim() ||
+      `deal-${productSlug}-${Date.now().toString(36).slice(-5)}`
+    if (await AmazingDeal.find(id)) {
+      id = `deal-${productSlug}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`
     }
 
     const startsAt = parseDate(payload.startsAt)
@@ -109,7 +115,7 @@ export default class DealsController {
     }
 
     const deal = await AmazingDeal.create({
-      id: payload.id,
+      id,
       productId: payload.productId,
       discountPercent: Math.round(payload.discountPercent),
       startsAt,

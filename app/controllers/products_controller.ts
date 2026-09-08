@@ -1,8 +1,16 @@
 import Product from '#models/product'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
+import SellerReview from '#models/seller_review'
+import SellerShop from '#models/seller_shop'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
+import { parseStoredUploadName, toPublicMediaUrl } from '#utils/media_upload'
+import {
+  applyCatalogFilters,
+  loadFilterableAttributes,
+  parseAttrFilters,
+} from '#utils/catalog_filters'
 
 const SORTS = [
   'relevant',
@@ -23,6 +31,10 @@ const storeReviewValidator = vine.compile(
     pros: vine.array(vine.string().trim().minLength(1).maxLength(80)).maxLength(10).optional(),
     cons: vine.array(vine.string().trim().minLength(1).maxLength(80)).maxLength(10).optional(),
     recommend: vine.boolean().optional(),
+    images: vine
+      .array(vine.string().trim().maxLength(500))
+      .maxLength(5)
+      .optional(),
   })
 )
 
@@ -84,31 +96,27 @@ export default class ProductsController {
     const onlyInStock = String(request.input('onlyInStock', 'false')) === 'true'
     const fastDelivery = String(request.input('fastDelivery', 'false')) === 'true'
     const minRating = Number(request.input('minRating', 0)) || 0
+    const attrs = parseAttrFilters(request.input('attrs'))
     const sort = String(request.input('sort', 'relevant')) as (typeof SORTS)[number]
     const page = Math.max(1, Number(request.input('page', 1)) || 1)
     const pageSize = Math.min(48, Math.max(1, Number(request.input('pageSize', 12)) || 12))
 
-    let query = Product.query()
+    const attributeMeta = Object.keys(attrs).length
+      ? await loadFilterableAttributes(category)
+      : []
 
-    if (category) query = query.where('category', category)
-    if (brands.length) query = query.whereIn('brand', brands)
-    if (minPrice > 0) query = query.where('price', '>=', minPrice)
-    if (maxPrice > 0) query = query.where('price', '<=', maxPrice)
-    if (onlyDiscount) query = query.whereNotNull('old_price')
-    if (onlyInStock) query = query.where('in_stock', true)
-    if (fastDelivery) query = query.where('fast_delivery', true)
-    if (minRating > 0) query = query.where('rating', '>=', minRating)
-
-    if (q) {
-      const like = `%${q}%`
-      query = query.where((builder) => {
-        builder
-          .whereILike('title', like)
-          .orWhereILike('brand', like)
-          .orWhereILike('category_label', like)
-          .orWhereILike('short_name', like)
-      })
-    }
+    let query = applyCatalogFilters(Product.query(), {
+      q,
+      category,
+      brands,
+      minPrice,
+      maxPrice,
+      onlyDiscount,
+      onlyInStock,
+      fastDelivery,
+      minRating,
+      attrs,
+    }, { attributeMeta })
 
     switch (sort) {
       case 'viewed':
@@ -152,6 +160,61 @@ export default class ProductsController {
       total,
       page,
       pageSize,
+    })
+  }
+
+  /**
+   * Facets for the current search scope (all matching rows, not page limit):
+   * price min/max, brands, and category filterable/variant attributes.
+   */
+  async facets({ request, response }: HttpContext) {
+    const q = String(request.input('q', '')).trim()
+    const category = String(request.input('category', '')).trim()
+    const onlyDiscount = String(request.input('onlyDiscount', 'false')) === 'true'
+    const onlyInStock = String(request.input('onlyInStock', 'false')) === 'true'
+    const fastDelivery = String(request.input('fastDelivery', 'false')) === 'true'
+    const minRating = Number(request.input('minRating', 0)) || 0
+
+    // Price/brand facets ignore price + brand + attr selections so ranges stay stable.
+    const base = applyCatalogFilters(
+      Product.query(),
+      { q, category, onlyDiscount, onlyInStock, fastDelivery, minRating },
+      { skipPrice: true, skipBrands: true, skipAttrs: true }
+    )
+
+    const priceRow = await base
+      .clone()
+      .clearOrder()
+      .clearSelect()
+      .min('price as min_price')
+      .max('price as max_price')
+      .first()
+
+    const brandRows = await base
+      .clone()
+      .clearOrder()
+      .clearSelect()
+      .distinct('brand')
+      .orderBy('brand', 'asc')
+
+    const minPrice = Math.max(0, Number((priceRow as any)?.$extras?.min_price ?? (priceRow as any)?.min_price ?? 0))
+    let maxPrice = Math.max(
+      minPrice,
+      Number((priceRow as any)?.$extras?.max_price ?? (priceRow as any)?.max_price ?? 0)
+    )
+    if (!maxPrice) maxPrice = 250_000_000
+
+    const brands = brandRows
+      .map((row) => String(row.brand || '').trim())
+      .filter(Boolean)
+
+    const attributes = await loadFilterableAttributes(category)
+
+    return response.ok({
+      minPrice,
+      maxPrice,
+      brands,
+      attributes,
     })
   }
 
@@ -202,6 +265,11 @@ export default class ProductsController {
     const payload = await request.validateUsing(storeReviewValidator)
     await user.load('profile')
 
+    const images = (payload.images ?? [])
+      .map((url) => toPublicMediaUrl(String(url || '').trim()))
+      .filter((url) => Boolean(parseStoredUploadName(url)))
+      .slice(0, 5)
+
     const review = await ProductReview.create({
       id: `r${Date.now()}`,
       productId: product.id,
@@ -213,10 +281,27 @@ export default class ProductsController {
       verified: false,
       pros: payload.pros?.length ? payload.pros : null,
       cons: payload.cons?.length ? payload.cons : null,
-      hasImage: false,
+      hasImage: images.length > 0,
+      images: images.length ? images : null,
       helpfulCount: 0,
       recommend: payload.recommend ?? true,
     })
+
+    const shop = await SellerShop.query().orderBy('id', 'asc').first()
+    await SellerReview.updateOrCreate(
+      { id: review.id },
+      {
+        id: review.id,
+        shopId: shop?.id ?? 1,
+        productId: review.productId,
+        name: review.name,
+        rating: review.rating,
+        text: review.text,
+        date: review.date,
+        reply: null,
+        moderation: 'pending',
+      },
+    )
 
     await refreshProductRating(product)
 

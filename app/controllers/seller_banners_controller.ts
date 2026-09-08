@@ -71,6 +71,7 @@ export default class SellerBannersController {
     const type = (payload.type ?? 'main') as BannerType
     const placement = (payload.placement ??
       (type === 'main' ? 'homepage_hero' : 'homepage_promo_strip')) as BannerPlacement
+    const linkType = (payload.linkType ?? 'url') as BannerLinkType
 
     const banner = await Banner.create({
       id,
@@ -79,14 +80,20 @@ export default class SellerBannersController {
       alt: payload.alt?.trim() || payload.title?.trim() || '',
       image: payload.image,
       imageMobile: payload.imageMobile?.trim() || null,
-      link: payload.link?.trim() || '',
-      linkType: (payload.linkType ?? 'url') as BannerLinkType,
-      productId: payload.productId ?? null,
-      brandId: payload.brandId ?? null,
-      campaignId: payload.campaignId ?? null,
+      link: linkType === 'none' ? '' : payload.link?.trim() || '',
+      linkType,
+      productId: linkType === 'product' ? (payload.productId ?? null) : null,
+      brandId: linkType === 'brand' ? (payload.brandId ?? null) : null,
+      campaignId: linkType === 'campaign' ? (payload.campaignId ?? null) : null,
+      buttonText: linkType === 'none' ? null : payload.buttonText?.trim() || null,
       type,
       placement,
-      categoryId: payload.categoryId ?? null,
+      categoryId:
+        linkType === 'category'
+          ? (payload.categoryId ?? null)
+          : payload.categoryId !== undefined
+            ? payload.categoryId
+            : null,
       active: payload.active ?? true,
       startsAt: parseOptionalDate(payload.startsAt),
       endsAt: parseOptionalDate(payload.endsAt),
@@ -110,6 +117,7 @@ export default class SellerBannersController {
     const payload = await request.validateUsing(updateBannerValidator)
     const type = (payload.type ?? banner.type) as BannerType
     const placement = (payload.placement ?? banner.placement) as BannerPlacement
+    const linkType = (payload.linkType ?? banner.linkType) as BannerLinkType
 
     banner.merge({
       title: payload.title?.trim() ?? banner.title,
@@ -120,11 +128,37 @@ export default class SellerBannersController {
         payload.imageMobile !== undefined
           ? payload.imageMobile?.trim() || null
           : banner.imageMobile,
-      link: payload.link?.trim() ?? banner.link,
-      linkType: (payload.linkType ?? banner.linkType) as BannerLinkType,
-      productId: payload.productId !== undefined ? payload.productId : banner.productId,
-      brandId: payload.brandId !== undefined ? payload.brandId : banner.brandId,
-      campaignId: payload.campaignId !== undefined ? payload.campaignId : banner.campaignId,
+      link:
+        linkType === 'none'
+          ? ''
+          : payload.link !== undefined
+            ? payload.link?.trim() || ''
+            : banner.link,
+      linkType,
+      productId:
+        linkType === 'product'
+          ? payload.productId !== undefined
+            ? payload.productId
+            : banner.productId
+          : null,
+      brandId:
+        linkType === 'brand'
+          ? payload.brandId !== undefined
+            ? payload.brandId
+            : banner.brandId
+          : null,
+      campaignId:
+        linkType === 'campaign'
+          ? payload.campaignId !== undefined
+            ? payload.campaignId
+            : banner.campaignId
+          : null,
+      buttonText:
+        linkType === 'none'
+          ? null
+          : payload.buttonText !== undefined
+            ? payload.buttonText?.trim() || null
+            : banner.buttonText,
       type,
       placement,
       categoryId: payload.categoryId !== undefined ? payload.categoryId : banner.categoryId,

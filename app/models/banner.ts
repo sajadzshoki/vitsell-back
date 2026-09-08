@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
 export type BannerType = 'main' | 'secondary'
-export type BannerLinkType = 'url' | 'product' | 'category' | 'brand' | 'campaign'
+export type BannerLinkType = 'none' | 'url' | 'product' | 'category' | 'brand' | 'campaign'
 export type BannerPlacement =
   | 'homepage_hero'
   | 'homepage_promo_strip'
@@ -54,6 +54,9 @@ export default class Banner extends BaseModel {
   declare campaignId: string | null
 
   @column()
+  declare buttonText: string | null
+
+  @column()
   declare type: BannerType
 
   @column()
@@ -90,6 +93,26 @@ export default class Banner extends BaseModel {
     return true
   }
 
+  /** Resolve public href from link type + target fields */
+  resolveHref(): string {
+    if (this.linkType === 'none') return ''
+    const explicit = (this.link || '').trim()
+    if (explicit) return explicit
+    if (this.linkType === 'product' && this.productId) {
+      return `/product/${this.productId}`
+    }
+    if (this.linkType === 'category' && this.categoryId) {
+      return `/search?category=${encodeURIComponent(this.categoryId)}`
+    }
+    if (this.linkType === 'brand' && this.brandId) {
+      return `/search?brand=${encodeURIComponent(this.brandId)}`
+    }
+    if (this.linkType === 'campaign' && this.campaignId) {
+      return `/search?campaign=${encodeURIComponent(this.campaignId)}`
+    }
+    return ''
+  }
+
   toAdminJSON() {
     return {
       id: this.id,
@@ -103,6 +126,7 @@ export default class Banner extends BaseModel {
       productId: this.productId,
       brandId: this.brandId,
       campaignId: this.campaignId,
+      buttonText: this.buttonText,
       type: this.type,
       placement: this.placement,
       categoryId: this.categoryId,
@@ -118,13 +142,15 @@ export default class Banner extends BaseModel {
 
   /** Shape compatible with public HeroSlide for homepage_hero */
   toHeroSlideJSON() {
+    const to = this.resolveHref()
+    const button = (this.buttonText || '').trim()
     return {
       id: this.id,
       eyebrow: this.alt || this.internalName || '',
       title: this.title || this.alt || '',
       subtitle: '',
-      cta: 'مشاهده',
-      to: this.link || '/',
+      cta: to ? button || 'مشاهده' : '',
+      to,
       image: this.image,
       icon: 'photo',
       tone: 'primary' as const,
@@ -133,12 +159,14 @@ export default class Banner extends BaseModel {
 
   /** Shape compatible with storefront HomeBanner for promo strips */
   toHomeBannerJSON() {
+    const to = this.resolveHref()
     return {
       id: this.id,
       title: this.title || this.alt || '',
       subtitle: this.alt && this.alt !== this.title ? this.alt : '',
       image: this.imageMobile || this.image,
-      to: this.link || '/',
+      to: to || undefined,
+      buttonText: to ? (this.buttonText || '').trim() || undefined : undefined,
       tone: 'primary' as const,
     }
   }

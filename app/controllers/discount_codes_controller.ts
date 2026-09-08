@@ -13,8 +13,8 @@ const storeValidator = vine.compile(
   vine.object({
     code: codeRule.clone(),
     percent: vine.number().min(1).max(99),
-    startsAt: vine.string().trim(),
-    endsAt: vine.string().trim(),
+    startsAt: vine.string().trim().nullable().optional(),
+    endsAt: vine.string().trim().nullable().optional(),
     minAmount: vine.number().min(0).optional(),
     oncePerUser: vine.boolean().optional(),
     active: vine.boolean().optional(),
@@ -24,8 +24,8 @@ const storeValidator = vine.compile(
 const updateValidator = vine.compile(
   vine.object({
     percent: vine.number().min(1).max(99),
-    startsAt: vine.string().trim(),
-    endsAt: vine.string().trim(),
+    startsAt: vine.string().trim().nullable().optional(),
+    endsAt: vine.string().trim().nullable().optional(),
     minAmount: vine.number().min(0).optional(),
     oncePerUser: vine.boolean().optional(),
     active: vine.boolean().optional(),
@@ -42,6 +42,11 @@ function parseDate(value: string) {
   const dt = DateTime.fromISO(value, { setZone: true })
   if (!dt.isValid) return null
   return dt.toUTC()
+}
+
+function parseOptionalDate(value: string | null | undefined) {
+  if (!value || !String(value).trim()) return null
+  return parseDate(String(value))
 }
 
 export default class DiscountCodesController {
@@ -69,19 +74,19 @@ export default class DiscountCodesController {
       })
     }
 
-    const startsAt = parseDate(payload.startsAt)
-    const endsAt = parseDate(payload.endsAt)
-    if (!startsAt) {
+    const startsAt = parseOptionalDate(payload.startsAt)
+    const endsAt = parseOptionalDate(payload.endsAt)
+    if (payload.startsAt && String(payload.startsAt).trim() && !startsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'startsAt', message: 'زمان شروع نامعتبر است' }],
       })
     }
-    if (!endsAt) {
+    if (payload.endsAt && String(payload.endsAt).trim() && !endsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'endsAt', message: 'زمان پایان نامعتبر است' }],
       })
     }
-    if (endsAt <= startsAt) {
+    if (startsAt && endsAt && endsAt <= startsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'endsAt', message: 'زمان پایان باید بعد از شروع باشد' }],
       })
@@ -108,19 +113,19 @@ export default class DiscountCodesController {
     }
 
     const payload = await request.validateUsing(updateValidator)
-    const startsAt = parseDate(payload.startsAt)
-    const endsAt = parseDate(payload.endsAt)
-    if (!startsAt) {
+    const startsAt = parseOptionalDate(payload.startsAt)
+    const endsAt = parseOptionalDate(payload.endsAt)
+    if (payload.startsAt && String(payload.startsAt).trim() && !startsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'startsAt', message: 'زمان شروع نامعتبر است' }],
       })
     }
-    if (!endsAt) {
+    if (payload.endsAt && String(payload.endsAt).trim() && !endsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'endsAt', message: 'زمان پایان نامعتبر است' }],
       })
     }
-    if (endsAt <= startsAt) {
+    if (startsAt && endsAt && endsAt <= startsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'endsAt', message: 'زمان پایان باید بعد از شروع باشد' }],
       })

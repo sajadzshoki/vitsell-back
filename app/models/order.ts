@@ -104,9 +104,11 @@ export default class Order extends BaseModel {
   @hasMany(() => SellerOrder, { foreignKey: 'buyerOrderId' })
   declare sellerOrders: HasMany<typeof SellerOrder>
 
-  toShopOrderJSON() {
+  toShopOrderJSON(extras?: { trackingCode?: string | null, carrier?: string | null }) {
     const status =
       this.status === 'pending_payment' ? ('processing' as const) : this.status
+    const trackingCode = extras?.trackingCode?.trim() || undefined
+    const carrier = extras?.carrier?.trim() || undefined
     return {
       id: this.id,
       date: this.date,
@@ -116,6 +118,8 @@ export default class Order extends BaseModel {
       shippingMethod: this.shippingMethod,
       paymentMethod: this.paymentMethod,
       address: this.address,
+      ...(trackingCode ? { trackingCode } : {}),
+      ...(carrier ? { carrier } : {}),
     }
   }
 }

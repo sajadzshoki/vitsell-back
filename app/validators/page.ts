@@ -33,7 +33,7 @@ const pageFields = {
 
 export const storePageValidator = vine.compile(
   vine.object({
-    id: idRule.clone(),
+    id: idRule.clone().optional(),
     ...pageFields,
   })
 )

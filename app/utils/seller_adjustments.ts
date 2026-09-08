@@ -150,6 +150,7 @@ export function projectAdjustmentsToTransactions(
     orderId: a.orderId,
     customerId: null as string | null,
     customerName: a.actorName,
+    customerPhone: '',
     reference: a.id,
     paymentId: null as string | null,
     refundId: null as string | null,

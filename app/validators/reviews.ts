@@ -31,6 +31,13 @@ export const replyReviewValidator = vine.compile(
   })
 )
 
+export const updateReviewTextValidator = vine.compile(
+  vine.object({
+    text: vine.string().trim().minLength(10).maxLength(2000).optional(),
+    reply: vine.string().trim().minLength(1).maxLength(4000).nullable().optional(),
+  })
+)
+
 export const updateReviewModerationValidator = vine.compile(
   vine.object({
     moderation: vine.enum(moderationStatuses),

@@ -144,7 +144,7 @@ export class AuthAccessTokenSchema extends BaseModel {
 }
 
 export class BannerSchema extends BaseModel {
-  static $columns = ['active', 'alt', 'brandId', 'campaignId', 'categoryId', 'createdAt', 'endsAt', 'id', 'image', 'imageMobile', 'internalName', 'link', 'linkType', 'placement', 'priority', 'productId', 'sortOrder', 'startsAt', 'title', 'type', 'updatedAt'] as const
+  static $columns = ['active', 'alt', 'brandId', 'buttonText', 'campaignId', 'categoryId', 'createdAt', 'endsAt', 'id', 'image', 'imageMobile', 'internalName', 'link', 'linkType', 'placement', 'priority', 'productId', 'sortOrder', 'startsAt', 'title', 'type', 'updatedAt'] as const
   $columns = BannerSchema.$columns
   @column()
   declare active: boolean
@@ -152,6 +152,8 @@ export class BannerSchema extends BaseModel {
   declare alt: string
   @column()
   declare brandId: string | null
+  @column()
+  declare buttonText: string | null
   @column()
   declare campaignId: string | null
   @column()
@@ -656,7 +658,7 @@ export class ProductQuestionSchema extends BaseModel {
 }
 
 export class ProductReviewSchema extends BaseModel {
-  static $columns = ['cons', 'createdAt', 'date', 'hasImage', 'helpfulCount', 'id', 'name', 'productId', 'pros', 'rating', 'recommend', 'text', 'updatedAt', 'userId', 'verified'] as const
+  static $columns = ['cons', 'createdAt', 'date', 'hasImage', 'helpfulCount', 'id', 'images', 'name', 'productId', 'pros', 'rating', 'recommend', 'text', 'updatedAt', 'userId', 'verified'] as const
   $columns = ProductReviewSchema.$columns
   @column()
   declare cons: any | null
@@ -670,6 +672,8 @@ export class ProductReviewSchema extends BaseModel {
   declare helpfulCount: number
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare images: any | null
   @column()
   declare name: string
   @column()
@@ -1168,7 +1172,7 @@ export class StoreDiscountSchema extends BaseModel {
   @column()
   declare description: string
   @column.dateTime()
-  declare endsAt: DateTime
+  declare endsAt: DateTime | null
   @column({ isPrimary: true })
   declare id: string
   @column()
@@ -1182,7 +1186,7 @@ export class StoreDiscountSchema extends BaseModel {
   @column()
   declare priority: number
   @column.dateTime()
-  declare startsAt: DateTime
+  declare startsAt: DateTime | null
   @column()
   declare status: string
   @column()

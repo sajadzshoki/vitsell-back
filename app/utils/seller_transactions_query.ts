@@ -34,6 +34,7 @@ export type SellerFinanceTransactionRow = {
   orderId: string | null
   customerId: string | null
   customerName: string
+  customerPhone: string
   reference: string
   paymentId: string | null
   refundId: string | null
@@ -94,6 +95,7 @@ function projectPayments(
     total: number
     paymentMethod: string
     customerName: string
+    customerPhone?: string
     date: string
     commerce?: any
     payment?: any
@@ -122,6 +124,7 @@ function projectPayments(
       orderId: order.id,
       customerId: commerce.customerId ? String(commerce.customerId) : null,
       customerName: String(order.customerName || ''),
+      customerPhone: String(order.customerPhone || ''),
       reference: String(refId || authority || ''),
       paymentId,
       refundId: null,
@@ -136,7 +139,10 @@ function projectPayments(
   })
 }
 
-function projectRefunds(refunds: SellerRefund[]): SellerFinanceTransactionRow[] {
+function projectRefunds(
+  refunds: SellerRefund[],
+  phoneByOrderId: Map<string, string>,
+): SellerFinanceTransactionRow[] {
   return refunds.map((r) => {
     const amount = Number(r.amount) || 0
     const createdAt = r.createdAt?.toISO() || ''
@@ -151,6 +157,7 @@ function projectRefunds(refunds: SellerRefund[]): SellerFinanceTransactionRow[] 
       orderId: r.orderId,
       customerId: null,
       customerName: r.customerName || '',
+      customerPhone: phoneByOrderId.get(String(r.orderId || '')) || '',
       reference: r.transactionId || '',
       paymentId: null,
       refundId: r.id,
@@ -189,6 +196,7 @@ function projectSettlements(payouts: SellerPayout[]): SellerFinanceTransactionRo
       orderId: null,
       customerId: null,
       customerName: '—',
+      customerPhone: '',
       reference,
       paymentId: null,
       refundId: null,
@@ -210,6 +218,7 @@ function projectSettlements(payouts: SellerPayout[]): SellerFinanceTransactionRo
         orderId: null,
         customerId: null,
         customerName: '—',
+        customerPhone: '',
         reference,
         paymentId: null,
         refundId: null,
@@ -234,6 +243,7 @@ function applyFilters(rows: SellerFinanceTransactionRow[], filters: Transactions
         || (t.orderId || '').toLowerCase().includes(q)
         || t.reference.toLowerCase().includes(q)
         || t.customerName.toLowerCase().includes(q)
+        || t.customerPhone.toLowerCase().includes(q)
         || t.gateway.toLowerCase().includes(q),
     )
   }
@@ -269,9 +279,12 @@ export async function buildSellerFinanceLedger(): Promise<SellerFinanceTransacti
     loadFinanceAdjustments(),
   ])
   const orderRows = await attachOrderListCommerce(orders)
+  const phoneByOrderId = new Map(
+    (orderRows as any[]).map((o) => [String(o.id), String(o.customerPhone || '')]),
+  )
   return [
     ...projectPayments(orderRows as any),
-    ...projectRefunds(refunds),
+    ...projectRefunds(refunds, phoneByOrderId),
     ...projectSettlements(payouts),
     ...projectAdjustmentsToTransactions(adjustments),
   ].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))

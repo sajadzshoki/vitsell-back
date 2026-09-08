@@ -1,7 +1,7 @@
 /**
  * One-off: promote phone to admin and set password for local testing.
  * Usage: node ace exec scripts/set_local_admin.ts
- * Or: docker compose exec api node --import tsx scripts/set_local_admin.ts
+ * Or: docker compose exec api node --import=@poppinss/ts-exec scripts/set_local_admin.ts
  */
 import 'reflect-metadata'
 import { Ignitor, prettyPrintError } from '@adonisjs/core'

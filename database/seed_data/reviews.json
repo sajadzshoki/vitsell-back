@@ -15,6 +15,11 @@
       "قیمت بالا"
     ],
     "hasImage": true,
+    "images": [
+      "/images/mock/iphone16pro-desert.jpg",
+      "/images/mock/iphone16_PNG13.png",
+      "/images/mock/galaxy-s25-ultra.jpg"
+    ],
     "helpfulCount": 42
   },
   {
@@ -75,6 +80,10 @@
     "text": "از هر نظر عالیه. گارانتی رسمی هم داشت که خیالم راحت شد.",
     "verified": true,
     "hasImage": true,
+    "images": [
+      "/images/mock/apple-watch-ultra.jpg",
+      "/images/mock/ipad-pro-m4.jpg"
+    ],
     "helpfulCount": 19
   },
   {

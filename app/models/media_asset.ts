@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { toPublicMediaUrl } from '#utils/media_upload'
 
 export type MediaKind = 'image' | 'video' | 'document' | 'other'
 
@@ -86,7 +87,7 @@ export default class MediaAsset extends BaseModel {
   toAdminJSON() {
     return {
       id: this.id,
-      url: this.url,
+      url: toPublicMediaUrl(this.url),
       filename: this.filename,
       mimeType: this.mimeType,
       kind: this.kind,

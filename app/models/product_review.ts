@@ -53,6 +53,15 @@ export default class ProductReview extends BaseModel {
   @column()
   declare hasImage: boolean
 
+  @column({
+    prepare: (value: string[] | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: string[] | string | null) => {
+      if (!value) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare images: string[] | null
+
   @column()
   declare helpfulCount: number
 
@@ -81,7 +90,8 @@ export default class ProductReview extends BaseModel {
       verified: this.verified,
       ...(this.pros?.length ? { pros: this.pros } : {}),
       ...(this.cons?.length ? { cons: this.cons } : {}),
-      ...(this.hasImage ? { hasImage: true } : {}),
+      ...(this.images?.length || this.hasImage ? { hasImage: true } : {}),
+      ...(this.images?.length ? { images: this.images } : {}),
       helpfulCount: this.helpfulCount,
       recommend: this.recommend,
     }

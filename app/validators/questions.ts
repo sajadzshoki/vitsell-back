@@ -21,6 +21,13 @@ export const replyQuestionValidator = vine.compile(
   })
 )
 
+export const updateQuestionValidator = vine.compile(
+  vine.object({
+    question: vine.string().trim().minLength(10).maxLength(1000).optional(),
+    answerText: vine.string().trim().minLength(2).maxLength(2000).optional(),
+  })
+)
+
 export const setQuestionVerifiedValidator = vine.compile(
   vine.object({
     verified: vine.boolean(),

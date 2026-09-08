@@ -17,6 +17,7 @@ export type SellerPaymentRow = {
   orderId: string
   customerId: string | null
   customerName: string
+  customerPhone: string
   amount: number
   currency: string
   paymentMethod: string
@@ -65,6 +66,7 @@ function projectOrderPayment(order: {
   total: number
   paymentMethod: string
   customerName: string
+  customerPhone?: string
   date: string
   commerce?: any
   payment?: any
@@ -85,6 +87,7 @@ function projectOrderPayment(order: {
     orderId: order.id,
     customerId: commerce.customerId != null ? String(commerce.customerId) : null,
     customerName: String(order.customerName || ''),
+    customerPhone: String(order.customerPhone || ''),
     amount,
     currency: 'IRR',
     paymentMethod: String(order.paymentMethod || ''),
@@ -112,6 +115,7 @@ function applyFilters(rows: SellerPaymentRow[], filters: SellerPaymentsQuery) {
         || (p.refId || '').toLowerCase().includes(q)
         || (p.authority || '').toLowerCase().includes(q)
         || p.customerName.toLowerCase().includes(q)
+        || p.customerPhone.toLowerCase().includes(q)
         || p.gateway.toLowerCase().includes(q),
     )
   }

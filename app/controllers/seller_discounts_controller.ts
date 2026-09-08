@@ -21,6 +21,21 @@ function parseDate(value: string) {
   return dt.toUTC()
 }
 
+function parseOptionalDate(value: string | null | undefined) {
+  if (!value || !String(value).trim()) return null
+  return parseDate(String(value))
+}
+
+function validateSchedule(
+  startsAt: DateTime | null,
+  endsAt: DateTime | null,
+): { field: string, message: string } | null {
+  if (startsAt && endsAt && endsAt <= startsAt) {
+    return { field: 'endsAt', message: 'پایان باید بعد از شروع باشد' }
+  }
+  return null
+}
+
 function slugify(input: string) {
   return (
     input
@@ -98,22 +113,21 @@ export default class SellerDiscountsController {
       })
     }
 
-    const startsAt = parseDate(payload.startsAt)
-    const endsAt = parseDate(payload.endsAt)
-    if (!startsAt) {
+    const startsAt = parseOptionalDate(payload.startsAt)
+    const endsAt = parseOptionalDate(payload.endsAt)
+    if (payload.startsAt && String(payload.startsAt).trim() && !startsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'startsAt', message: 'زمان شروع نامعتبر است' }],
       })
     }
-    if (!endsAt) {
+    if (payload.endsAt && String(payload.endsAt).trim() && !endsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'endsAt', message: 'زمان پایان نامعتبر است' }],
       })
     }
-    if (endsAt <= startsAt) {
-      return response.unprocessableEntity({
-        errors: [{ field: 'endsAt', message: 'پایان باید بعد از شروع باشد' }],
-      })
+    const scheduleError = validateSchedule(startsAt, endsAt)
+    if (scheduleError) {
+      return response.unprocessableEntity({ errors: [scheduleError] })
     }
 
     const type = payload.type as StoreDiscountType
@@ -145,22 +159,21 @@ export default class SellerDiscountsController {
     }
 
     const payload = await request.validateUsing(updateDiscountValidator)
-    const startsAt = parseDate(payload.startsAt)
-    const endsAt = parseDate(payload.endsAt)
-    if (!startsAt) {
+    const startsAt = parseOptionalDate(payload.startsAt)
+    const endsAt = parseOptionalDate(payload.endsAt)
+    if (payload.startsAt && String(payload.startsAt).trim() && !startsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'startsAt', message: 'زمان شروع نامعتبر است' }],
       })
     }
-    if (!endsAt) {
+    if (payload.endsAt && String(payload.endsAt).trim() && !endsAt) {
       return response.unprocessableEntity({
         errors: [{ field: 'endsAt', message: 'زمان پایان نامعتبر است' }],
       })
     }
-    if (endsAt <= startsAt) {
-      return response.unprocessableEntity({
-        errors: [{ field: 'endsAt', message: 'پایان باید بعد از شروع باشد' }],
-      })
+    const scheduleError = validateSchedule(startsAt, endsAt)
+    if (scheduleError) {
+      return response.unprocessableEntity({ errors: [scheduleError] })
     }
 
     const type = payload.type as StoreDiscountType

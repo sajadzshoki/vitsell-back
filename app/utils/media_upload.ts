@@ -1,6 +1,5 @@
 import type { MultipartFile } from '@adonisjs/core/bodyparser'
 import app from '@adonisjs/core/services/app'
-import env from '#start/env'
 import { mkdir, unlink } from 'node:fs/promises'
 import { randomBytes } from 'node:crypto'
 import { basename, extname } from 'node:path'
@@ -85,8 +84,7 @@ export async function saveUploadedMediaFile(file: MultipartFile, opts?: { maxSiz
     }
   }
 
-  const base = env.get('APP_URL').replace(/\/$/, '')
-  const url = `${base}/uploads/${name}`
+  const url = `/uploads/${name}`
   const mimeType = file.type && file.subtype
     ? `${file.type}/${file.subtype}`
     : mimeFromExt(ext)
@@ -100,6 +98,13 @@ export async function saveUploadedMediaFile(file: MultipartFile, opts?: { maxSiz
     kind: kindFromExt(ext),
     sizeBytes: typeof file.size === 'number' ? file.size : null,
   }
+}
+
+/** Normalize stored / legacy absolute APP_URL upload links to `/uploads/{name}`. */
+export function toPublicMediaUrl(url: string) {
+  const name = parseStoredUploadName(url)
+  if (name) return `/uploads/${name}`
+  return url
 }
 
 export function parseStoredUploadName(url: string) {

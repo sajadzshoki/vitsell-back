@@ -1,8 +1,9 @@
-import ProductQuestion from '#models/product_question'
+﻿import ProductQuestion from '#models/product_question'
 import {
   questionsQueryValidator,
   replyQuestionValidator,
   setQuestionVerifiedValidator,
+  updateQuestionValidator,
 } from '#validators/questions'
 import { querySellerQuestions } from '#utils/seller_questions_query'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -37,6 +38,38 @@ export default class SellerQuestionsController {
       return response.notFound({ errors: [{ field: 'id', message: 'پرسش یافت نشد' }] })
     }
     return response.ok(row.toJSON())
+  }
+
+  async update({ params, request, response }: HttpContext) {
+    const question = await ProductQuestion.find(params.id)
+    if (!question) {
+      return response.notFound({ errors: [{ field: 'id', message: 'پرسش یافت نشد' }] })
+    }
+
+    const payload = await request.validateUsing(updateQuestionValidator)
+    if (payload.question == null && payload.answerText == null) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'question', message: 'حداقل یک فیلد برای ویرایش لازم است' }],
+      })
+    }
+
+    if (payload.question != null) {
+      question.question = payload.question.trim()
+    }
+    if (payload.answerText != null) {
+      if (!question.answer) {
+        return response.unprocessableEntity({
+          errors: [{ field: 'answerText', message: 'این پرسش هنوز پاسخی ندارد' }],
+        })
+      }
+      question.answer = {
+        ...question.answer,
+        text: payload.answerText.trim(),
+        date: jalaliishDate(),
+      }
+    }
+    await question.save()
+    return response.ok(question.toJSON())
   }
 
   async reply({ params, request, response }: HttpContext) {

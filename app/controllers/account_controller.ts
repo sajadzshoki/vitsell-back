@@ -179,8 +179,17 @@ export default class AccountController {
     const orders = await Order.query()
       .where('user_id', user.id)
       .whereNot('status', 'pending_payment')
+      .preload('sellerOrders')
       .orderBy('created_at', 'desc')
-    return response.ok(orders.map((o) => o.toShopOrderJSON()))
+    return response.ok(
+      orders.map((o) => {
+        const seller = o.sellerOrders[0]
+        return o.toShopOrderJSON({
+          trackingCode: seller?.trackingCode,
+          carrier: seller?.carrier,
+        })
+      }),
+    )
   }
 
   async showOrder({ auth, params, response }: HttpContext) {
@@ -188,11 +197,18 @@ export default class AccountController {
     const order = await Order.query()
       .where('user_id', user.id)
       .where('id', params.id)
+      .preload('sellerOrders')
       .first()
     if (!order) {
       return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
     }
-    return response.ok(order.toShopOrderJSON())
+    const seller = order.sellerOrders[0]
+    return response.ok(
+      order.toShopOrderJSON({
+        trackingCode: seller?.trackingCode,
+        carrier: seller?.carrier,
+      }),
+    )
   }
 
   async reviews({ auth, response }: HttpContext) {

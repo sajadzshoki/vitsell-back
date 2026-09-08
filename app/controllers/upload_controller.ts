@@ -5,6 +5,7 @@ import {
   deleteStoredUpload,
   MEDIA_IMAGE_EXT,
   saveUploadedMediaFile,
+  toPublicMediaUrl,
 } from '#utils/media_upload'
 
 export default class UploadController {
@@ -34,7 +35,7 @@ export default class UploadController {
       })
     }
 
-    return response.created({ url: saved.url })
+    return response.created({ url: toPublicMediaUrl(saved.url) })
   }
 
   async show({ params, response }: HttpContext) {

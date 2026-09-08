@@ -55,14 +55,24 @@ export default class SellerPagesController {
 
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(storePageValidator)
-    const existing = await StaticPage.find(payload.id)
-    if (existing) {
-      return response.conflict({
-        errors: [{ field: 'id', message: 'شناسه صفحه تکراری است' }],
-      })
+    const titleSlug = payload.title
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]+/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 48) || 'page'
+    let id = payload.id?.trim() || `page-${titleSlug}-${Date.now().toString(36).slice(-4)}`
+    if (await StaticPage.find(id)) {
+      id = `page-${titleSlug}-${Date.now().toString(36)}`
     }
 
-    const path = normalizePath(payload.path)
+    const path = normalizePath(
+      payload.path?.trim()
+        ? payload.path
+        : `/${titleSlug}`,
+    )
     const pathClash = await StaticPage.query().where('path', path).first()
     if (pathClash) {
       return response.conflict({
@@ -77,7 +87,7 @@ export default class SellerPagesController {
         : null
 
     const page = await StaticPage.create({
-      id: payload.id,
+      id,
       path,
       title: payload.title,
       subtitle: payload.subtitle?.trim() || '',
