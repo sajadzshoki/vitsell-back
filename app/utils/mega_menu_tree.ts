@@ -76,50 +76,7 @@ function slugOrId(slug: string | null | undefined, id: string) {
   return s || id
 }
 
-/** Digikala-style listing path used by the storefront Nuxt app. */
-function toSearchCategoryPath(categoryId: string) {
-  return `/search/category-${encodeURIComponent(String(categoryId || '').trim())}`
-}
-
-/** Build storefront search href from a catalog filter (relative path + query). */
-function buildSearchHref(input: {
-  category?: string | null
-  brands?: string[]
-  minPrice?: number
-  maxPrice?: number
-  attrs?: Record<string, string[]>
-  q?: string
-  onlyDiscount?: boolean
-  onlyInStock?: boolean
-  fastDelivery?: boolean
-  minRating?: number
-}): string {
-  const category = String(input.category || '').trim()
-  const params = new URLSearchParams()
-  const q = String(input.q || '').trim()
-  if (q) params.set('q', q)
-  const brands = (input.brands || []).map((b) => String(b).trim()).filter(Boolean)
-  if (brands.length === 1) params.set('brands', brands[0]!)
-  else if (brands.length > 1) params.set('brands', brands.join(','))
-  const minPrice = Number(input.minPrice || 0) || 0
-  const maxPrice = Number(input.maxPrice || 0) || 0
-  if (minPrice > 0) params.set('minPrice', String(minPrice))
-  if (maxPrice > 0) params.set('maxPrice', String(maxPrice))
-  if (input.attrs && Object.keys(input.attrs).length) {
-    params.set('attrs', JSON.stringify(input.attrs))
-  }
-  if (input.onlyDiscount) params.set('onlyDiscount', '1')
-  if (input.onlyInStock) params.set('onlyInStock', '1')
-  if (input.fastDelivery) params.set('fastDelivery', '1')
-  const minRating = Number(input.minRating || 0) || 0
-  if (minRating > 0) params.set('minRating', String(minRating))
-
-  const path = category ? toSearchCategoryPath(category) : '/search'
-  const qs = params.toString()
-  return qs ? `${path}?${qs}` : path
-}
-
-/** Legacy SEO path for `/category/...` resolve (bookmarks / deep links). */
+/** SEO path `/category/{menu}/{section}/…` — resolved by `/mega-menu/resolve`. */
 function joinCategoryPath(parts: string[]) {
   return `/category/${parts.map((p) => encodeURIComponent(p)).join('/')}`
 }
@@ -196,14 +153,13 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
       sortOrder: Number(item.sortOrder) || 0,
     }
 
+    const itemSlug = slugOrId(item.slug, item.id)
+    const href = joinCategoryPath([...pathParts, itemSlug])
+
     if (item.type === 'category') {
       const cat = item.categoryId ? categoryById.get(item.categoryId) : undefined
       if (!cat) return null
-      return {
-        ...base,
-        href: toSearchCategoryPath(cat.id),
-        category: categoryRef(cat)!,
-      }
+      return { ...base, href, category: categoryRef(cat)! }
     }
 
     if (item.type === 'filter') {
@@ -212,17 +168,13 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
       if (filter.category && !categoryById.has(filter.category)) {
         return null
       }
-      return {
-        ...base,
-        href: buildSearchHref(filter),
-        filter,
-      }
+      return { ...base, href, filter }
     }
 
     if (item.type === 'link') {
       const url = (item.url || '').trim()
       if (!url) return null
-      return { ...base, url, href: url }
+      return { ...base, url }
     }
 
     return null
@@ -248,22 +200,12 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
         const childSections = buildSectionTree(menuId, section.id, nextParts)
         const cat = section.categoryId ? categoryRef(categoryById.get(section.categoryId)) : undefined
 
-        // Prefer catalog search URL when a category is linked; else first child/item target.
-        let href = cat ? toSearchCategoryPath(cat.id) : ''
-        if (!href) {
-          const childHref =
-            childSections.find((c) => c.href)?.href
-            || mappedItems.find((i) => i.href)?.href
-            || mappedItems.find((i) => i.url)?.url
-          href = childHref || joinCategoryPath(nextParts)
-        }
-
         return {
           id: section.id,
           title: section.title,
           slug: section.slug ?? null,
           sortOrder: Number(section.sortOrder) || 0,
-          href,
+          href: joinCategoryPath(nextParts),
           ...(cat ? { category: cat } : {}),
           items: mappedItems,
           sections: childSections,
@@ -282,10 +224,10 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
   const itemsOut: PublicMegaMenu[] = sortByOrder(menus).map((menu) => {
     const menuSlug = slugOrId(menu.slug, menu.id)
     const sections = buildSectionTree(menu.id, null, [menuSlug])
+    // Prefer first section SEO path (multi-segment → /category/[catId]/[...path]).
+    // Only use single-segment /category/{slug} when slug is a real taxonomy category.
     const firstSectionHref = sections[0]?.href
-    const taxonomyLanding = taxonomyBySlug.has(menuSlug)
-      ? toSearchCategoryPath(menuSlug)
-      : undefined
+    const taxonomyLanding = taxonomyBySlug.has(menuSlug) ? joinCategoryPath([menuSlug]) : undefined
     const href = firstSectionHref || taxonomyLanding
 
     return {
@@ -340,7 +282,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
       type: 'menu',
       category: cat,
       filter: cat ? { category: cat } : null,
-      href: cat ? toSearchCategoryPath(cat) : href,
+      href,
     }
   }
 
@@ -365,7 +307,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
           type: 'section',
           category,
           filter: category ? { category } : null,
-          href: category ? toSearchCategoryPath(category) : href,
+          href,
         }
       }
       continue
@@ -395,7 +337,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
           type: 'item',
           category: item.category.id,
           filter: { category: item.category.id },
-          href: toSearchCategoryPath(item.category.id),
+          href,
         }
       }
 
@@ -406,7 +348,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
           type: 'item',
           category: item.filter.category || null,
           filter: item.filter,
-          href: buildSearchHref(item.filter),
+          href,
         }
       }
     }
