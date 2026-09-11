@@ -1,4 +1,5 @@
 import ContentBlock from '#models/content_block'
+import Category from '#models/category'
 import Product from '#models/product'
 import ProductQuestion from '#models/product_question'
 import SellerListing from '#models/seller_listing'
@@ -180,6 +181,33 @@ function slugify(input: string) {
   )
 }
 
+async function assertListingCategory(
+  categoryId: string,
+  response: HttpContext['response']
+) {
+  const id = categoryId.trim()
+  if (!id) {
+    response.badRequest({
+      errors: [{ field: 'product.category', message: 'دسته‌بندی الزامی است' }],
+    })
+    return false
+  }
+  const cat = await Category.find(id)
+  if (!cat) {
+    response.badRequest({
+      errors: [{ field: 'product.category', message: 'دسته‌بندی انتخاب‌شده یافت نشد' }],
+    })
+    return false
+  }
+  if (cat.status === 'inactive') {
+    response.badRequest({
+      errors: [{ field: 'product.category', message: 'دسته‌بندی غیرفعال است؛ ابتدا آن را فعال کنید' }],
+    })
+    return false
+  }
+  return true
+}
+
 async function resolveSiteShop() {
   let siteShop = await SellerShop.query().where('slug', 'digishop').first()
   if (!siteShop) {
@@ -292,6 +320,7 @@ export default class SellerController {
   async storeListing({ request, response }: HttpContext) {
     const payload = await request.validateUsing(storeListingValidator)
     const p = payload.product
+    if (!(await assertListingCategory(p.category, response))) return
     const id = p.id?.trim() || `p-${slugify(p.shortName || p.title)}-${Date.now().toString().slice(-5)}`
 
     const product = await Product.updateOrCreate(
@@ -375,6 +404,7 @@ export default class SellerController {
 
     if (payload.product) {
       const p = payload.product
+      if (!(await assertListingCategory(p.category, response))) return
       product = await Product.updateOrCreate(
         { id: listing.productId },
         {

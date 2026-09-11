@@ -54,6 +54,10 @@ export interface ApiDefinition {
     store: typeof routes['activity.store']
     sync: typeof routes['activity.sync']
   }
+  megaMenu: {
+    index: typeof routes['mega_menu.index']
+    resolve: typeof routes['mega_menu.resolve']
+  }
   checkout: {
     zarinpalCallback: typeof routes['checkout.zarinpal_callback']
     place: typeof routes['checkout.place']
@@ -257,6 +261,25 @@ export interface ApiDefinition {
   sellerNavigation: {
     show: typeof routes['seller_navigation.show']
     update: typeof routes['seller_navigation.update']
+  }
+  sellerMegaMenus: {
+    index: typeof routes['seller_mega_menus.index']
+    reorder: typeof routes['seller_mega_menus.reorder']
+    show: typeof routes['seller_mega_menus.show']
+    store: typeof routes['seller_mega_menus.store']
+    update: typeof routes['seller_mega_menus.update']
+    setStatus: typeof routes['seller_mega_menus.set_status']
+    destroy: typeof routes['seller_mega_menus.destroy']
+    storeSection: typeof routes['seller_mega_menus.store_section']
+    reorderSections: typeof routes['seller_mega_menus.reorder_sections']
+    updateSection: typeof routes['seller_mega_menus.update_section']
+    setSectionStatus: typeof routes['seller_mega_menus.set_section_status']
+    destroySection: typeof routes['seller_mega_menus.destroy_section']
+    storeItem: typeof routes['seller_mega_menus.store_item']
+    reorderItems: typeof routes['seller_mega_menus.reorder_items']
+    updateItem: typeof routes['seller_mega_menus.update_item']
+    setItemStatus: typeof routes['seller_mega_menus.set_item_status']
+    destroyItem: typeof routes['seller_mega_menus.destroy_item']
   }
   sellerMarketing: {
     summary: typeof routes['seller_marketing.summary']

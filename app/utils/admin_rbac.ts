@@ -53,6 +53,7 @@ export const SYSTEM_ROLE_META: Record<
       'settings.view', 'settings.update',
       'system.view', 'system.manage',
       'navigation.view', 'navigation.update',
+      'mega_menu.view', 'mega_menu.create', 'mega_menu.update', 'mega_menu.delete',
       'imports.view', 'imports.create', 'imports.manage',
       'exports.view', 'exports.create',
     ],
@@ -69,6 +70,7 @@ export const SYSTEM_ROLE_META: Record<
       'inventory.view', 'inventory.update',
       'warehouses.view', 'warehouses.create', 'warehouses.update', 'warehouses.delete',
       'media.view', 'media.manage', 'seo.view', 'seo.update',
+      'mega_menu.view', 'mega_menu.create', 'mega_menu.update', 'mega_menu.delete',
     ],
   },
   ORDER_MANAGER: {
@@ -96,6 +98,8 @@ export const SYSTEM_ROLE_META: Record<
       'footer.view', 'footer.update',
       'banners.view', 'banners.create', 'banners.update', 'banners.delete',
       'seo.view', 'seo.update',
+      'mega_menu.view', 'mega_menu.create', 'mega_menu.update', 'mega_menu.delete',
+      'navigation.view', 'navigation.update',
     ],
   },
   MARKETING_MANAGER: {
@@ -177,6 +181,7 @@ export const SYSTEM_ROLE_META: Record<
       'finance_reports.view', 'financial_reconciliation.view',
       'admins.view', 'roles.view', 'permissions.view', 'audit.view', 'activity.view',
       'settings.view', 'seo.view', 'system.view', 'navigation.view',
+      'mega_menu.view',
       'imports.view', 'exports.view',
     ],
   },

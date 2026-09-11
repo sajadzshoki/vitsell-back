@@ -379,6 +379,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/content_controller').default['navigation']>>>
     }
   }
+  'mega_menu.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/mega-menu'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/mega_menu_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/mega_menu_controller').default['index']>>>
+    }
+  }
+  'mega_menu.resolve': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/mega-menu/resolve'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/mega_menu_controller').default['resolve']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/mega_menu_controller').default['resolve']>>>
+    }
+  }
   'content.discount_codes': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/discount-codes'
@@ -2213,6 +2237,210 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/navigation_settings').navigationSettingsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_navigation_controller').default['update']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_navigation_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/seller/mega-menus'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/mega_menu').megaMenusQueryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.reorder': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/mega-menus/reorder'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').reorderMegaMenuValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').reorderMegaMenuValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['reorder']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['reorder']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/seller/mega-menus/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['show']>>>
+    }
+  }
+  'seller_mega_menus.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/mega-menus'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').storeMegaMenuValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').storeMegaMenuValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/seller/mega-menus/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').updateMegaMenuValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').updateMegaMenuValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.set_status': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/seller/mega-menus/:id/status'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').megaMenuStatusValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').megaMenuStatusValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['setStatus']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['setStatus']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/seller/mega-menus/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['destroy']>>>
+    }
+  }
+  'seller_mega_menus.store_section': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/mega-menu-sections'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').storeMegaMenuSectionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').storeMegaMenuSectionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['storeSection']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['storeSection']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.reorder_sections': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/mega-menu-sections/reorder'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').reorderMegaMenuValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').reorderMegaMenuValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['reorderSections']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['reorderSections']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.update_section': {
+    methods: ["PUT"]
+    pattern: '/api/v1/seller/mega-menu-sections/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').updateMegaMenuSectionValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').updateMegaMenuSectionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['updateSection']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['updateSection']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.set_section_status': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/seller/mega-menu-sections/:id/status'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').megaMenuStatusValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').megaMenuStatusValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['setSectionStatus']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['setSectionStatus']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.destroy_section': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/seller/mega-menu-sections/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['destroySection']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['destroySection']>>>
+    }
+  }
+  'seller_mega_menus.store_item': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/mega-menu-items'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').storeMegaMenuItemValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').storeMegaMenuItemValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['storeItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['storeItem']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.reorder_items': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/mega-menu-items/reorder'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').reorderMegaMenuValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').reorderMegaMenuValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['reorderItems']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['reorderItems']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.update_item': {
+    methods: ["PUT"]
+    pattern: '/api/v1/seller/mega-menu-items/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').updateMegaMenuItemValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').updateMegaMenuItemValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['updateItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['updateItem']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.set_item_status': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/seller/mega-menu-items/:id/status'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/mega_menu').megaMenuStatusValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/mega_menu').megaMenuStatusValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['setItemStatus']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['setItemStatus']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_mega_menus.destroy_item': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/seller/mega-menu-items/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['destroyItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_mega_menus_controller').default['destroyItem']>>>
     }
   }
   'seller_marketing.summary': {

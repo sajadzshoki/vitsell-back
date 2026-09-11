@@ -49,6 +49,8 @@ const SellerSystemController = () => import('#controllers/seller_system_controll
 const SellerSettingsController = () => import('#controllers/seller_settings_controller')
 const SellerSeoController = () => import('#controllers/seller_seo_controller')
 const SellerNavigationController = () => import('#controllers/seller_navigation_controller')
+const MegaMenuController = () => import('#controllers/mega_menu_controller')
+const SellerMegaMenusController = () => import('#controllers/seller_mega_menus_controller')
 const SellerAuditController = () => import('#controllers/seller_audit_controller')
 
 router.get('/', () => {
@@ -104,6 +106,8 @@ router
     router.get('compare/templates/:category', [ContentController, 'compareTemplates'])
     router.get('footer', [ContentController, 'footer'])
     router.get('navigation', [ContentController, 'navigation'])
+    router.get('mega-menu', [MegaMenuController, 'index'])
+    router.get('mega-menu/resolve', [MegaMenuController, 'resolve'])
     router.get('discount-codes', [ContentController, 'discountCodes'])
     router.get('blog', [ContentController, 'blogIndex'])
     router.get('blog/:id', [ContentController, 'blogShow'])
@@ -298,6 +302,26 @@ router
         router.delete('seo/redirects/:id', [SellerSeoController, 'redirectsDestroy'])
         router.get('navigation', [SellerNavigationController, 'show'])
         router.put('navigation', [SellerNavigationController, 'update'])
+
+        router.get('mega-menus', [SellerMegaMenusController, 'index'])
+        router.post('mega-menus/reorder', [SellerMegaMenusController, 'reorder'])
+        router.get('mega-menus/:id', [SellerMegaMenusController, 'show'])
+        router.post('mega-menus', [SellerMegaMenusController, 'store'])
+        router.put('mega-menus/:id', [SellerMegaMenusController, 'update'])
+        router.patch('mega-menus/:id/status', [SellerMegaMenusController, 'setStatus'])
+        router.delete('mega-menus/:id', [SellerMegaMenusController, 'destroy'])
+
+        router.post('mega-menu-sections', [SellerMegaMenusController, 'storeSection'])
+        router.post('mega-menu-sections/reorder', [SellerMegaMenusController, 'reorderSections'])
+        router.put('mega-menu-sections/:id', [SellerMegaMenusController, 'updateSection'])
+        router.patch('mega-menu-sections/:id/status', [SellerMegaMenusController, 'setSectionStatus'])
+        router.delete('mega-menu-sections/:id', [SellerMegaMenusController, 'destroySection'])
+
+        router.post('mega-menu-items', [SellerMegaMenusController, 'storeItem'])
+        router.post('mega-menu-items/reorder', [SellerMegaMenusController, 'reorderItems'])
+        router.put('mega-menu-items/:id', [SellerMegaMenusController, 'updateItem'])
+        router.patch('mega-menu-items/:id/status', [SellerMegaMenusController, 'setItemStatus'])
+        router.delete('mega-menu-items/:id', [SellerMegaMenusController, 'destroyItem'])
 
         router.get('marketing', [SellerMarketingController, 'summary'])
 
