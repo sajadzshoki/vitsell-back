@@ -41,16 +41,21 @@ function applyCategoryFilters(query: CategoryQuery, filters: CategoriesQuery, op
   return q
 }
 
+/**
+ * Count products that still have a seller listing.
+ * Soft-deleted listings leave orphan `products` rows (inStock=false) that must not inflate admin counts.
+ */
 async function productCountMap(categoryIds: string[]) {
   const map = new Map<string, number>()
   if (!categoryIds.length) return map
 
   const rows = await db
     .from('products')
-    .select('category')
+    .innerJoin('seller_listings', 'seller_listings.product_id', 'products.id')
+    .select('products.category')
     .count('* as total')
-    .whereIn('category', categoryIds)
-    .groupBy('category')
+    .whereIn('products.category', categoryIds)
+    .groupBy('products.category')
 
   for (const row of rows as Array<{ category: string; total: string | number }>) {
     map.set(row.category, Number(row.total) || 0)

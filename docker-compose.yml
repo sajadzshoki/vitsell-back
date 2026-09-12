@@ -49,6 +49,8 @@ services:
       - ./start:/app/start
       - ./config:/app/config
       - ./database:/app/database
+      - ./commands:/app/commands
+      - ./docker/entrypoint.sh:/app/docker/entrypoint.sh
       - ./providers:/app/providers
       - ./adonisrc.ts:/app/adonisrc.ts
       - ./storage:/app/storage

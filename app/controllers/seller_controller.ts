@@ -775,16 +775,18 @@ export default class SellerController {
       return response.notFound({ errors: [{ field: 'productId', message: 'محصول یافت نشد' }] })
     }
 
-    const product = await Product.find(listing.productId)
+    const productId = listing.productId
     await listing.delete()
+
+    const product = await Product.find(productId)
     if (product) {
-      product.inStock = false
-      await product.save()
+      // Hard-delete so category/brand counts and storefront stay in sync
+      await product.delete()
     }
 
     return response.ok({
       message: 'محصول حذف شد',
-      productId: params.productId,
+      productId,
     })
   }
 

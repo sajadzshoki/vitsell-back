@@ -1,5 +1,4 @@
 import Category from '#models/category'
-import Product from '#models/product'
 import {
   storeCategoryValidator,
   updateCategoryValidator,
@@ -8,6 +7,7 @@ import { categoriesQueryValidator } from '#validators/categories'
 import { querySellerCategories } from '#utils/seller_categories_query'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { SeoMeta } from '#models/blog_post'
+import db from '@adonisjs/lucid/services/db'
 
 function normalizeSubs(
   subs?: Array<{ name: string; items?: string[]; image?: string | null }> | null
@@ -294,8 +294,14 @@ export default class CategoriesController {
       })
     }
 
-    const totalRow = await Product.query().where('category', category.id).count('* as total').first()
-    const total = Number((totalRow as any)?.$extras?.total ?? (totalRow as any)?.total ?? 0)
+    // Only active catalog listings block delete — soft-removed products keep a products row
+    const listed = await db
+      .from('products')
+      .innerJoin('seller_listings', 'seller_listings.product_id', 'products.id')
+      .where('products.category', category.id)
+      .count('* as total')
+      .first()
+    const total = Number((listed as any)?.total ?? 0)
     if (total > 0) {
       return response.conflict({
         errors: [

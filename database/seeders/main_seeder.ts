@@ -84,6 +84,17 @@ export default class extends BaseSeeder {
       }[]
     >('products.json')
 
+    const existingProductCount = Number(
+      ((await Product.query().count('* as total').first()) as any)?.$extras?.total ?? 0
+    )
+    const seedCatalog = existingProductCount === 0
+    if (!seedCatalog) {
+      console.log(
+        `[seed] ${existingProductCount} products already present — skipping products/deals (preserves admin deletes)`
+      )
+    }
+
+    if (seedCatalog) {
     for (const p of products) {
       const description =
         p.description ??
@@ -151,6 +162,7 @@ export default class extends BaseSeeder {
         )
       }
     }
+    } // seedCatalog products + deals
 
     const featuredId = products[0]?.id ?? 'iphone-16-pro'
     const reviews = loadJson<any[]>('reviews.json')
@@ -323,7 +335,8 @@ export default class extends BaseSeeder {
     for (const listing of seller.listings) {
       const exists = await Product.find(listing.productId)
       if (!exists) continue
-      await SellerListing.updateOrCreate(
+      // firstOrCreate: never resurrect listings the admin deleted
+      await SellerListing.firstOrCreate(
         { shopId: shop.id, productId: listing.productId },
         {
           shopId: shop.id,
