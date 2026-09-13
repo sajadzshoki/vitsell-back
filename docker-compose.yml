@@ -1,26 +1,26 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: digishop-postgres
+    container_name: vitsell-postgres
     restart: unless-stopped
     ports:
       # Host 5433–5532 often blocked by Windows Hyper-V reserved ranges; use 15432 instead.
       - '15432:5432'
     environment:
-      POSTGRES_USER: digishop
-      POSTGRES_PASSWORD: digishop
-      POSTGRES_DB: digishop
+      POSTGRES_USER: vitsell
+      POSTGRES_PASSWORD: vitsell
+      POSTGRES_DB: vitsell
     volumes:
-      - digishop_pg_data:/var/lib/postgresql/data
+      - vitsell_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U digishop -d digishop']
+      test: ['CMD-SHELL', 'pg_isready -U vitsell -d vitsell']
       interval: 5s
       timeout: 5s
       retries: 10
 
   api:
     build: .
-    container_name: digishop-api
+    container_name: vitsell-api
     restart: unless-stopped
     ports:
       - '3333:3333'
@@ -50,6 +50,8 @@ services:
       - ./start:/app/start
       - ./config:/app/config
       - ./database:/app/database
+      - ./commands:/app/commands
+      - ./docker/entrypoint.sh:/app/docker/entrypoint.sh
       - ./providers:/app/providers
       - ./adonisrc.ts:/app/adonisrc.ts
       - ./storage:/app/storage
@@ -64,4 +66,4 @@ services:
         condition: service_healthy
 
 volumes:
-  digishop_pg_data:
+  vitsell_pg_data:

@@ -1,10 +1,10 @@
-# Digishop Backend — Deploy
+# vitsell Backend — Deploy
 
 راهنمای کامل دیپلوی **فرانت + بک** در ریپوی فرانت:
 
-→ [`../digishop/DEPLOY.md`](../digishop/DEPLOY.md)
+→ [`../vitsell/DEPLOY.md`](../vitsell/DEPLOY.md)
 
-اگر مسیر نسبی در محیط شما فرق دارد، همان فایل `DEPLOY.md` داخل ریپوی `digishop` را باز کنید.
+اگر مسیر نسبی در محیط شما فرق دارد، همان فایل `DEPLOY.md` داخل ریپوی `vitsell` را باز کنید.
 
 ## خلاصه سریع Production API
 

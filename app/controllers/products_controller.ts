@@ -11,6 +11,7 @@ import {
   loadFilterableAttributes,
   parseAttrFilters,
 } from '#utils/catalog_filters'
+import { loadPlatformSettings } from '#utils/platform_settings'
 
 const SORTS = [
   'relevant',
@@ -105,6 +106,9 @@ export default class ProductsController {
       ? await loadFilterableAttributes(category)
       : []
 
+    const platform = await loadPlatformSettings()
+    const forceInStock = platform.outOfStockBehavior === 'hide' || onlyInStock
+
     let query = applyCatalogFilters(Product.query(), {
       q,
       category,
@@ -112,7 +116,7 @@ export default class ProductsController {
       minPrice,
       maxPrice,
       onlyDiscount,
-      onlyInStock,
+      onlyInStock: forceInStock,
       fastDelivery,
       minRating,
       attrs,
@@ -175,10 +179,13 @@ export default class ProductsController {
     const fastDelivery = String(request.input('fastDelivery', 'false')) === 'true'
     const minRating = Number(request.input('minRating', 0)) || 0
 
+    const platform = await loadPlatformSettings()
+    const forceInStock = platform.outOfStockBehavior === 'hide' || onlyInStock
+
     // Price/brand facets ignore price + brand + attr selections so ranges stay stable.
     const base = applyCatalogFilters(
       Product.query(),
-      { q, category, onlyDiscount, onlyInStock, fastDelivery, minRating },
+      { q, category, onlyDiscount, onlyInStock: forceInStock, fastDelivery, minRating },
       { skipPrice: true, skipBrands: true, skipAttrs: true }
     )
 

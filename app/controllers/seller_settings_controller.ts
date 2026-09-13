@@ -1,6 +1,6 @@
 import {
   loadPlatformSettings,
-  normalizePlatformSettings,
+  mergePlatformSettingsUpdate,
   savePlatformSettings,
 } from '#utils/platform_settings'
 import { platformSettingsValidator } from '#validators/platform_settings'
@@ -14,9 +14,15 @@ export default class SellerSettingsController {
 
   async update({ auth, request, response }: HttpContext) {
     const actor = auth.getUserOrFail()
+    // Copy before validateUsing — validators may mutate/strip nulls on the live body
+    const raw = { ...(request.body() as Record<string, unknown>) }
     const payload = await request.validateUsing(platformSettingsValidator)
     const current = await loadPlatformSettings()
-    const merged = normalizePlatformSettings({ ...current, ...payload })
+    const merged = mergePlatformSettingsUpdate(
+      current,
+      payload as unknown as Record<string, unknown>,
+      raw,
+    )
     const saved = await savePlatformSettings(merged)
     await recordAdminAudit(actor, {
       action: 'update',

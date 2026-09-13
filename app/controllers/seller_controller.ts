@@ -1,4 +1,5 @@
 import ContentBlock from '#models/content_block'
+import Category from '#models/category'
 import Product from '#models/product'
 import ProductQuestion from '#models/product_question'
 import SellerListing from '#models/seller_listing'
@@ -180,8 +181,35 @@ function slugify(input: string) {
   )
 }
 
+async function assertListingCategory(
+  categoryId: string,
+  response: HttpContext['response']
+) {
+  const id = categoryId.trim()
+  if (!id) {
+    response.badRequest({
+      errors: [{ field: 'product.category', message: 'دسته‌بندی الزامی است' }],
+    })
+    return false
+  }
+  const cat = await Category.find(id)
+  if (!cat) {
+    response.badRequest({
+      errors: [{ field: 'product.category', message: 'دسته‌بندی انتخاب‌شده یافت نشد' }],
+    })
+    return false
+  }
+  if (cat.status === 'inactive') {
+    response.badRequest({
+      errors: [{ field: 'product.category', message: 'دسته‌بندی غیرفعال است؛ ابتدا آن را فعال کنید' }],
+    })
+    return false
+  }
+  return true
+}
+
 async function resolveSiteShop() {
-  let siteShop = await SellerShop.query().where('slug', 'digishop').first()
+  let siteShop = await SellerShop.query().where('slug', 'vitsell').first()
   if (!siteShop) {
     siteShop = await SellerShop.query().orderBy('id', 'asc').first()
   }
@@ -292,6 +320,7 @@ export default class SellerController {
   async storeListing({ request, response }: HttpContext) {
     const payload = await request.validateUsing(storeListingValidator)
     const p = payload.product
+    if (!(await assertListingCategory(p.category, response))) return
     const id = p.id?.trim() || `p-${slugify(p.shortName || p.title)}-${Date.now().toString().slice(-5)}`
 
     const product = await Product.updateOrCreate(
@@ -375,6 +404,7 @@ export default class SellerController {
 
     if (payload.product) {
       const p = payload.product
+      if (!(await assertListingCategory(p.category, response))) return
       product = await Product.updateOrCreate(
         { id: listing.productId },
         {
@@ -659,7 +689,7 @@ export default class SellerController {
 
     const previous = question.answer
     question.answer = {
-      author: author?.trim() || 'کارشناس دیجی‌شاپ',
+      author: author?.trim() || 'کارشناس ویتسل',
       date: jalaliishDate(),
       text,
       helpfulYes: previous?.helpfulYes ?? 0,
@@ -745,16 +775,18 @@ export default class SellerController {
       return response.notFound({ errors: [{ field: 'productId', message: 'محصول یافت نشد' }] })
     }
 
-    const product = await Product.find(listing.productId)
+    const productId = listing.productId
     await listing.delete()
+
+    const product = await Product.find(productId)
     if (product) {
-      product.inStock = false
-      await product.save()
+      // Hard-delete so category/brand counts and storefront stay in sync
+      await product.delete()
     }
 
     return response.ok({
       message: 'محصول حذف شد',
-      productId: params.productId,
+      productId,
     })
   }
 

@@ -1,0 +1,1399 @@
+{
+  "replaceDemoIds": true,
+  "menus": [
+    {
+      "id": "mm-mobile",
+      "title": "گوشی موبایل و تجهیزات",
+      "slug": "mobile",
+      "icon": "device-mobile",
+      "sortOrder": 0,
+      "sections": [
+        {
+          "id": "mms-mobile-phones",
+          "title": "گوشی موبایل",
+          "categoryId": "mobile",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-mobile-iphone",
+              "title": "گوشی آیفون",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-iphone-16",
+                  "title": "آیفون ۱۶",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Apple"
+                    ],
+                    "q": "۱۶"
+                  },
+                  "sortOrder": 0,
+                  "slug": "iphone-16"
+                },
+                {
+                  "id": "mmi-iphone-15",
+                  "title": "آیفون ۱۵",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Apple"
+                    ],
+                    "q": "۱۵"
+                  },
+                  "sortOrder": 1,
+                  "slug": "iphone-15"
+                },
+                {
+                  "id": "mmi-iphone-14",
+                  "title": "آیفون ۱۴",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Apple"
+                    ],
+                    "q": "۱۴"
+                  },
+                  "sortOrder": 2,
+                  "slug": "iphone-14"
+                },
+                {
+                  "id": "mmi-iphone-13",
+                  "title": "آیفون ۱۳",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Apple"
+                    ],
+                    "q": "۱۳"
+                  },
+                  "sortOrder": 3,
+                  "slug": "iphone-13"
+                },
+                {
+                  "id": "mmi-iphone-all",
+                  "title": "همه آیفون‌ها",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Apple"
+                    ]
+                  },
+                  "sortOrder": 4,
+                  "slug": "all-iphones"
+                }
+              ],
+              "slug": "iphone"
+            },
+            {
+              "id": "mms-mobile-samsung",
+              "title": "گوشی سامسونگ",
+              "sortOrder": 1,
+              "items": [
+                {
+                  "id": "mmi-sam-s",
+                  "title": "سامسونگ سری S",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Samsung"
+                    ],
+                    "q": "S2"
+                  },
+                  "sortOrder": 0,
+                  "slug": "samsung-s-series"
+                },
+                {
+                  "id": "mmi-sam-a",
+                  "title": "سامسونگ سری A",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Samsung"
+                    ],
+                    "q": "A"
+                  },
+                  "sortOrder": 1,
+                  "slug": "samsung-a-series"
+                },
+                {
+                  "id": "mmi-sam-z",
+                  "title": "سامسونگ سری Z",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Samsung"
+                    ],
+                    "q": "Z"
+                  },
+                  "sortOrder": 2,
+                  "slug": "samsung-z-series"
+                },
+                {
+                  "id": "mmi-sam-all",
+                  "title": "همه سامسونگ",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Samsung"
+                    ]
+                  },
+                  "sortOrder": 3,
+                  "slug": "all-samsung"
+                }
+              ],
+              "slug": "samsung"
+            },
+            {
+              "id": "mms-mobile-xiaomi",
+              "title": "گوشی شیائومی",
+              "sortOrder": 2,
+              "items": [
+                {
+                  "id": "mmi-xi-redmi",
+                  "title": "ردمی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Xiaomi"
+                    ],
+                    "q": "Redmi"
+                  },
+                  "sortOrder": 0,
+                  "slug": "redmi"
+                },
+                {
+                  "id": "mmi-xi-poco",
+                  "title": "پوکو",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Xiaomi"
+                    ],
+                    "q": "Poco"
+                  },
+                  "sortOrder": 1,
+                  "slug": "poco"
+                },
+                {
+                  "id": "mmi-xi-all",
+                  "title": "همه شیائومی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Xiaomi"
+                    ]
+                  },
+                  "sortOrder": 2,
+                  "slug": "all-xiaomi"
+                }
+              ],
+              "slug": "xiaomi"
+            },
+            {
+              "id": "mms-mobile-huawei",
+              "title": "گوشی هوآوی",
+              "sortOrder": 3,
+              "items": [
+                {
+                  "id": "mmi-hua-all",
+                  "title": "همه هوآوی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Huawei"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "all-huawei"
+                },
+                {
+                  "id": "mmi-honor-all",
+                  "title": "آنر",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Honor"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "honor"
+                }
+              ],
+              "slug": "huawei"
+            },
+            {
+              "id": "mms-mobile-other",
+              "title": "سایر برندها",
+              "sortOrder": 4,
+              "items": [
+                {
+                  "id": "mmi-nokia",
+                  "title": "نوکیا",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Nokia"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "nokia"
+                },
+                {
+                  "id": "mmi-google",
+                  "title": "گوگل پیکسل",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Google"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "google-pixel"
+                },
+                {
+                  "id": "mmi-nothing",
+                  "title": "Nothing",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "brands": [
+                      "Nothing"
+                    ]
+                  },
+                  "sortOrder": 2,
+                  "slug": "nothing"
+                }
+              ],
+              "slug": "other-brands"
+            },
+            {
+              "id": "mms-mobile-phone-price",
+              "title": "براساس قیمت",
+              "slug": "by-price",
+              "sortOrder": 5,
+              "items": [
+                {
+                  "id": "mmi-phone-p30",
+                  "title": "تا ۳۰ میلیون",
+                  "slug": "price-up-to-30ml",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "maxPrice": 30000000
+                  },
+                  "sortOrder": 0
+                },
+                {
+                  "id": "mmi-phone-p50",
+                  "title": "تا ۵۰ میلیون",
+                  "slug": "price-up-to-50ml",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "maxPrice": 50000000
+                  },
+                  "sortOrder": 1
+                }
+              ],
+              "sections": []
+            }
+          ],
+          "slug": "mobile-phone"
+        },
+        {
+          "id": "mms-mobile-price",
+          "title": "گوشی براساس قیمت",
+          "categoryId": "mobile",
+          "sortOrder": 1,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-mobile-price-groups",
+              "title": "بازه قیمت",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-p1",
+                  "title": "زیر ۱۰ میلیون",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "maxPrice": 10000000
+                  },
+                  "sortOrder": 0,
+                  "slug": "price-up-to-10ml"
+                },
+                {
+                  "id": "mmi-p2",
+                  "title": "۱۰ تا ۲۰ میلیون",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "minPrice": 10000000,
+                    "maxPrice": 20000000
+                  },
+                  "sortOrder": 1,
+                  "slug": "price-10-to-20ml"
+                },
+                {
+                  "id": "mmi-p3",
+                  "title": "۲۰ تا ۴۰ میلیون",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "minPrice": 20000000,
+                    "maxPrice": 40000000
+                  },
+                  "sortOrder": 2,
+                  "slug": "price-20-to-40ml"
+                },
+                {
+                  "id": "mmi-p4",
+                  "title": "بالای ۴۰ میلیون",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "minPrice": 40000000
+                  },
+                  "sortOrder": 3,
+                  "slug": "price-above-40ml"
+                }
+              ],
+              "slug": "price-range"
+            },
+            {
+              "id": "mms-mobile-price-offers",
+              "title": "پیشنهاد ویژه",
+              "sortOrder": 1,
+              "items": [
+                {
+                  "id": "mmi-p-disc",
+                  "title": "گوشی‌های تخفیف‌دار",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "onlyDiscount": true
+                  },
+                  "sortOrder": 0,
+                  "slug": "discounted"
+                },
+                {
+                  "id": "mmi-p-fast",
+                  "title": "ارسال سریع",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "fastDelivery": true
+                  },
+                  "sortOrder": 1,
+                  "slug": "fast-delivery"
+                }
+              ],
+              "slug": "special-offers"
+            }
+          ],
+          "slug": "phones-by-price"
+        },
+        {
+          "id": "mms-mobile-storage",
+          "title": "گوشی براساس حافظه",
+          "categoryId": "mobile",
+          "sortOrder": 2,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-mobile-storage-list",
+              "title": "ظرفیت حافظه",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-st-128",
+                  "title": "۱۲۸ گیگابایت",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "۱۲۸"
+                  },
+                  "sortOrder": 0,
+                  "slug": "storage-128gb"
+                },
+                {
+                  "id": "mmi-st-256",
+                  "title": "۲۵۶ گیگابایت",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "۲۵۶"
+                  },
+                  "sortOrder": 1,
+                  "slug": "storage-256gb"
+                },
+                {
+                  "id": "mmi-st-512",
+                  "title": "۵۱۲ گیگابایت",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "۵۱۲"
+                  },
+                  "sortOrder": 2,
+                  "slug": "storage-512gb"
+                },
+                {
+                  "id": "mmi-st-1t",
+                  "title": "۱ ترابایت",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "ترابایت"
+                  },
+                  "sortOrder": 3,
+                  "slug": "storage-1tb"
+                }
+              ],
+              "slug": "storage"
+            }
+          ],
+          "slug": "phones-by-storage"
+        },
+        {
+          "id": "mms-mobile-accessories",
+          "title": "لوازم جانبی موبایل",
+          "categoryId": "mobile",
+          "sortOrder": 3,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-acc-protect",
+              "title": "محافظت",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-acc-case",
+                  "title": "قاب و کاور",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "قاب"
+                  },
+                  "sortOrder": 0,
+                  "slug": "cases"
+                },
+                {
+                  "id": "mmi-acc-glass",
+                  "title": "گلس و محافظ صفحه",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "گلس"
+                  },
+                  "sortOrder": 1,
+                  "slug": "screen-protectors"
+                }
+              ],
+              "slug": "protection"
+            },
+            {
+              "id": "mms-acc-power",
+              "title": "شارژ و باتری",
+              "sortOrder": 1,
+              "items": [
+                {
+                  "id": "mmi-acc-charger",
+                  "title": "شارژر و کابل",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "شارژر"
+                  },
+                  "sortOrder": 0,
+                  "slug": "chargers"
+                },
+                {
+                  "id": "mmi-acc-powerbank",
+                  "title": "پاوربانک",
+                  "type": "filter",
+                  "filter": {
+                    "category": "mobile",
+                    "q": "پاوربانک"
+                  },
+                  "sortOrder": 1,
+                  "slug": "powerbanks"
+                }
+              ],
+              "slug": "charging"
+            },
+            {
+              "id": "mms-acc-audio",
+              "title": "صوتی همراه",
+              "sortOrder": 2,
+              "items": [
+                {
+                  "id": "mmi-acc-airpods",
+                  "title": "ایرپاد و هندزفری",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "q": "ایرپاد"
+                  },
+                  "sortOrder": 0,
+                  "slug": "earbuds"
+                },
+                {
+                  "id": "mmi-acc-watch",
+                  "title": "ساعت هوشمند",
+                  "type": "category",
+                  "categoryId": "watch",
+                  "sortOrder": 1,
+                  "slug": "smartwatches"
+                }
+              ],
+              "slug": "audio-gear"
+            }
+          ],
+          "slug": "mobile-accessories"
+        }
+      ]
+    },
+    {
+      "id": "mm-laptop",
+      "title": "لپ تاپ و کامپیوتر",
+      "slug": "laptop",
+      "icon": "device-laptop",
+      "sortOrder": 1,
+      "sections": [
+        {
+          "id": "mms-laptop-all",
+          "title": "لپ‌تاپ",
+          "categoryId": "laptop",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-laptop-apple",
+              "title": "مک‌بوک",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-mb-pro",
+                  "title": "مک‌بوک پرو",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "Apple"
+                    ],
+                    "q": "پرو"
+                  },
+                  "sortOrder": 0,
+                  "slug": "macbook-pro"
+                },
+                {
+                  "id": "mmi-mb-air",
+                  "title": "مک‌بوک ایر",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "Apple"
+                    ],
+                    "q": "ایر"
+                  },
+                  "sortOrder": 1,
+                  "slug": "macbook-air"
+                },
+                {
+                  "id": "mmi-mb-all",
+                  "title": "همه اپل",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "Apple"
+                    ]
+                  },
+                  "sortOrder": 2,
+                  "slug": "all-apple-laptops"
+                }
+              ],
+              "slug": "macbook"
+            },
+            {
+              "id": "mms-laptop-asus",
+              "title": "لپ‌تاپ ایسوس",
+              "sortOrder": 1,
+              "items": [
+                {
+                  "id": "mmi-asus-rog",
+                  "title": "ROG گیمینگ",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "ASUS"
+                    ],
+                    "q": "گیمینگ"
+                  },
+                  "sortOrder": 0,
+                  "slug": "asus-rog"
+                },
+                {
+                  "id": "mmi-asus-all",
+                  "title": "همه ایسوس",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "ASUS"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "all-asus"
+                }
+              ],
+              "slug": "asus"
+            },
+            {
+              "id": "mms-laptop-lenovo",
+              "title": "لپ‌تاپ لنوو",
+              "sortOrder": 2,
+              "items": [
+                {
+                  "id": "mmi-lenovo-all",
+                  "title": "همه لنوو",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "Lenovo"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "all-lenovo"
+                },
+                {
+                  "id": "mmi-hp-all",
+                  "title": "اچ‌پی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "HP"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "hp"
+                },
+                {
+                  "id": "mmi-acer-all",
+                  "title": "ایسر",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "brands": [
+                      "Acer"
+                    ]
+                  },
+                  "sortOrder": 2,
+                  "slug": "acer"
+                }
+              ],
+              "slug": "lenovo"
+            }
+          ],
+          "slug": "laptop"
+        },
+        {
+          "id": "mms-laptop-usage",
+          "title": "لپ‌تاپ براساس کاربری",
+          "categoryId": "laptop",
+          "sortOrder": 1,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-laptop-usage-list",
+              "title": "کاربری",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-lap-gaming",
+                  "title": "گیمینگ",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "q": "گیمینگ"
+                  },
+                  "sortOrder": 0,
+                  "slug": "gaming"
+                },
+                {
+                  "id": "mmi-lap-student",
+                  "title": "دانشجویی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "q": "دانشجویی"
+                  },
+                  "sortOrder": 1,
+                  "slug": "student"
+                },
+                {
+                  "id": "mmi-lap-dev",
+                  "title": "برنامه‌نویسی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "q": "برنامه‌نویسی"
+                  },
+                  "sortOrder": 2,
+                  "slug": "programming"
+                },
+                {
+                  "id": "mmi-lap-design",
+                  "title": "طراحی و گرافیک",
+                  "type": "filter",
+                  "filter": {
+                    "category": "laptop",
+                    "q": "طراحی"
+                  },
+                  "sortOrder": 3,
+                  "slug": "design"
+                }
+              ],
+              "slug": "usage"
+            }
+          ],
+          "slug": "laptops-by-usage"
+        },
+        {
+          "id": "mms-laptop-price",
+          "title": "لپ‌تاپ براساس قیمت",
+          "categoryId": "laptop",
+          "sortOrder": 2,
+          "items": [
+            {
+              "id": "mmi-lap-p1",
+              "title": "زیر ۳۰ میلیون",
+              "type": "filter",
+              "filter": {
+                "category": "laptop",
+                "maxPrice": 30000000
+              },
+              "sortOrder": 0,
+              "slug": "price-up-to-30ml"
+            },
+            {
+              "id": "mmi-lap-p2",
+              "title": "۳۰ تا ۶۰ میلیون",
+              "type": "filter",
+              "filter": {
+                "category": "laptop",
+                "minPrice": 30000000,
+                "maxPrice": 60000000
+              },
+              "sortOrder": 1,
+              "slug": "price-30-to-60ml"
+            },
+            {
+              "id": "mmi-lap-p3",
+              "title": "بالای ۶۰ میلیون",
+              "type": "filter",
+              "filter": {
+                "category": "laptop",
+                "minPrice": 60000000
+              },
+              "sortOrder": 2,
+              "slug": "price-above-60ml"
+            }
+          ],
+          "sections": [],
+          "slug": "laptops-by-price"
+        }
+      ]
+    },
+    {
+      "id": "mm-audio",
+      "title": "هدفون و هندزفری",
+      "slug": "audio",
+      "icon": "headphones",
+      "sortOrder": 2,
+      "sections": [
+        {
+          "id": "mms-audio-types",
+          "title": "هدفون و هندزفری",
+          "categoryId": "audio",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-audio-products",
+              "title": "انواع محصول",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-audio-bt",
+                  "title": "هدفون بلوتوثی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "q": "هدفون"
+                  },
+                  "sortOrder": 0,
+                  "slug": "bluetooth-headphones"
+                },
+                {
+                  "id": "mmi-audio-airpods",
+                  "title": "ایرپاد",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "q": "ایرپاد"
+                  },
+                  "sortOrder": 1,
+                  "slug": "airpods"
+                },
+                {
+                  "id": "mmi-audio-speaker",
+                  "title": "اسپیکر قابل حمل",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "q": "اسپیکر"
+                  },
+                  "sortOrder": 2,
+                  "slug": "speakers"
+                }
+              ],
+              "slug": "audio-types"
+            },
+            {
+              "id": "mms-audio-brands",
+              "title": "بر اساس برند",
+              "sortOrder": 1,
+              "items": [
+                {
+                  "id": "mmi-audio-apple",
+                  "title": "اپل",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "brands": [
+                      "Apple"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "apple"
+                },
+                {
+                  "id": "mmi-audio-sony",
+                  "title": "سونی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "brands": [
+                      "Sony"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "sony"
+                },
+                {
+                  "id": "mmi-audio-jbl",
+                  "title": "جی‌بی‌ال",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "brands": [
+                      "JBL"
+                    ]
+                  },
+                  "sortOrder": 2,
+                  "slug": "jbl"
+                },
+                {
+                  "id": "mmi-audio-anker",
+                  "title": "انکر",
+                  "type": "filter",
+                  "filter": {
+                    "category": "audio",
+                    "brands": [
+                      "Anker"
+                    ]
+                  },
+                  "sortOrder": 3,
+                  "slug": "anker"
+                }
+              ],
+              "slug": "audio-brands"
+            }
+          ],
+          "slug": "headphones"
+        }
+      ]
+    },
+    {
+      "id": "mm-tv",
+      "title": "تلویزیون",
+      "slug": "tv",
+      "icon": "device-tv",
+      "sortOrder": 3,
+      "sections": [
+        {
+          "id": "mms-tv-all",
+          "title": "تلویزیون",
+          "categoryId": "tv",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-tv-brands",
+              "title": "بر اساس برند",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-tv-samsung",
+                  "title": "سامسونگ",
+                  "type": "filter",
+                  "filter": {
+                    "category": "tv",
+                    "brands": [
+                      "Samsung"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "samsung"
+                },
+                {
+                  "id": "mmi-tv-lg",
+                  "title": "ال‌جی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "tv",
+                    "brands": [
+                      "LG"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "lg"
+                },
+                {
+                  "id": "mmi-tv-sony",
+                  "title": "سونی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "tv",
+                    "brands": [
+                      "Sony"
+                    ]
+                  },
+                  "sortOrder": 2,
+                  "slug": "sony"
+                }
+              ],
+              "slug": "tv-brands"
+            },
+            {
+              "id": "mms-tv-tech",
+              "title": "فناوری تصویر",
+              "sortOrder": 1,
+              "items": [
+                {
+                  "id": "mmi-tv-oled",
+                  "title": "OLED",
+                  "type": "filter",
+                  "filter": {
+                    "category": "tv",
+                    "q": "OLED"
+                  },
+                  "sortOrder": 0,
+                  "slug": "oled"
+                },
+                {
+                  "id": "mmi-tv-qled",
+                  "title": "QLED",
+                  "type": "filter",
+                  "filter": {
+                    "category": "tv",
+                    "q": "QLED"
+                  },
+                  "sortOrder": 1,
+                  "slug": "qled"
+                },
+                {
+                  "id": "mmi-tv-4k",
+                  "title": "۴K هوشمند",
+                  "type": "filter",
+                  "filter": {
+                    "category": "tv",
+                    "q": "4K"
+                  },
+                  "sortOrder": 2,
+                  "slug": "4k"
+                }
+              ],
+              "slug": "display-tech"
+            }
+          ],
+          "slug": "tv"
+        }
+      ]
+    },
+    {
+      "id": "mm-watch",
+      "title": "ساعت هوشمند",
+      "slug": "watch",
+      "icon": "device-watch",
+      "sortOrder": 4,
+      "sections": [
+        {
+          "id": "mms-watch-all",
+          "title": "ساعت هوشمند",
+          "categoryId": "watch",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-watch-brands",
+              "title": "بر اساس برند",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-watch-apple",
+                  "title": "اپل واچ",
+                  "type": "filter",
+                  "filter": {
+                    "category": "watch",
+                    "brands": [
+                      "Apple"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "apple-watch"
+                },
+                {
+                  "id": "mmi-watch-samsung",
+                  "title": "گلکسی واچ",
+                  "type": "filter",
+                  "filter": {
+                    "category": "watch",
+                    "brands": [
+                      "Samsung"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "galaxy-watch"
+                },
+                {
+                  "id": "mmi-watch-xiaomi",
+                  "title": "شیائومی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "watch",
+                    "brands": [
+                      "Xiaomi"
+                    ]
+                  },
+                  "sortOrder": 2,
+                  "slug": "xiaomi-watch"
+                }
+              ],
+              "slug": "watch-brands"
+            }
+          ],
+          "slug": "smartwatch"
+        }
+      ]
+    },
+    {
+      "id": "mm-gaming",
+      "title": "کنسول و گیمینگ",
+      "slug": "gaming",
+      "icon": "device-gamepad-2",
+      "sortOrder": 5,
+      "sections": [
+        {
+          "id": "mms-gaming-consoles",
+          "title": "کنسول بازی",
+          "categoryId": "gaming",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-gaming-types",
+              "title": "انواع کنسول",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-gaming-ps5",
+                  "title": "پلی‌استیشن",
+                  "type": "filter",
+                  "filter": {
+                    "category": "gaming",
+                    "q": "پلی‌استیشن"
+                  },
+                  "sortOrder": 0,
+                  "slug": "playstation"
+                },
+                {
+                  "id": "mmi-gaming-xbox",
+                  "title": "ایکس‌باکس",
+                  "type": "filter",
+                  "filter": {
+                    "category": "gaming",
+                    "q": "ایکس‌باکس"
+                  },
+                  "sortOrder": 1,
+                  "slug": "xbox"
+                },
+                {
+                  "id": "mmi-gaming-nintendo",
+                  "title": "نینتندو",
+                  "type": "filter",
+                  "filter": {
+                    "category": "gaming",
+                    "q": "نینتندو"
+                  },
+                  "sortOrder": 2,
+                  "slug": "nintendo"
+                },
+                {
+                  "id": "mmi-gaming-acc",
+                  "title": "لوازم جانبی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "gaming",
+                    "q": "دسته"
+                  },
+                  "sortOrder": 3,
+                  "slug": "accessories"
+                }
+              ],
+              "slug": "console-types"
+            }
+          ],
+          "slug": "consoles"
+        }
+      ]
+    },
+    {
+      "id": "mm-camera",
+      "title": "دوربین",
+      "slug": "camera",
+      "icon": "camera",
+      "sortOrder": 6,
+      "sections": [
+        {
+          "id": "mms-camera-all",
+          "title": "دوربین",
+          "categoryId": "camera",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-camera-brands",
+              "title": "بر اساس برند",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-camera-canon",
+                  "title": "کانن",
+                  "type": "filter",
+                  "filter": {
+                    "category": "camera",
+                    "brands": [
+                      "Canon"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "canon"
+                },
+                {
+                  "id": "mmi-camera-sony",
+                  "title": "سونی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "camera",
+                    "brands": [
+                      "Sony"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "sony"
+                }
+              ],
+              "slug": "camera-brands"
+            }
+          ],
+          "slug": "camera"
+        }
+      ]
+    },
+    {
+      "id": "mm-home",
+      "title": "لوازم خانگی",
+      "slug": "home",
+      "icon": "home",
+      "sortOrder": 7,
+      "sections": [
+        {
+          "id": "mms-home-all",
+          "title": "لوازم خانگی",
+          "categoryId": "home",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-home-types",
+              "title": "دسته‌ها",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-home-vac",
+                  "title": "جاروبرقی",
+                  "type": "filter",
+                  "filter": {
+                    "category": "home",
+                    "q": "جاروبرقی"
+                  },
+                  "sortOrder": 0,
+                  "slug": "vacuum"
+                },
+                {
+                  "id": "mmi-home-kitchen",
+                  "title": "آشپزخانه",
+                  "type": "filter",
+                  "filter": {
+                    "category": "home",
+                    "q": "آشپزخانه"
+                  },
+                  "sortOrder": 1,
+                  "slug": "kitchen"
+                },
+                {
+                  "id": "mmi-home-smart",
+                  "title": "خانه هوشمند",
+                  "type": "filter",
+                  "filter": {
+                    "category": "home",
+                    "q": "هوشمند"
+                  },
+                  "sortOrder": 2,
+                  "slug": "smart-home"
+                }
+              ],
+              "slug": "home-types"
+            }
+          ],
+          "slug": "home"
+        }
+      ]
+    },
+    {
+      "id": "mm-fashion",
+      "title": "مد و پوشاک",
+      "slug": "fashion",
+      "icon": "shirt",
+      "sortOrder": 8,
+      "sections": [
+        {
+          "id": "mms-fashion-all",
+          "title": "مد و پوشاک",
+          "categoryId": "fashion",
+          "sortOrder": 0,
+          "items": [],
+          "sections": [
+            {
+              "id": "mms-fashion-brands",
+              "title": "بر اساس برند",
+              "sortOrder": 0,
+              "items": [
+                {
+                  "id": "mmi-fashion-nike",
+                  "title": "نایک",
+                  "type": "filter",
+                  "filter": {
+                    "category": "fashion",
+                    "brands": [
+                      "Nike"
+                    ]
+                  },
+                  "sortOrder": 0,
+                  "slug": "nike"
+                },
+                {
+                  "id": "mmi-fashion-adidas",
+                  "title": "آدیداس",
+                  "type": "filter",
+                  "filter": {
+                    "category": "fashion",
+                    "brands": [
+                      "Adidas"
+                    ]
+                  },
+                  "sortOrder": 1,
+                  "slug": "adidas"
+                }
+              ],
+              "slug": "fashion-brands"
+            }
+          ],
+          "slug": "fashion"
+        }
+      ]
+    },
+    {
+      "id": "mm-beauty",
+      "title": "زیبایی و سلامت",
+      "slug": "beauty",
+      "icon": "sparkles",
+      "sortOrder": 9,
+      "sections": [
+        {
+          "id": "mms-beauty-all",
+          "title": "زیبایی و سلامت",
+          "categoryId": "beauty",
+          "sortOrder": 0,
+          "items": [
+            {
+              "id": "mmi-beauty-all",
+              "title": "همه محصولات",
+              "type": "category",
+              "categoryId": "beauty",
+              "sortOrder": 0,
+              "slug": "all"
+            },
+            {
+              "id": "mmi-beauty-blog",
+              "title": "راهنمای خرید",
+              "type": "link",
+              "url": "/blog",
+              "sortOrder": 1,
+              "slug": "buying-guide"
+            }
+          ],
+          "sections": [],
+          "slug": "beauty"
+        }
+      ]
+    }
+  ]
+}

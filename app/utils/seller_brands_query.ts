@@ -28,16 +28,18 @@ function applyBrandFilters(query: BrandQuery, filters: BrandsQuery, options?: { 
   return q
 }
 
+/** Count products that still have a seller listing (orphans after listing delete are ignored). */
 async function productCountByName(names: string[]) {
   const map = new Map<string, number>()
   if (!names.length) return map
 
   const rows = await db
     .from('products')
-    .select('brand')
+    .innerJoin('seller_listings', 'seller_listings.product_id', 'products.id')
+    .select('products.brand')
     .count('* as total')
-    .whereIn('brand', names)
-    .groupBy('brand')
+    .whereIn('products.brand', names)
+    .groupBy('products.brand')
 
   for (const row of rows as Array<{ brand: string; total: string | number }>) {
     map.set(row.brand, Number(row.total) || 0)

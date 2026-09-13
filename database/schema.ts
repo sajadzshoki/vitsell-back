@@ -441,6 +441,81 @@ export class MediaAssetSchema extends BaseModel {
   declare width: number | null
 }
 
+export class MegaMenuItemSchema extends BaseModel {
+  static $columns = ['categoryId', 'createdAt', 'filter', 'id', 'sectionId', 'slug', 'sortOrder', 'status', 'title', 'type', 'updatedAt', 'url'] as const
+  $columns = MegaMenuItemSchema.$columns
+  @column()
+  declare categoryId: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare filter: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare sectionId: string
+  @column()
+  declare slug: string | null
+  @column()
+  declare sortOrder: number
+  @column()
+  declare status: string
+  @column()
+  declare title: string
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare url: string | null
+}
+
+export class MegaMenuSectionSchema extends BaseModel {
+  static $columns = ['categoryId', 'createdAt', 'id', 'menuId', 'parentId', 'slug', 'sortOrder', 'status', 'title', 'updatedAt'] as const
+  $columns = MegaMenuSectionSchema.$columns
+  @column()
+  declare categoryId: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare menuId: string
+  @column()
+  declare parentId: string | null
+  @column()
+  declare slug: string | null
+  @column()
+  declare sortOrder: number
+  @column()
+  declare status: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class MegaMenuSchema extends BaseModel {
+  static $columns = ['createdAt', 'icon', 'id', 'slug', 'sortOrder', 'status', 'title', 'updatedAt'] as const
+  $columns = MegaMenuSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare icon: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare slug: string
+  @column()
+  declare sortOrder: number
+  @column()
+  declare status: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class NotificationCampaignSchema extends BaseModel {
   static $columns = ['audienceGroup', 'audienceType', 'createdAt', 'description', 'icon', 'id', 'image', 'link', 'recipientCount', 'relatedEntity', 'scheduledAt', 'sentAt', 'status', 'title', 'type', 'updatedAt', 'userIds'] as const
   $columns = NotificationCampaignSchema.$columns

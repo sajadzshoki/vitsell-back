@@ -84,10 +84,21 @@ export default class extends BaseSeeder {
       }[]
     >('products.json')
 
+    const existingProductCount = Number(
+      ((await Product.query().count('* as total').first()) as any)?.$extras?.total ?? 0
+    )
+    const seedCatalog = existingProductCount === 0
+    if (!seedCatalog) {
+      console.log(
+        `[seed] ${existingProductCount} products already present — skipping products/deals (preserves admin deletes)`
+      )
+    }
+
+    if (seedCatalog) {
     for (const p of products) {
       const description =
         p.description ??
-        `${p.shortDesc || p.title}\n\nاین محصول با گارانتی اصالت کالا از فروشگاه دیجی‌شاپ عرضه می‌شود.`
+        `${p.shortDesc || p.title}\n\nاین محصول با گارانتی اصالت کالا از فروشگاه ویتسل عرضه می‌شود.`
       const features =
         p.features ??
         (['گارانتی اصالت کالا', 'ارسال سریع', 'پشتیبانی تخصصی'].filter(Boolean) as string[])
@@ -151,6 +162,7 @@ export default class extends BaseSeeder {
         )
       }
     }
+    } // seedCatalog products + deals
 
     const featuredId = products[0]?.id ?? 'iphone-16-pro'
     const reviews = loadJson<any[]>('reviews.json')
@@ -305,11 +317,11 @@ export default class extends BaseSeeder {
     }
     else {
       const shop = await SellerShop.updateOrCreate(
-        { slug: 'digishop' },
+        { slug: 'vitsell' },
         {
           userId: admin.id,
           name: seller.shop.name,
-          slug: 'digishop',
+          slug: 'vitsell',
           phone: seller.shop.phone,
           email: seller.shop.email,
           city: seller.shop.city,
@@ -323,7 +335,8 @@ export default class extends BaseSeeder {
     for (const listing of seller.listings) {
       const exists = await Product.find(listing.productId)
       if (!exists) continue
-      await SellerListing.updateOrCreate(
+      // firstOrCreate: never resurrect listings the admin deleted
+      await SellerListing.firstOrCreate(
         { shopId: shop.id, productId: listing.productId },
         {
           shopId: shop.id,
@@ -404,13 +417,13 @@ export default class extends BaseSeeder {
       await ContentBlock.create({
         key: 'siteSettings',
         value: {
-          name: 'دیجی‌شاپ',
-          slug: 'digishop',
+          name: 'ویتسل',
+          slug: 'vitsell',
           phone: '',
-          email: 'info@digishop.ir',
+          email: 'info@vitsell.ir',
           city: 'تهران',
           about:
-            'دیجی‌شاپ بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
+            'ویتسل بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
           rating: seller.shop.rating,
           reviewCount: seller.shop.reviewCount,
           joinDate: seller.shop.joinDate,

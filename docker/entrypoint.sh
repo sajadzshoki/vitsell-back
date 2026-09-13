@@ -2,7 +2,7 @@
 
 set -e
 
-echo "[digishop-api] waiting for postgres at ${DB_HOST:-postgres}:${DB_PORT:-5432}..."
+echo "[vitsell-api] waiting for postgres at ${DB_HOST:-postgres}:${DB_PORT:-5432}..."
 
 until node -e "
 const net = require('net');
@@ -23,7 +23,7 @@ s.on('error', () => process.exit(1));
   sleep 1
 done
 
-echo "[digishop-api] postgres is up"
+echo "[vitsell-api] postgres is up"
 
 node ace migration:run
 
@@ -41,6 +41,8 @@ else
   echo "[digishop-api] skipping db:seed (set RUN_DB_SEED=true to enable)"
 fi
 
-echo "[digishop-api] starting server on ${HOST:-0.0.0.0}:${PORT:-3333}..."
+echo "[vitsell-api] seed auto-run disabled (manual only)"
+
+echo "[vitsell-api] starting server on ${HOST:-0.0.0.0}:${PORT:-3333}..."
 
 exec node ace serve --hmr

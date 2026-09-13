@@ -16,8 +16,8 @@ export type SeoSettingsPayload = {
 }
 
 export const defaultSeoSettings: SeoSettingsPayload = {
-  siteName: 'دیجی‌شاپ',
-  siteUrl: 'https://digishop.local',
+  siteName: 'ویتسل',
+  siteUrl: 'https://vitsell.local',
   titlePattern: '{title} | {site}',
   defaultRobots: 'index,follow',
   defaultOgImage: '',

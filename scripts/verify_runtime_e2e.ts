@@ -1,5 +1,5 @@
 /**
- * Runtime HTTP E2E verification against a live digishop API.
+ * Runtime HTTP E2E verification against a live vitsell API.
  * Usage: node --import=@poppinss/ts-exec scripts/verify_runtime_e2e.ts
  */
 const BASE = process.env.API_BASE || 'http://127.0.0.1:3333/api/v1'

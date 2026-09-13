@@ -19,7 +19,7 @@ export default class KavenegarService {
 
   async sendOtp(phone: string, code: string) {
     const apiKey = env.get('KAVENEGAR_API_KEY')
-    const template = env.get('KAVENEGAR_OTP_TEMPLATE') || 'digishop-verify'
+    const template = env.get('KAVENEGAR_OTP_TEMPLATE') || 'vitsell-verify'
 
     if (!apiKey) {
       if (!this.allowMock()) {

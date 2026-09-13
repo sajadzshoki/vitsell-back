@@ -23,7 +23,7 @@ function jalaliishDate() {
 }
 
 async function resolveSiteShop() {
-  let siteShop = await SellerShop.query().where('slug', 'digishop').first()
+  let siteShop = await SellerShop.query().where('slug', 'vitsell').first()
   if (!siteShop) {
     siteShop = await SellerShop.query().orderBy('id', 'asc').first()
   }

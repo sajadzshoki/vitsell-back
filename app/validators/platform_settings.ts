@@ -7,9 +7,9 @@ export const platformSettingsValidator = vine.compile(
     dateFormatHint: vine.string().trim().optional(),
     numberFormatHint: vine.string().trim().optional(),
     timezone: vine.string().trim().optional(),
-    logoUrl: vine.string().trim().optional(),
-    faviconUrl: vine.string().trim().optional(),
-    defaultOgImage: vine.string().trim().optional(),
+    logoUrl: vine.string().trim().nullable().optional(),
+    faviconUrl: vine.string().trim().nullable().optional(),
+    defaultOgImage: vine.string().trim().nullable().optional(),
     brandName: vine.string().trim().optional(),
     brandDescription: vine.string().trim().optional(),
     supportPhone: vine.string().trim().optional(),
@@ -35,5 +35,8 @@ export const platformSettingsValidator = vine.compile(
     freeShippingThreshold: vine.number().min(0).optional(),
     deliveryEstimateText: vine.string().trim().optional(),
     shippingMethodsVisible: vine.boolean().optional(),
+    onlinePaymentEnabled: vine.boolean().optional(),
+    codPaymentEnabled: vine.boolean().optional(),
+    installmentPaymentEnabled: vine.boolean().optional(),
   })
 )

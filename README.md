@@ -1,6 +1,6 @@
-# Digishop API (AdonisJS 7 + Lucid + Postgres)
+# vitsell API (AdonisJS 7 + Lucid + Postgres)
 
-Backend for [digishop-front](../digishop-front). Domain models and JSON shapes mirror `digishop-front/app/data`.
+Backend for [vitsell-front](../vitsell-front). Domain models and JSON shapes mirror `vitsell-front/app/data`.
 
 ## Stack
 
@@ -18,14 +18,14 @@ Backend for [digishop-front](../digishop-front). Domain models and JSON shapes m
 ## Quick start (Docker Desktop)
 
 ```bash
-cd digishop-back
+cd vitsell-back
 docker compose up -d --build
 ```
 
 - API: http://localhost:3333  
-- Postgres: `localhost:5432` (user/pass/db: `digishop`)
+- Postgres: `localhost:5432` (user/pass/db: `vitsell`)
 
-Containers: `digishop-api`, `digishop-postgres`
+Containers: `vitsell-api`, `vitsell-postgres`
 
 ```bash
 docker compose logs -f api   # logs
@@ -39,17 +39,17 @@ docker compose up -d postgres
 cp .env.example .env
 npm install
 node ace migration:run
-node ace db:seed
+# node ace db:seed   # optional / manual only — not run automatically
 npm run dev
 ```
 
-Refresh seed JSON from frontend mocks:
+Refresh seed JSON from frontend mocks (manual):
 
 ```bash
-cd ../digishop-front
+cd ../vitsell-front
 npx tsx scripts/export-seed-to-back.mts
-cd ../digishop-back
-node ace db:seed
+cd ../vitsell-back
+# node ace db:seed   # optional / manual only
 ```
 
 ## Env
@@ -75,4 +75,4 @@ node ace db:seed
 
 ## Frontend
 
-Point digishop-front `BASE_URL` to `http://localhost:3333/api/v1` and send `Authorization: Bearer <token>`.
+Point vitsell-front `BASE_URL` to `http://localhost:3333/api/v1` and send `Authorization: Bearer <token>`.

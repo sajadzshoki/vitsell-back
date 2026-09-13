@@ -1,4 +1,4 @@
-# Digishop API — AdonisJS 7
+# vitsell API — AdonisJS 7
 FROM node:24-bookworm-slim
 
 WORKDIR /app

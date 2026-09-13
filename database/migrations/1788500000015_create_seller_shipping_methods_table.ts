@@ -22,7 +22,7 @@ export default class extends BaseSchema {
         {
           id: 'ship-express',
           name: 'پیک اکسپرس',
-          carrier: 'دیجی‌شاپ',
+          carrier: 'ویتسل',
           estimated_days: '۱–۲ روز',
           base_cost: 45000,
           status: 'active',

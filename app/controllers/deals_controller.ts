@@ -36,10 +36,34 @@ const activeValidator = vine.compile(
   })
 )
 
+const bulkStoreValidator = vine.compile(
+  vine.object({
+    items: vine.array(
+      vine.object({
+        productId: vine.string().trim().minLength(1),
+        discountPercent: vine.number().min(1).max(99),
+        startsAt: vine.string().trim(),
+        endsAt: vine.string().trim(),
+        active: vine.boolean().optional(),
+      })
+    ).minLength(1).maxLength(200),
+  })
+)
+
 function parseDate(value: string) {
   const dt = DateTime.fromISO(value, { setZone: true })
   if (!dt.isValid) return null
   return dt.toUTC()
+}
+
+function makeDealId(productId: string) {
+  const productSlug = productId
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'item'
+  return `deal-${productSlug}-${Date.now().toString(36).slice(-5)}-${Math.random().toString(36).slice(2, 5)}`
 }
 
 export default class DealsController {
@@ -65,17 +89,9 @@ export default class DealsController {
       })
     }
 
-    const productSlug = payload.productId
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 40) || 'item'
-    let id =
-      payload.id?.trim() ||
-      `deal-${productSlug}-${Date.now().toString(36).slice(-5)}`
+    let id = payload.id?.trim() || makeDealId(payload.productId)
     if (await AmazingDeal.find(id)) {
-      id = `deal-${productSlug}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`
+      id = makeDealId(payload.productId)
     }
 
     const startsAt = parseDate(payload.startsAt)
@@ -124,6 +140,77 @@ export default class DealsController {
     })
 
     return response.created(deal.toAdminJSON())
+  }
+
+  async bulkStore({ request, response }: HttpContext) {
+    const { items } = await request.validateUsing(bulkStoreValidator)
+    const created: Record<string, unknown>[] = []
+    const errors: { index: number, productId: string, message: string }[] = []
+    const seenActive = new Set<string>()
+
+    for (let index = 0; index < items.length; index++) {
+      const row = items[index]!
+      const productId = row.productId.trim()
+      const product = await Product.find(productId)
+      if (!product) {
+        errors.push({ index, productId, message: 'محصول یافت نشد' })
+        continue
+      }
+
+      const startsAt = parseDate(row.startsAt)
+      const endsAt = parseDate(row.endsAt)
+      if (!startsAt) {
+        errors.push({ index, productId, message: 'زمان شروع نامعتبر است' })
+        continue
+      }
+      if (!endsAt) {
+        errors.push({ index, productId, message: 'زمان پایان نامعتبر است' })
+        continue
+      }
+      if (endsAt <= startsAt) {
+        errors.push({ index, productId, message: 'زمان پایان باید بعد از شروع باشد' })
+        continue
+      }
+
+      const active = row.active ?? true
+      if (active) {
+        if (seenActive.has(productId)) {
+          errors.push({ index, productId, message: 'در همین فایل بیش از یک شگفت‌انگیز فعال برای این محصول است' })
+          continue
+        }
+        const clash = await AmazingDeal.query()
+          .where('product_id', productId)
+          .where('active', true)
+          .first()
+        if (clash) {
+          errors.push({ index, productId, message: 'برای این محصول قبلاً شگفت‌انگیز فعال ثبت شده است' })
+          continue
+        }
+        seenActive.add(productId)
+      }
+
+      try {
+        const deal = await AmazingDeal.create({
+          id: makeDealId(productId),
+          productId,
+          discountPercent: Math.round(row.discountPercent),
+          startsAt,
+          endsAt,
+          active,
+        })
+        created.push(deal.toAdminJSON())
+      }
+      catch {
+        errors.push({ index, productId, message: 'ثبت شگفت‌انگیز ناموفق بود' })
+      }
+    }
+
+    return response.ok({
+      created,
+      errors,
+      createdCount: created.length,
+      errorCount: errors.length,
+    })
   }
 
   async update({ params, request, response }: HttpContext) {

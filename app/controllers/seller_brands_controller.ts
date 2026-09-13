@@ -1,5 +1,4 @@
 import Brand from '#models/brand'
-import Product from '#models/product'
 import {
   brandStatusValidator,
   brandsQueryValidator,
@@ -9,6 +8,7 @@ import {
 import { querySellerBrands } from '#utils/seller_brands_query'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { SeoMeta } from '#models/blog_post'
+import db from '@adonisjs/lucid/services/db'
 
 function emptySeo(): SeoMeta {
   return {
@@ -51,6 +51,16 @@ function slugify(input: string) {
   )
 }
 
+async function listedProductCountByBrand(brandName: string) {
+  const row = await db
+    .from('products')
+    .innerJoin('seller_listings', 'seller_listings.product_id', 'products.id')
+    .where('products.brand', brandName)
+    .count('* as total')
+    .first()
+  return Number((row as any)?.total ?? 0)
+}
+
 export default class SellerBrandsController {
   async index({ request, response }: HttpContext) {
     const qs = { ...request.qs() }
@@ -73,8 +83,7 @@ export default class SellerBrandsController {
     if (!brand) {
       return response.notFound({ errors: [{ field: 'id', message: 'برند یافت نشد' }] })
     }
-    const countRow = await Product.query().where('brand', brand.name).count('* as total').first()
-    const productCount = Number((countRow as any)?.$extras?.total ?? (countRow as any)?.total ?? 0)
+    const productCount = await listedProductCountByBrand(brand.name)
     return response.ok(brand.toAdminJSON({ productCount }))
   }
 
@@ -125,8 +134,7 @@ export default class SellerBrandsController {
     brand.seo = normalizeSeo(payload.seo)
     await brand.save()
 
-    const countRow = await Product.query().where('brand', brand.name).count('* as total').first()
-    const productCount = Number((countRow as any)?.$extras?.total ?? (countRow as any)?.total ?? 0)
+    const productCount = await listedProductCountByBrand(brand.name)
     return response.ok(brand.toAdminJSON({ productCount }))
   }
 
@@ -147,8 +155,7 @@ export default class SellerBrandsController {
       return response.notFound({ errors: [{ field: 'id', message: 'برند یافت نشد' }] })
     }
 
-    const countRow = await Product.query().where('brand', brand.name).count('* as total').first()
-    const total = Number((countRow as any)?.$extras?.total ?? (countRow as any)?.total ?? 0)
+    const total = await listedProductCountByBrand(brand.name)
     if (total > 0) {
       return response.conflict({
         errors: [

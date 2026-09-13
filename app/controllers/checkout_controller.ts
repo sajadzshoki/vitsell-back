@@ -6,6 +6,7 @@ import Product from '#models/product'
 import Notification from '#models/notification'
 import ZarinpalService from '#services/zarinpal_service'
 import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
+import { loadPlatformSettings } from '#utils/platform_settings'
 import env from '#start/env'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -49,10 +50,26 @@ function jalaliishDate() {
   }).format(new Date())
 }
 
+function isPaymentMethodEnabled(
+  method: 'online' | 'cod' | 'installment',
+  settings: Awaited<ReturnType<typeof loadPlatformSettings>>,
+) {
+  if (method === 'online') return settings.onlinePaymentEnabled
+  if (method === 'cod') return settings.codPaymentEnabled
+  return settings.installmentPaymentEnabled
+}
+
 export default class CheckoutController {
   async place({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
     const payload = await request.validateUsing(placeValidator)
+
+    const platform = await loadPlatformSettings()
+    if (!isPaymentMethodEnabled(payload.paymentMethod, platform)) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'paymentMethod', message: 'این روش پرداخت فعال نیست' }],
+      })
+    }
 
     const address = await Address.query()
       .where('user_id', user.id)
