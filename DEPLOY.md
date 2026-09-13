@@ -19,36 +19,60 @@ npm run build
 cd build && npm ci --omit=dev && node bin/server.js
 ```
 
-### دامنه‌های vistatest (نمونه)
+### دامنه‌های production (vitsell)
 
 روی سرور API حتماً این‌ها را در `.env` بگذارید و سرویس را ری‌استارت کنید:
 
 ```env
 NODE_ENV=production
-APP_URL=https://digishop-back.vistatest.top
-FRONTEND_URL=https://digishop.vistatest.top
-ADMIN_URL=https://digishop-admin.vistatest.top
+APP_URL=https://api.vitsell.ir
+FRONTEND_URL=https://vitsell.ir
+ADMIN_URL=https://seller.vitsell.ir
 ```
 
-`ADMIN_URL` باید **دقیقاً** origin پنل ادمین باشد (با `https`، بدون `/` انتهایی).  
-اگر روی `http://localhost:4001` مانده باشد، از `https://digishop-admin.vistatest.top` لاگین با خطای  
-«ورود مدیر فقط از دامنه پنل ادمین مجاز است» رد می‌شود.
+`ADMIN_URL` باید **دقیقاً** origin پنل ادمین باشد (همان scheme: `http` یا `https`، بدون `/` انتهایی).  
+اگر با دامنهٔ اشتباه باشد، لاگین ادمین با `403` رد می‌شود.
+
+### Docker روی سرور — نکته حیاتی
+
+`docker compose restart` متغیرهای env را عوض **نمی‌کند**. بعد از ویرایش `.env` / compose:
+
+```bash
+# ببینید داخل کانتینر واقعاً چه ADMIN_URL یی لود شده:
+docker exec digishop-api printenv ADMIN_URL NODE_ENV FRONTEND_URL APP_URL
+
+# باید ببینید:
+# ADMIN_URL=https://seller.vitsell.ir
+
+# اگر هنوز دامنهٔ قدیمی است:
+docker compose -f docker-compose.prod.yml up -d --force-recreate --build api
+# یا با همان compose فعلی‌تان:
+docker rm -f digishop-api
+docker compose up -d --force-recreate --build api
+docker network connect main digishop-api   # اگر از شبکهٔ خارجی nginx استفاده می‌کنید
+```
+
+در `docker-compose` بخش `environment:` مقدارهای `ADMIN_URL` / `FRONTEND_URL` / `APP_URL` / `NODE_ENV` را **override** می‌کند و `.env` را بی‌اثر می‌کند.  
+برای production از `docker-compose.prod.yml` استفاده کنید (URL فقط از `.env`) یا آن کلیدها را از بلوک `environment` حذف کنید.
+
+`.env` پیشنهادی:
+
+```env
+NODE_ENV=production
+APP_URL=https://api.vitsell.ir
+FRONTEND_URL=https://vitsell.ir
+ADMIN_URL=https://seller.vitsell.ir
+APP_VERSION=1.0.0
+```
+
+Health check (بدون DB): `GET /health` → `{ "status": "ok", "version": "<APP_VERSION>" }`  
+در Docker Compose برای سرویس `api` هم همین مسیر به‌عنوان `healthcheck` ست شده است.
 
 سید **`09121234567` را دیگر به‌عنوان admin نمی‌سازد** — اولین ادمین را دستی بسازید (role=`admin`).
 
-بعد از تغییر: `docker compose restart api` یا ری‌استارت process Node.
-
-Dev با Docker:
+Dev لوکال:
 
 ```bash
 docker compose up -d --build
 # API http://localhost:3333  |  Postgres host port 15432
 ```
-
-
-
-
-docker rm -f digishop-api
-docker compose build --no-cache api
-docker compose up -d --force-recreate api
-docker network connect main digishop-api

@@ -1,0 +1,179 @@
+# Digishop Backend (AdonisJS 7) — GitLab CI
+# Stages: lint → test (Postgres) → build → docker (manual / tags)
+#
+# Optional: override APP_KEY / DB_* via GitLab CI/CD Variables.
+
+stages:
+  - lint
+  - test
+  - build
+  - docker
+
+default:
+  image: node:24-bookworm
+  interruptible: true
+
+variables:
+  npm_config_cache: '$CI_PROJECT_DIR/.npm'
+  # CI-only key (32-byte base64). Override in GitLab Variables if desired.
+  APP_KEY: 'ZGlnaXNob3AtY2ktYXBwLWtleS0tMzItYnl0ZXMhISE='
+  HOST: '0.0.0.0'
+  PORT: '3333'
+  LOG_LEVEL: 'info'
+  APP_URL: 'http://localhost:3333'
+  FRONTEND_URL: 'http://localhost:4000'
+  ADMIN_URL: 'http://localhost:4001'
+  APP_VERSION: '1.0.0'
+  SESSION_DRIVER: 'memory'
+  ALLOW_OTP_MOCK: 'true'
+  ALLOW_PAYMENT_MOCK: 'true'
+  ZARINPAL_MERCHANT_ID: '00000000-0000-0000-0000-000000000000'
+  ZARINPAL_SANDBOX: 'true'
+  ZARINPAL_CALLBACK_URL: 'http://localhost:3333/api/v1/payments/zarinpal/callback'
+  POSTGRES_DB: digishop
+  POSTGRES_USER: digishop
+  POSTGRES_PASSWORD: digishop
+  DB_HOST: postgres
+  DB_PORT: '5432'
+  DB_USER: digishop
+  DB_PASSWORD: digishop
+  DB_DATABASE: digishop
+  FF_NETWORK_PER_BUILD: 'true'
+
+.node_job:
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+    policy: pull-push
+  before_script:
+    - |
+      cat > .env <<EOF
+      TZ=UTC
+      PORT=${PORT}
+      HOST=${HOST}
+      NODE_ENV=${NODE_ENV:-test}
+      LOG_LEVEL=${LOG_LEVEL}
+      APP_KEY=${APP_KEY}
+      APP_URL=${APP_URL}
+      FRONTEND_URL=${FRONTEND_URL}
+      ADMIN_URL=${ADMIN_URL}
+      APP_VERSION=${APP_VERSION}
+      SESSION_DRIVER=${SESSION_DRIVER}
+      DB_HOST=${DB_HOST}
+      DB_PORT=${DB_PORT}
+      DB_USER=${DB_USER}
+      DB_PASSWORD=${DB_PASSWORD}
+      DB_DATABASE=${DB_DATABASE}
+      ALLOW_OTP_MOCK=${ALLOW_OTP_MOCK}
+      ALLOW_PAYMENT_MOCK=${ALLOW_PAYMENT_MOCK}
+      ZARINPAL_MERCHANT_ID=${ZARINPAL_MERCHANT_ID}
+      ZARINPAL_SANDBOX=${ZARINPAL_SANDBOX}
+      ZARINPAL_CALLBACK_URL=${ZARINPAL_CALLBACK_URL}
+      EOF
+    - npm ci --prefer-offline
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+lint:
+  extends: .node_job
+  stage: lint
+  variables:
+    NODE_ENV: development
+  script:
+    - npm run lint
+    - npm run typecheck
+
+test:
+  extends: .node_job
+  stage: test
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+  variables:
+    NODE_ENV: test
+  before_script:
+    - |
+      cat > .env <<EOF
+      TZ=UTC
+      PORT=${PORT}
+      HOST=${HOST}
+      NODE_ENV=test
+      LOG_LEVEL=${LOG_LEVEL}
+      APP_KEY=${APP_KEY}
+      APP_URL=${APP_URL}
+      FRONTEND_URL=${FRONTEND_URL}
+      ADMIN_URL=${ADMIN_URL}
+      APP_VERSION=${APP_VERSION}
+      SESSION_DRIVER=${SESSION_DRIVER}
+      DB_HOST=${DB_HOST}
+      DB_PORT=${DB_PORT}
+      DB_USER=${DB_USER}
+      DB_PASSWORD=${DB_PASSWORD}
+      DB_DATABASE=${DB_DATABASE}
+      ALLOW_OTP_MOCK=${ALLOW_OTP_MOCK}
+      ALLOW_PAYMENT_MOCK=${ALLOW_PAYMENT_MOCK}
+      ZARINPAL_MERCHANT_ID=${ZARINPAL_MERCHANT_ID}
+      ZARINPAL_SANDBOX=${ZARINPAL_SANDBOX}
+      ZARINPAL_CALLBACK_URL=${ZARINPAL_CALLBACK_URL}
+      EOF
+    - npm ci --prefer-offline
+    - |
+      echo "Waiting for Postgres at ${DB_HOST}:${DB_PORT}..."
+      for i in $(seq 1 60); do
+        node -e "
+          const net = require('net');
+          const s = net.connect({ host: process.env.DB_HOST, port: Number(process.env.DB_PORT) }, () => { s.end(); process.exit(0); });
+          s.on('error', () => process.exit(1));
+        " && break
+        sleep 1
+      done
+    - node ace migration:run --force
+  script:
+    - npm test
+
+build:
+  extends: .node_job
+  stage: build
+  variables:
+    NODE_ENV: production
+  script:
+    - npm run build
+  artifacts:
+    name: 'api-$CI_COMMIT_SHORT_SHA'
+    paths:
+      - build/
+    expire_in: 7 days
+    when: on_success
+
+# Push to GitLab Container Registry — auto on tags, manual on main/MR
+docker:
+  stage: docker
+  image: docker:27-cli
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_TLS_CERTDIR: ''
+    DOCKER_HOST: tcp://docker:2375
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    IMAGE_LATEST: $CI_REGISTRY_IMAGE:latest
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -t "$IMAGE_TAG" -t "$IMAGE_LATEST" .
+    - docker push "$IMAGE_TAG"
+    - docker push "$IMAGE_LATEST"
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+      allow_failure: true
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true

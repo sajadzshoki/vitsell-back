@@ -1,4 +1,5 @@
 import { middleware } from '#start/kernel'
+import env from '#start/env'
 import router from '@adonisjs/core/services/router'
 
 const AuthController = () => import('#controllers/auth_controller')
@@ -52,7 +53,15 @@ const SellerNavigationController = () => import('#controllers/seller_navigation_
 const SellerAuditController = () => import('#controllers/seller_audit_controller')
 
 router.get('/', () => {
-  return { name: 'digishop-api', version: '1' }
+  return { name: 'digishop-api', version: env.get('APP_VERSION') }
+})
+
+/** Lightweight health check — no DB. Use for Docker / load balancer probes. */
+router.get('/health', ({ response }) => {
+  return response.ok({
+    status: 'ok',
+    version: env.get('APP_VERSION'),
+  })
 })
 
 router.get('/uploads/:file', [UploadController, 'show'])
