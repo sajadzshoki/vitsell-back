@@ -35,10 +35,11 @@ services:
       ADMIN_URL: http://localhost:4001
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: vitsell
-      DB_PASSWORD: vitsell
-      DB_DATABASE: vitsell
-      # Local Docker: OTP/payment mock when provider keys are empty
+      DB_USER: digishop
+      DB_PASSWORD: digishop
+      DB_DATABASE: digishop
+      # Local Docker: seed sample data + OTP/payment mock when provider keys are empty
+      RUN_DB_SEED: "true"
       ALLOW_OTP_MOCK: "true"
       ALLOW_PAYMENT_MOCK: "true"
       ZARINPAL_CALLBACK_URL: http://localhost:3333/api/v1/payments/zarinpal/callback
@@ -54,6 +55,12 @@ services:
       - ./providers:/app/providers
       - ./adonisrc.ts:/app/adonisrc.ts
       - ./storage:/app/storage
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:3333/health']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     depends_on:
       postgres:
         condition: service_healthy

@@ -31,8 +31,16 @@ export function assertAdminPanelRequest({ request, response }: HttpContext): boo
     return true
   }
 
+  const payload: { message: string, allowed?: string, origin?: string } = {
+    message: 'ورود مدیر فقط از دامنه پنل ادمین مجاز است',
+  }
+  if (env.get('NODE_ENV') !== 'production') {
+    payload.allowed = allowed
+    payload.origin = origin || refererOrigin || ''
+  }
+
   response.forbidden({
-    errors: [{ message: 'ورود مدیر فقط از دامنه پنل ادمین مجاز است' }],
+    errors: [payload],
   })
   return false
 }
