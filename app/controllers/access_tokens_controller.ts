@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
-/** Scaffold leftover — digishop auth uses OTP via AuthController. */
+/** Scaffold leftover — vitsell auth uses OTP via AuthController. */
 export default class AccessTokensController {
   async store({ response }: HttpContext) {
     return response.notFound({ message: 'Not used' })

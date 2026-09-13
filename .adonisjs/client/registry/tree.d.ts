@@ -163,6 +163,7 @@ export interface ApiDefinition {
   }
   deals: {
     index: typeof routes['deals.index']
+    bulkStore: typeof routes['deals.bulk_store']
     show: typeof routes['deals.show']
     store: typeof routes['deals.store']
     update: typeof routes['deals.update']

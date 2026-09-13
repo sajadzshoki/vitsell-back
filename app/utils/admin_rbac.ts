@@ -1,4 +1,4 @@
-/** System RBAC defaults — keep in sync with digishop FE seller-permissions / seller-roles */
+/** System RBAC defaults — keep in sync with vitsell FE seller-permissions / seller-roles */
 
 export type AdminRoleStatus = 'active' | 'inactive'
 export type AdminStaffStatus = 'active' | 'inactive' | 'suspended'

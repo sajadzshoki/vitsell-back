@@ -17,13 +17,13 @@ export type SiteSettings = {
 }
 
 export const defaultSiteSettings: SiteSettings = {
-  name: 'دیجی‌شاپ',
-  slug: 'digishop',
+  name: 'ویتسل',
+  slug: 'vitsell',
   phone: '',
-  email: 'info@digishop.ir',
+  email: 'info@vitsell.ir',
   city: 'تهران',
   about:
-    'دیجی‌شاپ بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
+    'ویتسل بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
   rating: 0,
   reviewCount: 0,
   joinDate: '',

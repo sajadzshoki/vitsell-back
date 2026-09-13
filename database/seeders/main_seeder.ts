@@ -98,7 +98,7 @@ export default class extends BaseSeeder {
     for (const p of products) {
       const description =
         p.description ??
-        `${p.shortDesc || p.title}\n\nاین محصول با گارانتی اصالت کالا از فروشگاه دیجی‌شاپ عرضه می‌شود.`
+        `${p.shortDesc || p.title}\n\nاین محصول با گارانتی اصالت کالا از فروشگاه ویتسل عرضه می‌شود.`
       const features =
         p.features ??
         (['گارانتی اصالت کالا', 'ارسال سریع', 'پشتیبانی تخصصی'].filter(Boolean) as string[])
@@ -317,11 +317,11 @@ export default class extends BaseSeeder {
     }
     else {
       const shop = await SellerShop.updateOrCreate(
-        { slug: 'digishop' },
+        { slug: 'vitsell' },
         {
           userId: admin.id,
           name: seller.shop.name,
-          slug: 'digishop',
+          slug: 'vitsell',
           phone: seller.shop.phone,
           email: seller.shop.email,
           city: seller.shop.city,
@@ -417,13 +417,13 @@ export default class extends BaseSeeder {
       await ContentBlock.create({
         key: 'siteSettings',
         value: {
-          name: 'دیجی‌شاپ',
-          slug: 'digishop',
+          name: 'ویتسل',
+          slug: 'vitsell',
           phone: '',
-          email: 'info@digishop.ir',
+          email: 'info@vitsell.ir',
           city: 'تهران',
           about:
-            'دیجی‌شاپ بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
+            'ویتسل بزرگ‌ترین فروشگاه اینترنتی محصولات دیجیتال با گارانتی اصالت کالا و ارسال سریع به سراسر ایران.',
           rating: seller.shop.rating,
           reviewCount: seller.shop.reviewCount,
           joinDate: seller.shop.joinDate,

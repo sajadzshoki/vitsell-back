@@ -1,20 +1,20 @@
 /**
- * Export digishop-front mock data → digishop-back/database/seed_data
- * Run from digishop-front: npx tsx ../digishop-back/scripts/export_seed.ts
- * Or from digishop-back with path aliases via tsx in front cwd.
+ * Export vitsell-front mock data → vitsell-back/database/seed_data
+ * Run from vitsell-front: npx tsx ../vitsell-back/scripts/export_seed.ts
+ * Or from vitsell-back with path aliases via tsx in front cwd.
  */
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { products, categoryLabels } from '../../digishop-front/app/data/products.ts'
-import { categories } from '../../digishop-front/app/data/categories.ts'
-import { categoryPageMeta } from '../../digishop-front/app/data/category-pages.ts'
-import { productMockReviews, productMockQuestions } from '../../digishop-front/app/data/product-detail.ts'
-import { heroSlides, heroFeatures } from '../../digishop-front/app/data/hero.ts'
-import { homeBrands, homeCircleItems, homePromos } from '../../digishop-front/app/data/home.ts'
-import { cartDiscountCodes } from '../../digishop-front/app/data/cart.ts'
-import { citiesByProvince } from '../../digishop-front/app/data/iran-locations.ts'
-import { compareTemplates, radarCriteriaByCategory } from '../../digishop-front/app/data/compare.ts'
+import { products, categoryLabels } from '../../vitsell-front/app/data/products.ts'
+import { categories } from '../../vitsell-front/app/data/categories.ts'
+import { categoryPageMeta } from '../../vitsell-front/app/data/category-pages.ts'
+import { productMockReviews, productMockQuestions } from '../../vitsell-front/app/data/product-detail.ts'
+import { heroSlides, heroFeatures } from '../../vitsell-front/app/data/hero.ts'
+import { homeBrands, homeCircleItems, homePromos } from '../../vitsell-front/app/data/home.ts'
+import { cartDiscountCodes } from '../../vitsell-front/app/data/cart.ts'
+import { citiesByProvince } from '../../vitsell-front/app/data/iran-locations.ts'
+import { compareTemplates, radarCriteriaByCategory } from '../../vitsell-front/app/data/compare.ts'
 import {
   footerTrustItems,
   footerColumns,
@@ -24,7 +24,7 @@ import {
   footerContact,
   footerAppStores,
   footerBadges,
-} from '../../digishop-front/app/data/footer.ts'
+} from '../../vitsell-front/app/data/footer.ts'
 import {
   defaultSellerShop,
   defaultSellerListings,
@@ -32,8 +32,8 @@ import {
   defaultSellerReviews,
   defaultSellerPayouts,
   defaultSellerSales,
-} from '../../digishop-front/app/data/seller.ts'
-import { blogPosts } from '../../digishop-front/app/data/static-pages.ts'
+} from '../../vitsell-front/app/data/seller.ts'
+import { blogPosts } from '../../vitsell-front/app/data/static-pages.ts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '../database/seed_data')

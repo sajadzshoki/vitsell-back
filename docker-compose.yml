@@ -1,26 +1,26 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: digishop-postgres
+    container_name: vitsell-postgres
     restart: unless-stopped
     ports:
       # Host 5433–5532 often blocked by Windows Hyper-V reserved ranges; use 15432 instead.
       - '15432:5432'
     environment:
-      POSTGRES_USER: digishop
-      POSTGRES_PASSWORD: digishop
-      POSTGRES_DB: digishop
+      POSTGRES_USER: vitsell
+      POSTGRES_PASSWORD: vitsell
+      POSTGRES_DB: vitsell
     volumes:
-      - digishop_pg_data:/var/lib/postgresql/data
+      - vitsell_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U digishop -d digishop']
+      test: ['CMD-SHELL', 'pg_isready -U vitsell -d vitsell']
       interval: 5s
       timeout: 5s
       retries: 10
 
   api:
     build: .
-    container_name: digishop-api
+    container_name: vitsell-api
     restart: unless-stopped
     ports:
       - '3333:3333'
@@ -35,9 +35,9 @@ services:
       ADMIN_URL: http://localhost:4001
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: digishop
-      DB_PASSWORD: digishop
-      DB_DATABASE: digishop
+      DB_USER: vitsell
+      DB_PASSWORD: vitsell
+      DB_DATABASE: vitsell
       # Local Docker: OTP/payment mock when provider keys are empty
       ALLOW_OTP_MOCK: "true"
       ALLOW_PAYMENT_MOCK: "true"
@@ -59,4 +59,4 @@ services:
         condition: service_healthy
 
 volumes:
-  digishop_pg_data:
+  vitsell_pg_data:

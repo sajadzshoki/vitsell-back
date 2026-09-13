@@ -209,7 +209,7 @@ async function assertListingCategory(
 }
 
 async function resolveSiteShop() {
-  let siteShop = await SellerShop.query().where('slug', 'digishop').first()
+  let siteShop = await SellerShop.query().where('slug', 'vitsell').first()
   if (!siteShop) {
     siteShop = await SellerShop.query().orderBy('id', 'asc').first()
   }
@@ -689,7 +689,7 @@ export default class SellerController {
 
     const previous = question.answer
     question.answer = {
-      author: author?.trim() || 'کارشناس دیجی‌شاپ',
+      author: author?.trim() || 'کارشناس ویتسل',
       date: jalaliishDate(),
       text,
       helpfulYes: previous?.helpfulYes ?? 0,

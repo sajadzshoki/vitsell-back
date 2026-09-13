@@ -702,6 +702,12 @@ const routes = {
     tokens: [{"old":"/api/v1/seller/deals","type":0,"val":"api","end":""},{"old":"/api/v1/seller/deals","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/deals","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/deals","type":0,"val":"deals","end":""}],
     types: placeholder as Registry['deals.index']['types'],
   },
+  'deals.bulk_store': {
+    methods: ["POST"],
+    pattern: '/api/v1/seller/deals/bulk',
+    tokens: [{"old":"/api/v1/seller/deals/bulk","type":0,"val":"api","end":""},{"old":"/api/v1/seller/deals/bulk","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/deals/bulk","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/deals/bulk","type":0,"val":"deals","end":""},{"old":"/api/v1/seller/deals/bulk","type":0,"val":"bulk","end":""}],
+    types: placeholder as Registry['deals.bulk_store']['types'],
+  },
   'deals.show': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/seller/deals/:id',

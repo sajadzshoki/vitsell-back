@@ -1,7 +1,7 @@
-# مستند Routeهای API — Digishop Back
+# مستند Routeهای API — vitsell Back
 
 منبع حقیقت: `start/routes.ts`  
-مستند کامل (فرانت + API): [`digishop-front/docs/ROUTES.md`](../../digishop-front/docs/ROUTES.md)
+مستند کامل (فرانت + API): [`vitsell-front/docs/ROUTES.md`](../../vitsell-front/docs/ROUTES.md)
 
 **Prefix:** `/api/v1`  
 **Auth:** `Authorization: Bearer <token>`

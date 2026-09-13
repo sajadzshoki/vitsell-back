@@ -38,6 +38,10 @@ export type PlatformSettingsPayload = {
   freeShippingThreshold: number
   deliveryEstimateText: string
   shippingMethodsVisible: boolean
+  /** Checkout payment methods (storefront) */
+  onlinePaymentEnabled: boolean
+  codPaymentEnabled: boolean
+  installmentPaymentEnabled: boolean
 }
 
 export const defaultPlatformSettings: PlatformSettingsPayload = {
@@ -74,6 +78,9 @@ export const defaultPlatformSettings: PlatformSettingsPayload = {
   freeShippingThreshold: 0,
   deliveryEstimateText: '۱ تا ۳ روز کاری',
   shippingMethodsVisible: true,
+  onlinePaymentEnabled: true,
+  codPaymentEnabled: true,
+  installmentPaymentEnabled: true,
 }
 
 function asString(value: unknown, fallback: string) {
@@ -102,6 +109,34 @@ function emailHref(email: string) {
   return email.startsWith('mailto:') ? email : `mailto:${email}`
 }
 
+export const CLEARABLE_IMAGE_KEYS = ['logoUrl', 'faviconUrl', 'defaultOgImage'] as const
+
+function hasOwn(obj: Record<string, unknown>, key: string) {
+  return Object.prototype.hasOwnProperty.call(obj, key)
+}
+
+function clearedImageValue(value: unknown) {
+  return value == null || String(value).trim() === '' ? '' : String(value).trim()
+}
+
+/**
+ * Merge validated payload onto current settings, forcing empty string when the client
+ * explicitly sends null/"" for branding images (Vine may drop null optionals).
+ */
+export function mergePlatformSettingsUpdate(
+  current: PlatformSettingsPayload,
+  payload: Record<string, unknown>,
+  raw: Record<string, unknown>,
+): PlatformSettingsPayload {
+  const next: Record<string, unknown> = { ...current, ...payload }
+  for (const key of CLEARABLE_IMAGE_KEYS) {
+    if (!hasOwn(raw, key) && !hasOwn(payload, key)) continue
+    const value = hasOwn(raw, key) ? raw[key] : payload[key]
+    next[key] = clearedImageValue(value)
+  }
+  return normalizePlatformSettings(next)
+}
+
 export function normalizePlatformSettings(raw: unknown): PlatformSettingsPayload {
   const src = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
   const stock = String(src.outOfStockBehavior || defaultPlatformSettings.outOfStockBehavior)
@@ -113,9 +148,9 @@ export function normalizePlatformSettings(raw: unknown): PlatformSettingsPayload
     dateFormatHint: asString(src.dateFormatHint, defaultPlatformSettings.dateFormatHint),
     numberFormatHint: asString(src.numberFormatHint, defaultPlatformSettings.numberFormatHint),
     timezone: asString(src.timezone, defaultPlatformSettings.timezone),
-    logoUrl: asString(src.logoUrl, ''),
-    faviconUrl: asString(src.faviconUrl, ''),
-    defaultOgImage: asString(src.defaultOgImage, ''),
+    logoUrl: clearedImageValue(src.logoUrl),
+    faviconUrl: clearedImageValue(src.faviconUrl),
+    defaultOgImage: clearedImageValue(src.defaultOgImage),
     brandName: asString(src.brandName, ''),
     brandDescription: asString(src.brandDescription, ''),
     supportPhone: asString(src.supportPhone, ''),
@@ -148,6 +183,9 @@ export function normalizePlatformSettings(raw: unknown): PlatformSettingsPayload
       defaultPlatformSettings.deliveryEstimateText,
     ),
     shippingMethodsVisible: asBool(src.shippingMethodsVisible, true),
+    onlinePaymentEnabled: asBool(src.onlinePaymentEnabled, true),
+    codPaymentEnabled: asBool(src.codPaymentEnabled, true),
+    installmentPaymentEnabled: asBool(src.installmentPaymentEnabled, true),
   }
 }
 
@@ -216,7 +254,7 @@ export async function savePlatformSettings(payload: unknown) {
   return next
 }
 
-/** Public site payload overlay: identity + branding/contact from platform settings. */
+/** Public site payload overlay: identity + branding/contact + storefront prefs. */
 export async function loadPublicSiteProfile() {
   const [site, platform] = await Promise.all([loadSiteSettings(), loadPlatformSettings()])
   return {
@@ -231,5 +269,24 @@ export async function loadPublicSiteProfile() {
     supportEmail: platform.supportEmail || site.email,
     address: platform.address,
     workingHours: platform.workingHours,
+    // localization
+    defaultLocale: platform.defaultLocale,
+    currencyLabel: platform.currencyLabel,
+    dateFormatHint: platform.dateFormatHint,
+    numberFormatHint: platform.numberFormatHint,
+    timezone: platform.timezone,
+    // commerce
+    minOrderAmount: platform.minOrderAmount,
+    guestCheckoutEnabled: platform.guestCheckoutEnabled,
+    outOfStockBehavior: platform.outOfStockBehavior,
+    taxDisplay: platform.taxDisplay,
+    // shipping (used on storefront checkout)
+    freeShippingThreshold: platform.freeShippingThreshold,
+    deliveryEstimateText: platform.deliveryEstimateText,
+    shippingMethodsVisible: platform.shippingMethodsVisible,
+    // payments (used on storefront checkout)
+    onlinePaymentEnabled: platform.onlinePaymentEnabled,
+    codPaymentEnabled: platform.codPaymentEnabled,
+    installmentPaymentEnabled: platform.installmentPaymentEnabled,
   }
 }

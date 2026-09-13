@@ -81,7 +81,7 @@ export default class SellerQuestionsController {
     const payload = await request.validateUsing(replyQuestionValidator)
     const previous = question.answer
     question.answer = {
-      author: payload.author?.trim() || 'کارشناس دیجی‌شاپ',
+      author: payload.author?.trim() || 'کارشناس ویتسل',
       date: jalaliishDate(),
       text: payload.text.trim(),
       helpfulYes: previous?.helpfulYes ?? 0,

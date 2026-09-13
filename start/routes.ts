@@ -54,7 +54,7 @@ const SellerMegaMenusController = () => import('#controllers/seller_mega_menus_c
 const SellerAuditController = () => import('#controllers/seller_audit_controller')
 
 router.get('/', () => {
-  return { name: 'digishop-api', version: '1' }
+  return { name: 'vitsell-api', version: '1' }
 })
 
 router.get('/uploads/:file', [UploadController, 'show'])
@@ -220,6 +220,7 @@ router
         router.put('categories/:id', [CategoriesController, 'update'])
         router.delete('categories/:id', [CategoriesController, 'destroy'])
         router.get('deals', [DealsController, 'index'])
+        router.post('deals/bulk', [DealsController, 'bulkStore'])
         router.get('deals/:id', [DealsController, 'show'])
         router.post('deals', [DealsController, 'store'])
         router.put('deals/:id', [DealsController, 'update'])

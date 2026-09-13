@@ -9,10 +9,11 @@ import SellerOrder from '#models/seller_order'
 import SellerOrderItemRow from '#models/seller_order_item_row'
 import User from '#models/user'
 import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
+import { loadPlatformSettings } from '#utils/platform_settings'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import db from '@adonisjs/lucid/services/db'
 
-const FREE_SHIPPING_THRESHOLD = 500_000
+const FALLBACK_FREE_SHIPPING_THRESHOLD = 500_000
 
 export type PlaceCheckoutInput = {
   addressId: string
@@ -31,9 +32,14 @@ export class CheckoutError extends Error {
   }
 }
 
-function shippingPrice(method: 'express' | 'post' | 'pickup', subtotal: number) {
+function shippingPrice(
+  method: 'express' | 'post' | 'pickup',
+  subtotal: number,
+  freeShippingThreshold: number,
+) {
   if (method === 'pickup' || subtotal <= 0) return 0
-  const free = subtotal >= FREE_SHIPPING_THRESHOLD
+  const threshold = freeShippingThreshold > 0 ? freeShippingThreshold : 500_000
+  const free = subtotal >= threshold
   if (method === 'express') return free ? 45_000 : 55_000
   return free ? 0 : 40_000
 }
@@ -94,6 +100,7 @@ export default class CheckoutService {
       .where('status', 'active')
 
     const listingByProduct = new Map(listings.map((l) => [l.productId, l]))
+    const platform = await loadPlatformSettings()
 
     const lines: CartLine[] = []
     for (const item of cartItems) {
@@ -108,7 +115,7 @@ export default class CheckoutService {
           `محصول «${item.product.title}» فروشنده فعال ندارد`
         )
       }
-      if (listing.stock < item.qty) {
+      if (listing.stock < item.qty && platform.outOfStockBehavior !== 'allow_backorder') {
         throw new CheckoutError(
           409,
           'stock',
@@ -124,6 +131,14 @@ export default class CheckoutService {
     }
 
     const subtotal = lines.reduce((sum, i) => sum + Number(i.product.price) * i.qty, 0)
+
+    if (platform.minOrderAmount > 0 && subtotal < platform.minOrderAmount) {
+      throw new CheckoutError(
+        422,
+        'minOrder',
+        `حداقل مبلغ سفارش ${platform.minOrderAmount.toLocaleString('fa-IR')} ${platform.currencyLabel} است`
+      )
+    }
 
     let discountAmount = 0
     let discountCode: string | null = null
@@ -144,7 +159,11 @@ export default class CheckoutService {
       }
     }
 
-    const shipCost = shippingPrice(input.shippingMethod, subtotal)
+    const freeThreshold =
+      platform.freeShippingThreshold > 0
+        ? platform.freeShippingThreshold
+        : FALLBACK_FREE_SHIPPING_THRESHOLD
+    const shipCost = shippingPrice(input.shippingMethod, subtotal, freeThreshold)
     const total = Math.max(0, subtotal - discountAmount + shipCost)
     const orderId = `BZ-${Math.floor(100000 + Math.random() * 900000)}`
     const isOnline = input.paymentMethod === 'online'
@@ -160,7 +179,7 @@ export default class CheckoutService {
     }))
 
     const order = await db.transaction(async (trx) => {
-      await this.reserveStock(trx, lines)
+      await this.reserveStock(trx, lines, platform.outOfStockBehavior === 'allow_backorder')
 
       const created = await Order.create(
         {
@@ -276,7 +295,11 @@ export default class CheckoutService {
     return { order, total, isOnline }
   }
 
-  private async reserveStock(trx: TransactionClientContract, lines: CartLine[]) {
+  private async reserveStock(
+    trx: TransactionClientContract,
+    lines: CartLine[],
+    allowBackorder = false,
+  ) {
     const listingIds = [...new Set(lines.map((l) => l.listing.id))]
     const locked = await SellerListing.query({ client: trx })
       .whereIn('id', listingIds)
@@ -289,10 +312,10 @@ export default class CheckoutService {
       if (!listing || listing.status !== 'active') {
         throw new CheckoutError(409, 'stock', `محصول ${line.productId} در دسترس نیست`)
       }
-      if (listing.stock < line.qty) {
+      if (listing.stock < line.qty && !allowBackorder) {
         throw new CheckoutError(409, 'stock', `موجودی «${line.product.title}» کافی نیست`)
       }
-      listing.stock -= line.qty
+      listing.stock = Math.max(0, listing.stock - line.qty)
       listing.sold += line.qty
       if (listing.stock <= 0) {
         listing.stock = 0

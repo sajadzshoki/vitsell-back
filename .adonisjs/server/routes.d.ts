@@ -120,6 +120,7 @@ export type ScannedRoutes = {
     'categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'deals.index': { paramsTuple?: []; params?: {} }
+    'deals.bulk_store': { paramsTuple?: []; params?: {} }
     'deals.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'deals.store': { paramsTuple?: []; params?: {} }
     'deals.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -527,6 +528,7 @@ export type ScannedRoutes = {
     'seller_reconciliation.resolve': { paramsTuple?: []; params?: {} }
     'seller_adjustments.store': { paramsTuple?: []; params?: {} }
     'categories.store': { paramsTuple?: []; params?: {} }
+    'deals.bulk_store': { paramsTuple?: []; params?: {} }
     'deals.store': { paramsTuple?: []; params?: {} }
     'discount_codes.store': { paramsTuple?: []; params?: {} }
     'content_promos.store': { paramsTuple?: []; params?: {} }

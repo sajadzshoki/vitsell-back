@@ -1,10 +1,10 @@
-# Digishop Backend — Deploy
+# vitsell Backend — Deploy
 
 راهنمای کامل دیپلوی **فرانت + بک** در ریپوی فرانت:
 
-→ [`../digishop/DEPLOY.md`](../digishop/DEPLOY.md)
+→ [`../vitsell/DEPLOY.md`](../vitsell/DEPLOY.md)
 
-اگر مسیر نسبی در محیط شما فرق دارد، همان فایل `DEPLOY.md` داخل ریپوی `digishop` را باز کنید.
+اگر مسیر نسبی در محیط شما فرق دارد، همان فایل `DEPLOY.md` داخل ریپوی `vitsell` را باز کنید.
 
 ## خلاصه سریع Production API
 
@@ -25,13 +25,13 @@ cd build && npm ci --omit=dev && node bin/server.js
 
 ```env
 NODE_ENV=production
-APP_URL=https://digishop-back.vistatest.top
-FRONTEND_URL=https://digishop.vistatest.top
-ADMIN_URL=https://digishop-admin.vistatest.top
+APP_URL=https://vitsell-back.vistatest.top
+FRONTEND_URL=https://vitsell.vistatest.top
+ADMIN_URL=https://vitsell-admin.vistatest.top
 ```
 
 `ADMIN_URL` باید **دقیقاً** origin پنل ادمین باشد (با `https`، بدون `/` انتهایی).  
-اگر روی `http://localhost:4001` مانده باشد، از `https://digishop-admin.vistatest.top` لاگین با خطای  
+اگر روی `http://localhost:4001` مانده باشد، از `https://vitsell-admin.vistatest.top` لاگین با خطای  
 «ورود مدیر فقط از دامنه پنل ادمین مجاز است» رد می‌شود.
 
 سید **`09121234567` را دیگر به‌عنوان admin نمی‌سازد** — اولین ادمین را دستی بسازید (role=`admin`).
@@ -48,7 +48,7 @@ docker compose up -d --build
 
 
 
-docker rm -f digishop-api
+docker rm -f vitsell-api
 docker compose build --no-cache api
 docker compose up -d --force-recreate api
-docker network connect main digishop-api
+docker network connect main vitsell-api

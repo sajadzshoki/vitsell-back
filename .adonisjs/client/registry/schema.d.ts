@@ -1399,6 +1399,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/deals_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'deals.bulk_store': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/deals/bulk'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/deals_controller').default['bulkStore']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/deals_controller').default['bulkStore']>>>
+    }
+  }
   'deals.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/seller/deals/:id'

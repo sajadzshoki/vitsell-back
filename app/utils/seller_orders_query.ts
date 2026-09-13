@@ -114,14 +114,14 @@ export function applyOrderFilters(
 function applySort(query: OrderQuery, sort?: string) {
   switch (sort) {
     case 'oldest':
-      return query.orderBy('date_key', 'asc').orderBy('id', 'asc')
+      return query.orderBy('created_at', 'asc').orderBy('id', 'asc')
     case 'amount_desc':
-      return query.orderBy('total', 'desc').orderBy('date_key', 'desc')
+      return query.orderBy('total', 'desc').orderBy('created_at', 'desc')
     case 'amount_asc':
-      return query.orderBy('total', 'asc').orderBy('date_key', 'desc')
+      return query.orderBy('total', 'asc').orderBy('created_at', 'desc')
     case 'newest':
     default:
-      return query.orderBy('date_key', 'desc').orderBy('id', 'desc')
+      return query.orderBy('created_at', 'desc').orderBy('id', 'desc')
   }
 }
 
