@@ -43,7 +43,7 @@ export default class UploadController {
     if (
       !file
       || file !== params.file
-      || !/^[\w.-]+\.(jpe?g|png|webp|gif|mp4|webm|mov|pdf|txt|docx?)$/i.test(file)
+      || !/^[\w.-]+\.(jpe?g|png|webp|gif|svg|mp4|webm|mov|pdf|txt|docx?)$/i.test(file)
     ) {
       return response.badRequest({
         errors: [{ field: 'file', message: 'نام فایل نامعتبر است' }],

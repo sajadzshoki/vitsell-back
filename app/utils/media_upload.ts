@@ -5,7 +5,7 @@ import { randomBytes } from 'node:crypto'
 import { basename, extname } from 'node:path'
 import { mediaKindFromMime, type MediaKind } from '#models/media_asset'
 
-export const MEDIA_IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif'])
+export const MEDIA_IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'])
 export const MEDIA_VIDEO_EXT = new Set(['mp4', 'webm', 'mov'])
 export const MEDIA_DOC_EXT = new Set(['pdf', 'txt', 'doc', 'docx'])
 export const MEDIA_ALLOWED_EXT = new Set([
@@ -20,6 +20,7 @@ const MIME_BY_EXT: Record<string, string> = {
   png: 'image/png',
   webp: 'image/webp',
   gif: 'image/gif',
+  svg: 'image/svg+xml',
   mp4: 'video/mp4',
   webm: 'video/webm',
   mov: 'video/quicktime',
@@ -113,7 +114,7 @@ export function parseStoredUploadName(url: string) {
     const part = path.split('/').pop() || ''
     const name = basename(part)
     if (!name || name !== part) return null
-    if (!/^[\w.-]+\.(jpe?g|png|webp|gif|mp4|webm|mov|pdf|txt|docx?)$/i.test(name)) return null
+    if (!/^[\w.-]+\.(jpe?g|png|webp|gif|svg|mp4|webm|mov|pdf|txt|docx?)$/i.test(name)) return null
     return name
   } catch {
     return null
