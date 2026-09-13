@@ -4,26 +4,26 @@
 #   NODE_ENV=production
 #   APP_URL=https://api.vitsell.ir
 #   FRONTEND_URL=https://vitsell.ir
-#   ADMIN_URL=https://seller.vitsell.ir
+#   ADMIN_URL=https://admin.vitsell.ir
 #
 # After editing `.env`, recreate (restart is not enough):
 #   docker compose -f docker-compose.prod.yml up -d --force-recreate api
 # Verify:
 #   docker exec digishop-api printenv ADMIN_URL NODE_ENV FRONTEND_URL APP_URL
 # Expect:
-#   ADMIN_URL=https://seller.vitsell.ir
+#   ADMIN_URL=https://admin.vitsell.ir
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: digishop-postgres
+    container_name: postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-vitsell}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-vitsell}
       POSTGRES_DB: ${DB_DATABASE:-vitsell}
     volumes:
-      - digishop_pg_data:/var/lib/postgresql/data
+      - vitsell_pg_data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
       interval: 5s
@@ -32,7 +32,7 @@ services:
 
   api:
     build: .
-    container_name: digishop-api
+    container_name: api
     restart: unless-stopped
     env_file:
       - .env
@@ -45,17 +45,16 @@ services:
       DB_USER: ${DB_USER:-vitsell}
       DB_PASSWORD: ${DB_PASSWORD:-vitsell}
       DB_DATABASE: ${DB_DATABASE:-vitsell}
-      # Never seed production data (overrides .env)
       RUN_DB_SEED: "false"
-    healthcheck:
-      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:3333/health']
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
-  digishop_pg_data:
+  vitsell_pg_data:
+
+
+networks:
+  default:
+    external: true
+    name: main
