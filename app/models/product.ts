@@ -4,9 +4,26 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Category from '#models/category'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
+import type { SeoMeta } from '#models/blog_post'
 
 export type ProductColor = { name: string; hex: string }
 export type ProductSpec = { key: string; value: string }
+
+function emptySeo(): SeoMeta {
+  return {
+    metaTitle: '',
+    metaDescription: '',
+    metaKeywords: '',
+    canonicalUrl: '',
+    robots: 'index,follow',
+    ogTitle: '',
+    ogDescription: '',
+    ogImage: '',
+    twitterTitle: '',
+    twitterDescription: '',
+    twitterImage: '',
+  }
+}
 
 export default class Product extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -138,6 +155,31 @@ export default class Product extends BaseModel {
   })
   declare buyNotes: Array<{ icon: string; text: string }> | null
 
+  @column({
+    prepare: (value: SeoMeta | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: SeoMeta | string | null) => {
+      if (!value) return null
+      if (typeof value === 'string') {
+        try {
+          return { ...emptySeo(), ...JSON.parse(value) }
+        } catch {
+          return emptySeo()
+        }
+      }
+      return { ...emptySeo(), ...value }
+    },
+  })
+  declare seo: SeoMeta | null
+
+  @column({
+    prepare: (value: string[] | null) => (value ? JSON.stringify(value) : '[]'),
+    consume: (value: string[] | string | null) => {
+      if (!value) return []
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare tags: string[]
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -184,6 +226,8 @@ export default class Product extends BaseModel {
       ...(this.description ? { description: this.description } : {}),
       ...(this.features?.length ? { features: this.features } : {}),
       ...(this.buyNotes?.length ? { buyNotes: this.buyNotes } : {}),
+      seo: this.seo ? { ...emptySeo(), ...this.seo } : null,
+      tags: Array.isArray(this.tags) ? this.tags : [],
     }
   }
 }

@@ -23,7 +23,7 @@ variables:
   APP_URL: 'http://localhost:3333'
   FRONTEND_URL: 'http://localhost:4000'
   ADMIN_URL: 'http://localhost:4001'
-  APP_VERSION: '1.0.0'
+  APP_VERSION: 'beta.0.1'
   SESSION_DRIVER: 'memory'
   ALLOW_OTP_MOCK: 'true'
   ALLOW_PAYMENT_MOCK: 'true'

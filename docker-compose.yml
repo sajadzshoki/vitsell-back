@@ -33,11 +33,12 @@ services:
       APP_URL: http://localhost:3333
       FRONTEND_URL: http://localhost:4000
       ADMIN_URL: http://localhost:4001
+      APP_VERSION: ${APP_VERSION:-beta.0.1}
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: digishop
-      DB_PASSWORD: digishop
-      DB_DATABASE: digishop
+      DB_USER: vitsell
+      DB_PASSWORD: vitsell
+      DB_DATABASE: vitsell
       # Local Docker: seed sample data + OTP/payment mock when provider keys are empty
       RUN_DB_SEED: "true"
       ALLOW_OTP_MOCK: "true"

@@ -8,6 +8,8 @@ import SellerReview from '#models/seller_review'
 import SellerPayout from '#models/seller_payout'
 import SellerShop from '#models/seller_shop'
 import User from '#models/user'
+import type { SeoMeta } from '#models/blog_post'
+import { upsertCategorySpecKeys } from '#models/category_spec_key'
 import { saveFooterPayload } from '#utils/footer'
 import { computeSellerSalesPoints } from '#utils/seller_sales'
 import { querySellerListings } from '#utils/seller_listings_query'
@@ -112,6 +114,46 @@ const footerValidator = vine.compile(
 
 const listingStatusEnum = ['active', 'pending', 'inactive', 'out_of_stock'] as const
 
+const listingSeoSchema = vine.object({
+  metaTitle: vine.string().trim().optional(),
+  metaDescription: vine.string().trim().optional(),
+  metaKeywords: vine.string().trim().optional(),
+  canonicalUrl: vine.string().trim().optional(),
+  robots: vine.string().trim().optional(),
+  ogTitle: vine.string().trim().optional(),
+  ogDescription: vine.string().trim().optional(),
+  ogImage: vine.string().trim().optional(),
+  twitterTitle: vine.string().trim().optional(),
+  twitterDescription: vine.string().trim().optional(),
+  twitterImage: vine.string().trim().optional(),
+})
+
+function emptyProductSeo(): SeoMeta {
+  return {
+    metaTitle: '',
+    metaDescription: '',
+    metaKeywords: '',
+    canonicalUrl: '',
+    robots: 'index,follow',
+    ogTitle: '',
+    ogDescription: '',
+    ogImage: '',
+    twitterTitle: '',
+    twitterDescription: '',
+    twitterImage: '',
+  }
+}
+
+function normalizeProductSeo(seo: Partial<SeoMeta> | null | undefined): SeoMeta | null {
+  if (!seo || typeof seo !== 'object') return null
+  const next = { ...emptyProductSeo(), ...seo }
+  const hasAny = Object.entries(next).some(([key, value]) => {
+    if (key === 'robots') return value !== 'index,follow'
+    return Boolean(String(value || '').trim())
+  })
+  return hasAny ? next : null
+}
+
 const listingProductFields = {
   id: vine.string().trim().optional(),
   title: vine.string().trim(),
@@ -151,6 +193,8 @@ const listingProductFields = {
   hasVariants: vine.boolean().optional(),
   sku: vine.string().trim().optional(),
   lowStockThreshold: vine.number().min(0).optional(),
+  seo: listingSeoSchema.clone().optional(),
+  tags: vine.array(vine.string().trim()).optional(),
 }
 
 const storeListingValidator = vine.compile(
@@ -352,11 +396,15 @@ export default class SellerController {
         hasVariants: p.hasVariants ?? false,
         sku: p.sku?.trim() || null,
         lowStockThreshold: p.lowStockThreshold ?? 5,
+        seo: normalizeProductSeo(p.seo),
+        tags: p.tags?.length ? p.tags.map((t) => t.trim()).filter(Boolean) : [],
         scores: null,
         soldCount: 0,
         viewCount: 0,
       }
     )
+
+    await upsertCategorySpecKeys(product.category, product.specs)
 
     const status = payload.status ?? (payload.stock > 0 ? 'pending' : 'out_of_stock')
 
@@ -434,11 +482,18 @@ export default class SellerController {
           hasVariants: p.hasVariants ?? product?.hasVariants ?? false,
           sku: p.sku !== undefined ? p.sku?.trim() || null : product?.sku ?? null,
           lowStockThreshold: p.lowStockThreshold ?? product?.lowStockThreshold ?? 5,
+          seo: p.seo !== undefined ? normalizeProductSeo(p.seo) : product?.seo ?? null,
+          tags:
+            p.tags !== undefined
+              ? p.tags.map((t) => t.trim()).filter(Boolean)
+              : product?.tags ?? [],
           scores: product?.scores ?? null,
           soldCount: product?.soldCount ?? 0,
           viewCount: product?.viewCount ?? 0,
         }
       )
+
+      await upsertCategorySpecKeys(product.category, product.specs)
     }
 
     if (payload.stock != null) {

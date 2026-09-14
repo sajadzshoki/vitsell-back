@@ -224,6 +224,7 @@ router
         router.post('adjustments', [SellerAdjustmentsController, 'store'])
         router.get('reports', [SellerReportsController, 'index'])
         router.get('categories', [CategoriesController, 'adminIndex'])
+        router.get('categories/:id/spec-keys', [CategoriesController, 'specKeys'])
         router.get('categories/:id', [CategoriesController, 'adminShow'])
         router.post('categories', [CategoriesController, 'store'])
         router.put('categories/:id', [CategoriesController, 'update'])

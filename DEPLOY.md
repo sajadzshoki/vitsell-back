@@ -62,7 +62,7 @@ NODE_ENV=production
 APP_URL=https://api.vitsell.ir
 FRONTEND_URL=https://vitsell.ir
 ADMIN_URL=https://seller.vitsell.ir
-APP_VERSION=1.0.0
+APP_VERSION=beta.0.1
 ```
 
 Health check (بدون DB): `GET /health` → `{ "status": "ok", "version": "<APP_VERSION>" }`  

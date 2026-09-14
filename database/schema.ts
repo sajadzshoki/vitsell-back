@@ -320,6 +320,23 @@ export class CategorySchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class CategorySpecKeySchema extends BaseModel {
+  static $columns = ['categoryId', 'createdAt', 'id', 'key', 'updatedAt', 'usageCount'] as const
+  $columns = CategorySpecKeySchema.$columns
+  @column()
+  declare categoryId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare key: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare usageCount: number
+}
+
 export class ContactMessageSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'fullName', 'id', 'message', 'phone', 'subject', 'updatedAt'] as const
   $columns = ContactMessageSchema.$columns
@@ -770,7 +787,7 @@ export class ProductReviewSchema extends BaseModel {
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['badge', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'shortDesc', 'shortName', 'sku', 'soldCount', 'specs', 'title', 'updatedAt', 'viewCount'] as const
+  static $columns = ['badge', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'specs', 'tags', 'title', 'updatedAt', 'viewCount'] as const
   $columns = ProductSchema.$columns
   @column()
   declare badge: string | null
@@ -821,6 +838,8 @@ export class ProductSchema extends BaseModel {
   @column()
   declare scores: any | null
   @column()
+  declare seo: any | null
+  @column()
   declare shortDesc: string | null
   @column()
   declare shortName: string | null
@@ -830,6 +849,8 @@ export class ProductSchema extends BaseModel {
   declare soldCount: number
   @column()
   declare specs: any | null
+  @column()
+  declare tags: any
   @column()
   declare title: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
