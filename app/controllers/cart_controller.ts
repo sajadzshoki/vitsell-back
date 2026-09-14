@@ -1,5 +1,6 @@
 import CartItem from '#models/cart_item'
 import Product from '#models/product'
+import { productToCatalogWithStock, productsToCatalogWithStock } from '#utils/catalog_stock'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 
@@ -17,12 +18,16 @@ export default class CartController {
       .where('user_id', user.id)
       .preload('product')
 
+    const products = items.filter((i) => i.product).map((i) => i.product)
+    const catalogs = await productsToCatalogWithStock(products)
+    const byId = new Map(catalogs.map((p) => [p.id, p]))
+
     const lines = items
       .filter((i) => i.product)
       .map((i) => ({
         id: i.productId,
         qty: i.qty,
-        product: i.product.toCatalogJSON(),
+        product: byId.get(i.productId) ?? i.product.toCatalogJSON(),
       }))
 
     return response.ok(lines)
@@ -52,7 +57,7 @@ export default class CartController {
     return response.ok({
       id: item.productId,
       qty: item.qty,
-      product: item.product.toCatalogJSON(),
+      product: await productToCatalogWithStock(item.product),
     })
   }
 
@@ -79,7 +84,7 @@ export default class CartController {
     return response.ok({
       id: item.productId,
       qty: item.qty,
-      product: item.product.toCatalogJSON(),
+      product: await productToCatalogWithStock(item.product),
     })
   }
 

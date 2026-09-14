@@ -12,6 +12,10 @@ import {
   parseAttrFilters,
 } from '#utils/catalog_filters'
 import { loadPlatformSettings } from '#utils/platform_settings'
+import {
+  productToCatalogWithStock,
+  productsToCatalogWithStock,
+} from '#utils/catalog_stock'
 
 const SORTS = [
   'relevant',
@@ -160,7 +164,7 @@ export default class ProductsController {
     const items = await query.offset((page - 1) * pageSize).limit(pageSize)
 
     return response.ok({
-      items: items.map((p) => p.toCatalogJSON()),
+      items: await productsToCatalogWithStock(items),
       total,
       page,
       pageSize,
@@ -232,7 +236,7 @@ export default class ProductsController {
     }
     product.viewCount += 1
     await product.save()
-    return response.ok(product.toCatalogJSON())
+    return response.ok(await productToCatalogWithStock(product))
   }
 
   async reviews({ params, request, response }: HttpContext) {

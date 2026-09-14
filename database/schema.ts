@@ -787,10 +787,12 @@ export class ProductReviewSchema extends BaseModel {
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['badge', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'specs', 'tags', 'title', 'updatedAt', 'viewCount'] as const
+  static $columns = ['badge', 'barcode', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'specs', 'tags', 'title', 'updatedAt', 'variantAxes', 'variants', 'viewCount', 'weight'] as const
   $columns = ProductSchema.$columns
   @column()
   declare badge: string | null
+  @column()
+  declare barcode: string | null
   @column()
   declare brand: string
   @column()
@@ -856,7 +858,13 @@ export class ProductSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
+  declare variantAxes: any | null
+  @column()
+  declare variants: any | null
+  @column()
   declare viewCount: number
+  @column()
+  declare weight: string | null
 }
 
 export class ProfileSchema extends BaseModel {

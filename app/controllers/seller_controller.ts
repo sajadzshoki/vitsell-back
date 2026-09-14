@@ -192,7 +192,11 @@ const listingProductFields = {
   published: vine.boolean().optional(),
   hasVariants: vine.boolean().optional(),
   sku: vine.string().trim().optional(),
+  barcode: vine.string().trim().optional(),
+  weight: vine.string().trim().optional(),
   lowStockThreshold: vine.number().min(0).optional(),
+  variantAxes: vine.array(vine.any()).optional(),
+  variants: vine.array(vine.any()).optional(),
   seo: listingSeoSchema.clone().optional(),
   tags: vine.array(vine.string().trim()).optional(),
 }
@@ -395,7 +399,11 @@ export default class SellerController {
         published: p.published ?? true,
         hasVariants: p.hasVariants ?? false,
         sku: p.sku?.trim() || null,
+        barcode: p.barcode?.trim() || null,
+        weight: p.weight?.trim() || null,
         lowStockThreshold: p.lowStockThreshold ?? 5,
+        variantAxes: Array.isArray(p.variantAxes) && p.variantAxes.length ? p.variantAxes : null,
+        variants: Array.isArray(p.variants) && p.variants.length ? p.variants : null,
         seo: normalizeProductSeo(p.seo),
         tags: p.tags?.length ? p.tags.map((t) => t.trim()).filter(Boolean) : [],
         scores: null,
@@ -481,7 +489,17 @@ export default class SellerController {
           published: p.published ?? product?.published ?? true,
           hasVariants: p.hasVariants ?? product?.hasVariants ?? false,
           sku: p.sku !== undefined ? p.sku?.trim() || null : product?.sku ?? null,
+          barcode: p.barcode !== undefined ? p.barcode?.trim() || null : product?.barcode ?? null,
+          weight: p.weight !== undefined ? p.weight?.trim() || null : product?.weight ?? null,
           lowStockThreshold: p.lowStockThreshold ?? product?.lowStockThreshold ?? 5,
+          variantAxes:
+            p.variantAxes !== undefined
+              ? (Array.isArray(p.variantAxes) && p.variantAxes.length ? p.variantAxes : null)
+              : product?.variantAxes ?? null,
+          variants:
+            p.variants !== undefined
+              ? (Array.isArray(p.variants) && p.variants.length ? p.variants : null)
+              : product?.variants ?? null,
           seo: p.seo !== undefined ? normalizeProductSeo(p.seo) : product?.seo ?? null,
           tags:
             p.tags !== undefined

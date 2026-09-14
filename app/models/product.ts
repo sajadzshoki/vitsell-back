@@ -131,7 +131,31 @@ export default class Product extends BaseModel {
   declare sku: string | null
 
   @column()
+  declare barcode: string | null
+
+  @column()
+  declare weight: string | null
+
+  @column()
   declare lowStockThreshold: number
+
+  @column({
+    prepare: (value: unknown[] | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: unknown[] | string | null) => {
+      if (!value) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare variantAxes: unknown[] | null
+
+  @column({
+    prepare: (value: unknown[] | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: unknown[] | string | null) => {
+      if (!value) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare variants: unknown[] | null
 
   @column()
   declare description: string | null
@@ -217,8 +241,12 @@ export default class Product extends BaseModel {
       featured: Boolean(this.featured),
       published: this.published !== false,
       hasVariants: Boolean(this.hasVariants),
-      ...(this.sku ? { sku: this.sku } : {}),
+      sku: this.sku || '',
+      barcode: this.barcode || '',
+      weight: this.weight || '',
       lowStockThreshold: Number(this.lowStockThreshold) || 5,
+      variantAxes: Array.isArray(this.variantAxes) ? this.variantAxes : [],
+      variants: Array.isArray(this.variants) ? this.variants : [],
       ...(this.shortDesc ? { shortDesc: this.shortDesc } : {}),
       ...(this.shortName ? { shortName: this.shortName } : {}),
       ...(this.scores ? { scores: this.scores } : {}),

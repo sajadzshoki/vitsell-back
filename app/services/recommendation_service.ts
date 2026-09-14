@@ -4,6 +4,7 @@ import UserActivity from '#models/user_activity'
 import type { ActivityEventType } from '#models/user_activity'
 import CartItem from '#models/cart_item'
 import WishlistItem from '#models/wishlist_item'
+import { productsToCatalogWithStock } from '#utils/catalog_stock'
 
 const EVENT_WEIGHTS: Record<ActivityEventType, number> = {
   product_view: 1,
@@ -160,7 +161,7 @@ export async function recommendProducts(options: {
   }
 
   return {
-    items: collected.slice(0, limit).map((p) => p.toCatalogJSON()),
+    items: await productsToCatalogWithStock(collected.slice(0, limit)),
     personalized: categories.length > 0,
     categories,
   }

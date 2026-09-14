@@ -13,6 +13,7 @@ import { loadAboutPage } from '#utils/about_page'
 import { loadPublicSiteProfile } from '#utils/platform_settings'
 import { loadPublicNavigation } from '#utils/navigation_settings'
 import { loadFooterWithSiteOverlay } from '#utils/site_settings'
+import { productsToCatalogWithStock, stockByProductIds } from '#utils/catalog_stock'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 
@@ -86,16 +87,20 @@ export default class ContentController {
       .orderBy('created_at', 'desc')
       .limit(12)
 
-    let dealsOfTheDay: ReturnType<typeof applyDealToCatalog>[] = []
+    let dealsOfTheDay: Array<ReturnType<typeof applyDealToCatalog> & { stock: number }> = []
     if (liveDeals.length) {
       const productIds = liveDeals.map((d) => d.productId)
       const products = await Product.query().whereIn('id', productIds)
       const byId = new Map(products.map((p) => [p.id, p]))
+      const stocks = await stockByProductIds(productIds)
       dealsOfTheDay = liveDeals
         .map((deal) => {
           const product = byId.get(deal.productId)
           if (!product) return null
-          return applyDealToCatalog(product, deal.discountPercent)
+          return {
+            ...applyDealToCatalog(product, deal.discountPercent),
+            stock: stocks.get(deal.productId) ?? 0,
+          }
         })
         .filter((p): p is NonNullable<typeof p> => Boolean(p))
         .slice(0, 6)
@@ -106,11 +111,15 @@ export default class ContentController {
         .whereNotNull('old_price')
         .orderBy('rating', 'desc')
         .limit(6)
-      dealsOfTheDay = deals.map((p) => p.toCatalogJSON() as ReturnType<typeof applyDealToCatalog>)
+      dealsOfTheDay = await productsToCatalogWithStock(deals) as typeof dealsOfTheDay
     }
 
-    const bestSellers = await Product.query().orderBy('sold_count', 'desc').limit(8)
-    const newArrivals = await Product.query().orderBy('created_at', 'desc').limit(8)
+    const bestSellers = await productsToCatalogWithStock(
+      await Product.query().orderBy('sold_count', 'desc').limit(8),
+    )
+    const newArrivals = await productsToCatalogWithStock(
+      await Product.query().orderBy('created_at', 'desc').limit(8),
+    )
 
     const rootCategories = await Category.query()
       .where('status', 'active')
@@ -123,7 +132,7 @@ export default class ContentController {
       title: string
       category: string
       viewAllTo: string
-      products: ReturnType<Product['toCatalogJSON']>[]
+      products: Awaited<ReturnType<typeof productsToCatalogWithStock>>
     }[] = []
 
     for (const cat of rootCategories) {
@@ -137,7 +146,7 @@ export default class ContentController {
         title: `پرفروش‌ترین‌های ${cat.name}`,
         category: cat.id,
         viewAllTo: `/search?category=${encodeURIComponent(cat.id)}`,
-        products: shelfProducts.map((p) => p.toCatalogJSON()),
+        products: await productsToCatalogWithStock(shelfProducts),
       })
       if (categoryShelves.length >= 3) break
     }
@@ -185,8 +194,8 @@ export default class ContentController {
       categoryShelves,
       topMobileBrands,
       dealsOfTheDay,
-      bestSellers: bestSellers.map((p) => p.toCatalogJSON()),
-      newArrivals: newArrivals.map((p) => p.toCatalogJSON()),
+      bestSellers,
+      newArrivals,
     })
   }
 

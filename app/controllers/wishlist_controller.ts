@@ -1,5 +1,6 @@
 import WishlistItem from '#models/wishlist_item'
 import Product from '#models/product'
+import { productToCatalogWithStock, productsToCatalogWithStock } from '#utils/catalog_stock'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 
@@ -17,7 +18,7 @@ export default class WishlistController {
       .preload('product')
 
     return response.ok(
-      items.filter((i) => i.product).map((i) => i.product.toCatalogJSON())
+      await productsToCatalogWithStock(items.filter((i) => i.product).map((i) => i.product))
     )
   }
 
@@ -38,7 +39,7 @@ export default class WishlistController {
       await WishlistItem.create({ userId: user.id, productId })
     }
 
-    return response.ok(product.toCatalogJSON())
+    return response.ok(await productToCatalogWithStock(product))
   }
 
   async destroy({ auth, params, response }: HttpContext) {
