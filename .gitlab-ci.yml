@@ -25,6 +25,7 @@ variables:
   ADMIN_URL: 'http://localhost:4001'
   APP_VERSION: 'beta.0.1'
   SESSION_DRIVER: 'memory'
+  DRIVE_DISK: 'fs'
   ALLOW_OTP_MOCK: 'true'
   ALLOW_PAYMENT_MOCK: 'true'
   ZARINPAL_MERCHANT_ID: '00000000-0000-0000-0000-000000000000'
@@ -62,6 +63,7 @@ variables:
       ADMIN_URL=${ADMIN_URL}
       APP_VERSION=${APP_VERSION}
       SESSION_DRIVER=${SESSION_DRIVER}
+      DRIVE_DISK=${DRIVE_DISK:-fs}
       DB_HOST=${DB_HOST}
       DB_PORT=${DB_PORT}
       DB_USER=${DB_USER}
@@ -110,6 +112,7 @@ test:
       ADMIN_URL=${ADMIN_URL}
       APP_VERSION=${APP_VERSION}
       SESSION_DRIVER=${SESSION_DRIVER}
+      DRIVE_DISK=${DRIVE_DISK:-fs}
       DB_HOST=${DB_HOST}
       DB_PORT=${DB_PORT}
       DB_USER=${DB_USER}

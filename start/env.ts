@@ -22,6 +22,23 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
 
+  /**
+   * Drive / MinIO (S3-compatible). Default disk is `s3` locally & in prod.
+   * Use `fs` in CI or when MinIO is unavailable.
+   */
+  DRIVE_DISK: Env.schema.enum(['fs', 's3'] as const),
+  AWS_ACCESS_KEY_ID: Env.schema.string.optional(),
+  AWS_SECRET_ACCESS_KEY: Env.schema.string.optional(),
+  AWS_REGION: Env.schema.string.optional(),
+  S3_BUCKET: Env.schema.string.optional(),
+  /** Internal API endpoint (e.g. http://127.0.0.1:9000 or http://minio:9000). */
+  S3_ENDPOINT: Env.schema.string.optional(),
+  /**
+   * Browser-facing base URL for objects (path-style): http://127.0.0.1:9000/vitsell
+   * When set with DRIVE_DISK=s3, media JSON returns this URL instead of /uploads/...
+   */
+  S3_PUBLIC_URL: Env.schema.string.optional(),
+
   DB_HOST: Env.schema.string({ format: 'host' }),
   DB_PORT: Env.schema.number(),
   DB_USER: Env.schema.string(),

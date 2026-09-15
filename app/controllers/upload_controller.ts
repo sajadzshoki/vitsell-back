@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import app from '@adonisjs/core/services/app'
-import { basename } from 'node:path'
+import { basename, extname } from 'node:path'
 import {
   deleteStoredUpload,
   MEDIA_IMAGE_EXT,
+  mimeFromExt,
+  openStoredUpload,
   saveUploadedMediaFile,
   toPublicMediaUrl,
 } from '#utils/media_upload'
@@ -50,7 +51,21 @@ export default class UploadController {
       })
     }
 
-    const filePath = app.makePath('storage/uploads', file)
-    return response.download(filePath)
+    const opened = await openStoredUpload(file)
+    if (!opened) {
+      return response.notFound({
+        errors: [{ field: 'file', message: 'فایل یافت نشد' }],
+      })
+    }
+
+    const ext = extname(file).slice(1).toLowerCase()
+    const contentType = opened.meta?.contentType || mimeFromExt(ext)
+    response.header('Content-Type', contentType)
+    if (opened.meta?.contentLength != null) {
+      response.header('Content-Length', String(opened.meta.contentLength))
+    }
+    response.header('Cache-Control', 'public, max-age=31536000, immutable')
+
+    return response.stream(opened.stream)
   }
 }

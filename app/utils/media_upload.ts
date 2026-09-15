@@ -1,8 +1,8 @@
 import type { MultipartFile } from '@adonisjs/core/bodyparser'
-import app from '@adonisjs/core/services/app'
-import { mkdir, unlink } from 'node:fs/promises'
 import { randomBytes } from 'node:crypto'
 import { basename, extname } from 'node:path'
+import drive from '@adonisjs/drive/services/main'
+import env from '#start/env'
 import { mediaKindFromMime, type MediaKind } from '#models/media_asset'
 
 export const MEDIA_IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'])
@@ -73,12 +73,17 @@ export async function saveUploadedMediaFile(file: MultipartFile, opts?: { maxSiz
     }
   }
 
-  const dir = app.makePath('storage/uploads')
-  await mkdir(dir, { recursive: true })
   const name = `${Date.now()}-${randomBytes(6).toString('hex')}.${ext}`
-  await file.move(dir, { name, overwrite: false })
+  const mimeType = file.type && file.subtype
+    ? `${file.type}/${file.subtype}`
+    : mimeFromExt(ext)
 
-  if (file.state !== 'moved') {
+  try {
+    await file.moveToDisk(name, {
+      contentType: mimeType,
+      visibility: 'public',
+    })
+  } catch {
     return {
       ok: false as const,
       error: 'ذخیره فایل ناموفق بود',
@@ -86,9 +91,6 @@ export async function saveUploadedMediaFile(file: MultipartFile, opts?: { maxSiz
   }
 
   const url = `/uploads/${name}`
-  const mimeType = file.type && file.subtype
-    ? `${file.type}/${file.subtype}`
-    : mimeFromExt(ext)
 
   return {
     ok: true as const,
@@ -101,11 +103,23 @@ export async function saveUploadedMediaFile(file: MultipartFile, opts?: { maxSiz
   }
 }
 
-/** Normalize stored / legacy absolute APP_URL upload links to `/uploads/{name}`. */
+/**
+ * Public URL for clients.
+ * - With S3_PUBLIC_URL (MinIO/CDN): direct object URL
+ * - Otherwise: `/uploads/{name}` served by the API (streams from Drive)
+ */
 export function toPublicMediaUrl(url: string) {
   const name = parseStoredUploadName(url)
-  if (name) return `/uploads/${name}`
-  return url
+  if (!name) return url
+
+  const publicBase = String(env.get('S3_PUBLIC_URL') || '')
+    .trim()
+    .replace(/\/+$/, '')
+  if (publicBase && env.get('DRIVE_DISK') === 's3') {
+    return `${publicBase}/${name}`
+  }
+
+  return `/uploads/${name}`
 }
 
 export function parseStoredUploadName(url: string) {
@@ -124,12 +138,24 @@ export function parseStoredUploadName(url: string) {
 export async function deleteStoredUpload(url: string) {
   const name = parseStoredUploadName(url)
   if (!name) return
-  const filePath = app.makePath('storage/uploads', name)
   try {
-    await unlink(filePath)
+    await drive.use().delete(name)
   } catch {
     /* ignore missing file */
   }
+}
+
+/** Stream a stored upload from the active Drive disk (MinIO or local fs). */
+export async function openStoredUpload(name: string) {
+  const disk = drive.use()
+  if (!(await disk.exists(name))) return null
+
+  const [stream, meta] = await Promise.all([
+    disk.getStream(name),
+    disk.getMetaData(name).catch(() => null),
+  ])
+
+  return { stream, meta }
 }
 
 function parseSize(input: string) {

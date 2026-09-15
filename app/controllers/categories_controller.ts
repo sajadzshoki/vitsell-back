@@ -222,9 +222,37 @@ export default class CategoriesController {
       .orderBy('usage_count', 'desc')
       .orderBy('key', 'asc')
 
-    return response.ok({
-      items: rows.map((row) => row.toJSON()),
-    })
+    const usageByKey = new Map<string, number>()
+    for (const row of rows) {
+      const key = String(row.key || '').trim()
+      if (!key) continue
+      usageByKey.set(key, Number(row.usageCount) || 0)
+    }
+
+    // Also harvest keys from existing products (covers seed / pre-upsert data)
+    const products = await Product.query()
+      .where('category', category.id)
+      .select('id', 'specs')
+
+    for (const product of products) {
+      const specs = Array.isArray(product.specs) ? product.specs : []
+      for (const spec of specs) {
+        const key = String(spec?.key || '').trim()
+        if (!key) continue
+        usageByKey.set(key, (usageByKey.get(key) || 0) + 1)
+      }
+    }
+
+    const items = [...usageByKey.entries()]
+      .map(([key, usageCount]) => ({
+        id: `derived-${category.id}-${key}`,
+        categoryId: category.id,
+        key,
+        usageCount,
+      }))
+      .sort((a, b) => b.usageCount - a.usageCount || a.key.localeCompare(b.key, 'fa'))
+
+    return response.ok({ items })
   }
 
   async store({ request, response }: HttpContext) {

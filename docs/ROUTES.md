@@ -34,7 +34,7 @@
 | `GET` | `/products/:id/questions` | — |
 | `POST` | `/products/:id/questions` | ✅ |
 | `POST` | `/upload` | ✅ |
-| `GET` | `/uploads/:file` | — *(خارج از prefix api)* |
+| `GET` | `/uploads/:file` | — | سرو فایل از Drive (MinIO bucket `vitsell` یا `fs`) — خارج از `/api/v1` |
 | `GET` | `/home` | — |
 | `GET` | `/recommendations` | اختیاری | پیشنهاد شخصی‌سازی‌شده |
 | `POST` | `/activity` | ✅ | ثبت فعالیت کاربر |
