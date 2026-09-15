@@ -15,6 +15,9 @@ export default class CartItem extends BaseModel {
   declare productId: string
 
   @column()
+  declare variantId: string | null
+
+  @column()
   declare qty: number
 
   @column.dateTime({ autoCreate: true })

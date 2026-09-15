@@ -2,11 +2,16 @@ import Address from '#models/address'
 import CartItem from '#models/cart_item'
 import Order from '#models/order'
 import Payment from '#models/payment'
-import Product from '#models/product'
 import Notification from '#models/notification'
 import ZarinpalService from '#services/zarinpal_service'
 import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
 import { loadPlatformSettings } from '#utils/platform_settings'
+import {
+  findProductVariant,
+  productVariantLabel,
+  productVariantPrice,
+  productVariants,
+} from '#utils/product_variants'
 import env from '#start/env'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -52,7 +57,7 @@ function jalaliishDate() {
 
 function isPaymentMethodEnabled(
   method: 'online' | 'cod' | 'installment',
-  settings: Awaited<ReturnType<typeof loadPlatformSettings>>,
+  settings: Awaited<ReturnType<typeof loadPlatformSettings>>
 ) {
   if (method === 'online') return settings.onlinePaymentEnabled
   if (method === 'cod') return settings.codPaymentEnabled
@@ -81,9 +86,7 @@ export default class CheckoutController {
       })
     }
 
-    const cartItems = await CartItem.query()
-      .where('user_id', user.id)
-      .preload('product')
+    const cartItems = await CartItem.query().where('user_id', user.id).preload('product')
 
     if (!cartItems.length) {
       return response.unprocessableEntity({
@@ -92,7 +95,23 @@ export default class CheckoutController {
     }
 
     const lines = cartItems.filter((i) => i.product)
-    const subtotal = lines.reduce((sum, i) => sum + Number(i.product.price) * i.qty, 0)
+    for (const line of lines) {
+      const variant = findProductVariant(line.product, line.variantId)
+      if (productVariants(line.product).length && !variant) {
+        return response.conflict({
+          errors: [{ field: 'cart', message: `واریانت «${line.product.title}» معتبر نیست` }],
+        })
+      }
+      if (variant && (variant.status !== 'active' || Number(variant.stock) < line.qty)) {
+        return response.conflict({
+          errors: [{ field: 'stock', message: `موجودی «${line.product.title}» کافی نیست` }],
+        })
+      }
+    }
+    const subtotal = lines.reduce((sum, line) => {
+      const variant = findProductVariant(line.product, line.variantId)
+      return sum + productVariantPrice(line.product, variant) * line.qty
+    }, 0)
 
     let discountAmount = 0
     let discountCode: string | null = null
@@ -119,11 +138,16 @@ export default class CheckoutController {
     const total = Math.max(0, subtotal - discountAmount + shipCost)
     const orderId = `BZ-${Math.floor(100000 + Math.random() * 900000)}`
 
-    const orderItems = lines.map((i) => ({
-      productId: i.productId,
-      qty: i.qty,
-      price: Number(i.product.price),
-    }))
+    const orderItems = lines.map((line) => {
+      const variant = findProductVariant(line.product, line.variantId)
+      return {
+        productId: line.productId,
+        qty: line.qty,
+        price: productVariantPrice(line.product, variant),
+        variantId: line.variantId,
+        variantLabel: productVariantLabel(variant),
+      }
+    })
 
     const isOnline = payload.paymentMethod === 'online'
 

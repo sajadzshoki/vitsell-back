@@ -129,8 +129,8 @@ router
       .group(() => {
         router.get('/', [CartController, 'index'])
         router.post('/', [CartController, 'store'])
-        router.patch('/:productId', [CartController, 'update'])
-        router.delete('/:productId', [CartController, 'destroy'])
+        router.patch('/:lineId', [CartController, 'update'])
+        router.delete('/:lineId', [CartController, 'destroy'])
         router.delete('/', [CartController, 'clear'])
       })
       .prefix('cart')
@@ -325,7 +325,10 @@ router
         router.post('mega-menu-sections', [SellerMegaMenusController, 'storeSection'])
         router.post('mega-menu-sections/reorder', [SellerMegaMenusController, 'reorderSections'])
         router.put('mega-menu-sections/:id', [SellerMegaMenusController, 'updateSection'])
-        router.patch('mega-menu-sections/:id/status', [SellerMegaMenusController, 'setSectionStatus'])
+        router.patch('mega-menu-sections/:id/status', [
+          SellerMegaMenusController,
+          'setSectionStatus',
+        ])
         router.delete('mega-menu-sections/:id', [SellerMegaMenusController, 'destroySection'])
 
         router.post('mega-menu-items', [SellerMegaMenusController, 'storeItem'])

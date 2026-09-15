@@ -10,6 +10,8 @@ export type OrderItem = {
   productId: string
   qty: number
   price: number
+  variantId?: string | null
+  variantLabel?: string
 }
 
 export type OrderAddress = {
@@ -24,12 +26,7 @@ export type OrderAddress = {
   isDefault?: boolean
 }
 
-export type OrderStatus =
-  | 'delivered'
-  | 'shipping'
-  | 'processing'
-  | 'cancelled'
-  | 'pending_payment'
+export type OrderStatus = 'delivered' | 'shipping' | 'processing' | 'cancelled' | 'pending_payment'
 
 export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending_payment: ['processing', 'cancelled'],
@@ -104,9 +101,8 @@ export default class Order extends BaseModel {
   @hasMany(() => SellerOrder, { foreignKey: 'buyerOrderId' })
   declare sellerOrders: HasMany<typeof SellerOrder>
 
-  toShopOrderJSON(extras?: { trackingCode?: string | null, carrier?: string | null }) {
-    const status =
-      this.status === 'pending_payment' ? ('processing' as const) : this.status
+  toShopOrderJSON(extras?: { trackingCode?: string | null; carrier?: string | null }) {
+    const status = this.status === 'pending_payment' ? ('processing' as const) : this.status
     const trackingCode = extras?.trackingCode?.trim() || undefined
     const carrier = extras?.carrier?.trim() || undefined
     return {

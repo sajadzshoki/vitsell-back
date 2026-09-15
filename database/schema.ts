@@ -271,7 +271,7 @@ export class BrandSchema extends BaseModel {
 }
 
 export class CartItemSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'productId', 'qty', 'updatedAt', 'userId'] as const
+  static $columns = ['createdAt', 'id', 'productId', 'qty', 'updatedAt', 'userId', 'variantId'] as const
   $columns = CartItemSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -285,6 +285,8 @@ export class CartItemSchema extends BaseModel {
   declare updatedAt: DateTime | null
   @column()
   declare userId: number
+  @column()
+  declare variantId: string | null
 }
 
 export class CategorySchema extends BaseModel {

@@ -5,7 +5,13 @@ import SellerShop from '#models/seller_shop'
 import Order from '#models/order'
 import SellerOrderItemRow from '#models/seller_order_item_row'
 
-export type SellerOrderItem = { productId: string; qty: number; price: number }
+export type SellerOrderItem = {
+  productId: string
+  qty: number
+  price: number
+  variantId?: string | null
+  variantLabel?: string
+}
 export type SellerOrderAddress = {
   province: string
   city: string
@@ -14,12 +20,7 @@ export type SellerOrderAddress = {
 }
 
 export type SellerOrderStatus =
-  | 'new'
-  | 'packing'
-  | 'shipped'
-  | 'delivered'
-  | 'returned'
-  | 'cancelled'
+  'new' | 'packing' | 'shipped' | 'delivered' | 'returned' | 'cancelled'
 
 export const SELLER_ORDER_TRANSITIONS: Record<SellerOrderStatus, SellerOrderStatus[]> = {
   new: ['packing', 'cancelled'],
