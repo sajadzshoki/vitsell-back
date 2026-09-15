@@ -13,6 +13,8 @@ import { loadAboutPage } from '#utils/about_page'
 import { loadPublicSiteProfile } from '#utils/platform_settings'
 import { loadPublicNavigation } from '#utils/navigation_settings'
 import { loadFooterWithSiteOverlay } from '#utils/site_settings'
+import { loadSeoSettings } from '#utils/seo_settings'
+import { loadSeoRedirects } from '#utils/seo_redirects'
 import { productsToCatalogWithStock, stockByProductIds } from '#utils/catalog_stock'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
@@ -233,6 +235,17 @@ export default class ContentController {
 
   async navigation({ response }: HttpContext) {
     return response.ok(await loadPublicNavigation())
+  }
+
+  /** Public storefront SEO defaults (no auth). */
+  async seo({ response }: HttpContext) {
+    return response.ok(await loadSeoSettings())
+  }
+
+  /** Public active redirects only (no auth). */
+  async seoRedirects({ response }: HttpContext) {
+    const items = (await loadSeoRedirects()).filter((r) => r.active)
+    return response.ok({ items })
   }
 
   async discountCodes({ response }: HttpContext) {

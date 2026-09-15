@@ -115,6 +115,8 @@ router
     router.get('compare/templates/:category', [ContentController, 'compareTemplates'])
     router.get('footer', [ContentController, 'footer'])
     router.get('navigation', [ContentController, 'navigation'])
+    router.get('seo', [ContentController, 'seo'])
+    router.get('seo/redirects', [ContentController, 'seoRedirects'])
     router.get('mega-menu', [MegaMenuController, 'index'])
     router.get('mega-menu/resolve', [MegaMenuController, 'resolve'])
     router.get('discount-codes', [ContentController, 'discountCodes'])

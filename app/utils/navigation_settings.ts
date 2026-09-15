@@ -146,8 +146,12 @@ export function normalizeNavigationSettings(raw: unknown): NavigationSettingsPay
   const bottom = Array.isArray(src.bottomLinks) ? src.bottomLinks : null
 
   return {
-    quickLinks: (quick?.length ? quick : defaultNavigationSettings.quickLinks).map(normalizeQuick),
-    bottomLinks: (bottom?.length ? bottom : defaultNavigationSettings.bottomLinks).map(normalizeBottom),
+    quickLinks: (quick?.length ? quick : defaultNavigationSettings.quickLinks)
+      .map(normalizeQuick)
+      .map(healCategoryBrowseLink),
+    bottomLinks: (bottom?.length ? bottom : defaultNavigationSettings.bottomLinks)
+      .map(normalizeBottom)
+      .map(healCategoryBrowseLink),
   }
 }
 
@@ -164,6 +168,19 @@ export async function saveNavigationSettings(payload: unknown) {
     { key: NAVIGATION_SETTINGS_KEY, value: next },
   )
   return next
+}
+
+/**
+ * Heal known misconfigs: categories browse must stay on `/category`,
+ * not bare `/search` (product listing lives under `/search/category-*`).
+ */
+function healCategoryBrowseLink<T extends { id: string; to?: string }>(link: T): T {
+  if (link.id !== 'categories') return link
+  const to = String(link.to || '').trim()
+  if (!to || to === '/search') {
+    return { ...link, to: '/category' }
+  }
+  return link
 }
 
 /** Public storefront payload — only enabled links. */

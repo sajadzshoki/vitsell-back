@@ -43,6 +43,9 @@
 | `GET` | `/compare/templates/:category` | — |
 | `GET` | `/site` | — | تنظیمات هویت سایت |
 | `GET` | `/footer` | — |
+| `GET` | `/navigation` | — | منوی سریع و bottom nav |
+| `GET` | `/seo` | — | تنظیمات سئوی سراسری (عمومی) |
+| `GET` | `/seo/redirects` | — | ریدایرکت‌های فعال (عمومی) |
 | `GET` | `/discount-codes` | — |
 | `GET` | `/blog` | — |
 | `GET` | `/blog/:id` | — |
