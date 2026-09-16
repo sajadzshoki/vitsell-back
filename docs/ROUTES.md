@@ -84,6 +84,11 @@
 | `GET\|POST` | `/seller/listings` | ✅ admin | لیست / افزودن محصول |
 | `GET` | `/seller/listings/:productId` | ✅ admin | جزئیات listing + محصول |
 | `PATCH` | `/seller/listings/:productId` | ✅ admin | وضعیت / موجودی / ویرایش محصول |
+| `POST` | `/seller/importers/technolife/preview` | ✅ admin | پیش‌نمایش ایمپورت تکنولایف |
+| `POST` | `/seller/importers/technolife/import` | ✅ admin | شروع بچ ایمپورت |
+| `GET` | `/seller/importers/technolife/imports` | ✅ admin | تاریخچه بچ‌ها |
+| `GET` | `/seller/importers/technolife/imports/:id` | ✅ admin | جزئیات بچ + آیتم‌ها |
+| `POST` | `/seller/importers/technolife/imports/:id/retry` | ✅ admin | تلاش مجدد آیتم‌های ناموفق |
 | `GET\|POST` | `/seller/categories` | ✅ admin | لیست کامل / ایجاد دسته |
 | `GET\|PUT\|DELETE` | `/seller/categories/:id` | ✅ admin | جزئیات / ویرایش / حذف دسته |
 | `GET\|POST` | `/seller/deals` | ✅ admin | لیست / ایجاد شگفت‌انگیز |

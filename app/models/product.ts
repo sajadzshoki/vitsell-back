@@ -204,6 +204,21 @@ export default class Product extends BaseModel {
   })
   declare tags: string[]
 
+  @column()
+  declare source: string | null
+
+  @column()
+  declare sourceUrl: string | null
+
+  @column()
+  declare sourceProductId: string | null
+
+  @column.dateTime()
+  declare sourceImportedAt: DateTime | null
+
+  @column.dateTime()
+  declare sourceUpdatedAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -256,6 +271,15 @@ export default class Product extends BaseModel {
       ...(this.buyNotes?.length ? { buyNotes: this.buyNotes } : {}),
       seo: this.seo ? { ...emptySeo(), ...this.seo } : null,
       tags: Array.isArray(this.tags) ? this.tags : [],
+      ...(this.source
+        ? {
+            source: this.source,
+            sourceUrl: this.sourceUrl,
+            sourceProductId: this.sourceProductId,
+            sourceImportedAt: this.sourceImportedAt?.toISO() ?? null,
+            sourceUpdatedAt: this.sourceUpdatedAt?.toISO() ?? null,
+          }
+        : {}),
     }
   }
 }

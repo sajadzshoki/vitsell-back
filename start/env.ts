@@ -53,4 +53,17 @@ export default await Env.create(new URL('../', import.meta.url), {
   ZARINPAL_SANDBOX: Env.schema.boolean.optional(),
   ZARINPAL_CALLBACK_URL: Env.schema.string.optional(),
   ALLOW_PAYMENT_MOCK: Env.schema.boolean.optional(),
+
+  /** Technolife product importer (optional; defaults applied in config/technolife.ts) */
+  TECHNOLIFE_ENABLED: Env.schema.boolean.optional(),
+  TECHNOLIFE_REQUEST_DELAY_MS: Env.schema.number.optional(),
+  TECHNOLIFE_TIMEOUT_MS: Env.schema.number.optional(),
+  TECHNOLIFE_MAX_RETRIES: Env.schema.number.optional(),
+  TECHNOLIFE_CONCURRENCY: Env.schema.number.optional(),
+  TECHNOLIFE_DEFAULT_CATEGORY_ID: Env.schema.string.optional(),
+  TECHNOLIFE_UPDATE_PRICE: Env.schema.boolean.optional(),
+  TECHNOLIFE_UPDATE_INVENTORY: Env.schema.boolean.optional(),
+  TECHNOLIFE_UPDATE_DESCRIPTION: Env.schema.boolean.optional(),
+  TECHNOLIFE_UPDATE_IMAGES: Env.schema.boolean.optional(),
+  TECHNOLIFE_UPDATE_SPECS: Env.schema.boolean.optional(),
 })

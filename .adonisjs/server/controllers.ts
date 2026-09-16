@@ -54,6 +54,7 @@ export const controllers = {
   SellerSettlements: () => import('#controllers/seller_settlements_controller'),
   SellerShipping: () => import('#controllers/seller_shipping_controller'),
   SellerSystem: () => import('#controllers/seller_system_controller'),
+  SellerTechnolifeImporter: () => import('#controllers/seller_technolife_importer_controller'),
   SellerTransactions: () => import('#controllers/seller_transactions_controller'),
   SellerWarehouses: () => import('#controllers/seller_warehouses_controller'),
   Upload: () => import('#controllers/upload_controller'),

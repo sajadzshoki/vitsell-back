@@ -726,6 +726,72 @@ export class ProductAttributeSchema extends BaseModel {
   declare variantDefining: boolean
 }
 
+export class ProductImportBatchSchema extends BaseModel {
+  static $columns = ['config', 'createdAt', 'duplicateCount', 'failedCount', 'finishedAt', 'id', 'mode', 'source', 'startedAt', 'status', 'successCount', 'totalCount', 'updatedAt'] as const
+  $columns = ProductImportBatchSchema.$columns
+  @column()
+  declare config: any | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare duplicateCount: number
+  @column()
+  declare failedCount: number
+  @column.dateTime()
+  declare finishedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare mode: string
+  @column()
+  declare source: string
+  @column.dateTime()
+  declare startedAt: DateTime | null
+  @column()
+  declare status: string
+  @column()
+  declare successCount: number
+  @column()
+  declare totalCount: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class ProductImportItemSchema extends BaseModel {
+  static $columns = ['batchId', 'createdAt', 'errorCode', 'errorMessage', 'finishedAt', 'id', 'productId', 'result', 'source', 'sourceProductId', 'sourceUrl', 'startedAt', 'status', 'updatedAt', 'warnings'] as const
+  $columns = ProductImportItemSchema.$columns
+  @column()
+  declare batchId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare errorCode: string | null
+  @column()
+  declare errorMessage: string | null
+  @column.dateTime()
+  declare finishedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare productId: string | null
+  @column()
+  declare result: any | null
+  @column()
+  declare source: string
+  @column()
+  declare sourceProductId: string | null
+  @column()
+  declare sourceUrl: string
+  @column.dateTime()
+  declare startedAt: DateTime | null
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare warnings: any | null
+}
+
 export class ProductQuestionSchema extends BaseModel {
   static $columns = ['answer', 'createdAt', 'date', 'id', 'name', 'productId', 'question', 'updatedAt', 'userId', 'verified'] as const
   $columns = ProductQuestionSchema.$columns
@@ -789,7 +855,7 @@ export class ProductReviewSchema extends BaseModel {
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['badge', 'barcode', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'specs', 'tags', 'title', 'updatedAt', 'variantAxes', 'variants', 'viewCount', 'weight'] as const
+  static $columns = ['badge', 'barcode', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'source', 'sourceImportedAt', 'sourceProductId', 'sourceUpdatedAt', 'sourceUrl', 'specs', 'tags', 'title', 'updatedAt', 'variantAxes', 'variants', 'viewCount', 'weight'] as const
   $columns = ProductSchema.$columns
   @column()
   declare badge: string | null
@@ -851,6 +917,16 @@ export class ProductSchema extends BaseModel {
   declare sku: string | null
   @column()
   declare soldCount: number
+  @column()
+  declare source: string | null
+  @column.dateTime()
+  declare sourceImportedAt: DateTime | null
+  @column()
+  declare sourceProductId: string | null
+  @column.dateTime()
+  declare sourceUpdatedAt: DateTime | null
+  @column()
+  declare sourceUrl: string | null
   @column()
   declare specs: any | null
   @column()

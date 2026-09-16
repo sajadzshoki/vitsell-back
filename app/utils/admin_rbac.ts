@@ -17,7 +17,7 @@ export const SYSTEM_ROLE_META: Record<
     description: 'دسترسی گسترده بدون مدیریت نقش‌ها و کاربران ادمین',
     permissions: [
       'dashboard.view', 'analytics.view',
-      'products.view', 'products.create', 'products.update', 'products.delete',
+      'products.view', 'products.create', 'products.update', 'products.delete', 'products.import',
       'categories.view', 'categories.create', 'categories.update', 'categories.delete',
       'brands.view', 'brands.create', 'brands.update', 'brands.delete',
       'attributes.view', 'attributes.create', 'attributes.update', 'attributes.delete',
@@ -63,7 +63,7 @@ export const SYSTEM_ROLE_META: Record<
     description: 'مدیریت کاتالوگ، موجودی و ویژگی‌ها',
     permissions: [
       'dashboard.view', 'analytics.view',
-      'products.view', 'products.create', 'products.update', 'products.delete',
+      'products.view', 'products.create', 'products.update', 'products.delete', 'products.import',
       'categories.view', 'categories.create', 'categories.update', 'categories.delete',
       'brands.view', 'brands.create', 'brands.update', 'brands.delete',
       'attributes.view', 'attributes.create', 'attributes.update', 'attributes.delete',

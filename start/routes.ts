@@ -44,6 +44,8 @@ const SellerCustomersController = () => import('#controllers/seller_customers_co
 const SellerReviewsController = () => import('#controllers/seller_reviews_controller')
 const SellerQuestionsController = () => import('#controllers/seller_questions_controller')
 const SellerMediaController = () => import('#controllers/seller_media_controller')
+const SellerTechnolifeImporterController = () =>
+  import('#controllers/seller_technolife_importer_controller')
 const SellerAdminsController = () => import('#controllers/seller_admins_controller')
 const SellerRolesController = () => import('#controllers/seller_roles_controller')
 const SellerSystemController = () => import('#controllers/seller_system_controller')
@@ -413,6 +415,15 @@ router
         router.get('customers/:id', [SellerCustomersController, 'show'])
         router.patch('customers/:id', [SellerCustomersController, 'update'])
         router.patch('customers/:id/status', [SellerCustomersController, 'setStatus'])
+
+        router.post('importers/technolife/preview', [SellerTechnolifeImporterController, 'preview'])
+        router.post('importers/technolife/import', [SellerTechnolifeImporterController, 'import'])
+        router.get('importers/technolife/imports', [SellerTechnolifeImporterController, 'imports'])
+        router.get('importers/technolife/imports/:id', [SellerTechnolifeImporterController, 'showImport'])
+        router.post('importers/technolife/imports/:id/retry', [
+          SellerTechnolifeImporterController,
+          'retryImport',
+        ])
       })
       .prefix('seller')
       .use(middleware.auth())
