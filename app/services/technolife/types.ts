@@ -23,6 +23,12 @@ export type TechnolifeVariantOption = {
   value?: string
 }
 
+export type TechnolifeColor = {
+  name: string
+  hex: string
+  image?: string
+}
+
 export type TechnolifeParsedProduct = {
   sourceUrl: string
   sourceProductId: string | null
@@ -32,14 +38,18 @@ export type TechnolifeParsedProduct = {
   brandEn: string | null
   model: string | null
   description: string | null
+  reviewHtml: string | null
+  reviewImages: string[]
   shortDescription: string | null
-  priceRial: number | null
-  oldPriceRial: number | null
+  priceAmount: number | null
+  oldPriceAmount: number | null
   priceCurrency: string | null
   discountPercent: number | null
   availability: TechnolifeAvailability
   availabilityText: string | null
+  stock: number | null
   images: string[]
+  colors: TechnolifeColor[]
   specs: TechnolifeSpec[]
   variants: TechnolifeVariantOption[]
   categoryPath: string[]
@@ -62,7 +72,10 @@ export type TechnolifeNormalizedProduct = {
   discountPercent: number | null
   availability: TechnolifeAvailability
   availabilityText: string | null
+  stock: number
   images: string[]
+  reviewImages: string[]
+  colors: TechnolifeColor[]
   specs: TechnolifeSpec[]
   variants: TechnolifeVariantOption[]
   categoryHints: string[]

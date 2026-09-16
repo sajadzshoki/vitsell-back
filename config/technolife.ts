@@ -51,10 +51,24 @@ export const technolifeConfig = {
     return Math.max(1, Math.min(1, numEnv('TECHNOLIFE_CONCURRENCY', 1)))
   },
   get maxImages() {
-    return Math.max(1, numEnv('TECHNOLIFE_MAX_IMAGES', 10))
+    return Math.max(1, numEnv('TECHNOLIFE_MAX_IMAGES', 20))
+  },
+  get defaultStock() {
+    return Math.max(0, Math.floor(numEnv('TECHNOLIFE_DEFAULT_STOCK', 10)))
   },
   get defaultCategoryId() {
     return String(env.get('TECHNOLIFE_DEFAULT_CATEGORY_ID' as never) || 'mobile').trim() || 'mobile'
+  },
+  get defaultCategoryUrl() {
+    return (
+      String(
+        env.get('TECHNOLIFE_DEFAULT_CATEGORY_URL' as never) ||
+          'https://www.technolife.com/category/mobile/mobile-phone'
+      ).trim() || 'https://www.technolife.com/category/mobile/mobile-phone'
+    )
+  },
+  get maxCategoryImport() {
+    return Math.max(1, Math.min(500, Math.floor(numEnv('TECHNOLIFE_MAX_CATEGORY_IMPORT', 100))))
   },
   get defaultFieldPolicy(): TechnolifeFieldPolicy {
     return {

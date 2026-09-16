@@ -1,18 +1,22 @@
 import { DateTime } from 'luxon'
 import logger from '@adonisjs/core/services/logger'
 // DateTime used for source timestamps and batch lifecycle
-import technolifeConfig, { type TechnolifeFieldPolicy, type TechnolifeImportMode } from '#config/technolife'
+import technolifeConfig, {
+  type TechnolifeFieldPolicy,
+  type TechnolifeImportMode,
+} from '#config/technolife'
 import TechnolifeClient, { TechnolifeFetchError } from '#services/technolife/client'
 import { parseTechnolifeHtml } from '#services/technolife/parser'
 import { normalizeTechnolifeProduct } from '#services/technolife/normalizer'
 import { resolveBrand } from '#services/technolife/brand_mapper'
 import { resolveCategory } from '#services/technolife/category_mapper'
 import { findDuplicateProduct } from '#services/technolife/duplicate'
-import { importRemoteImages } from '#services/technolife/image_importer'
+import { importRemoteImages, rewriteImportedHtmlImages } from '#services/technolife/image_importer'
 import { validateTechnolifeUrl } from '#services/technolife/url'
 import ListingWriteService from '#services/listing_write_service'
 import ProductImportBatch from '#models/product_import_batch'
 import ProductImportItem from '#models/product_import_item'
+import Product from '#models/product'
 import type {
   TechnolifeImportItemResult,
   TechnolifePreviewResult,
@@ -27,6 +31,17 @@ export type ImportOptions = {
 
 function mergePolicy(partial?: Partial<TechnolifeFieldPolicy>): TechnolifeFieldPolicy {
   return { ...technolifeConfig.defaultFieldPolicy, ...partial }
+}
+
+async function uniqueProductId(suggested: string | null): Promise<string | undefined> {
+  if (!suggested) return undefined
+  let candidate = suggested
+  let suffix = 2
+  while (await Product.find(candidate)) {
+    candidate = `${suggested}-${suffix}`
+    suffix += 1
+  }
+  return candidate
 }
 
 export default class TechnolifeImportService {
@@ -145,12 +160,7 @@ export default class TechnolifeImportService {
     batch.successCount = success
     batch.failedCount = failed
     batch.duplicateCount = duplicate
-    batch.status =
-      failed === 0 && duplicate === 0
-        ? 'success'
-        : success > 0
-          ? 'partial'
-          : 'failed'
+    batch.status = failed === 0 && duplicate === 0 ? 'success' : success > 0 ? 'partial' : 'failed'
     batch.finishedAt = DateTime.now()
     await batch.save()
     logger.info({ batchId }, '[TechnolifeImporter] Import completed')
@@ -272,6 +282,7 @@ export default class TechnolifeImportService {
       const policy = mergePolicy(options.fieldPolicy)
       let imageUrls = normalized.images
       const imagesImported: string[] = []
+      let description = normalized.description
 
       if (options.downloadImages !== false && normalized.images.length) {
         const limited = normalized.images.slice(0, technolifeConfig.maxImages)
@@ -287,6 +298,25 @@ export default class TechnolifeImportService {
         }
       }
 
+      if (options.downloadImages !== false && normalized.reviewImages.length) {
+        const reviewMedia = await importRemoteImages(
+          normalized.reviewImages.slice(0, technolifeConfig.maxImages),
+          validated.normalized,
+          { alt: normalized.shortName || normalized.title }
+        )
+        warnings.push(...reviewMedia.warnings)
+        imagesImported.push(...reviewMedia.urls)
+        description = rewriteImportedHtmlImages(
+          description,
+          validated.normalized,
+          reviewMedia.items,
+          true
+        )
+        if (reviewMedia.urls.length < normalized.reviewImages.length) {
+          warnings.push('برخی تصاویر نقد و بررسی دانلود نشدند و از توضیحات حذف شدند')
+        }
+      }
+
       const primaryImage = imageUrls[0] || '/images/placeholder-product.png'
       const gallery = imageUrls.slice(1)
       const fieldsChanged: string[] = []
@@ -299,7 +329,8 @@ export default class TechnolifeImportService {
           source: 'technolife',
           sourceUrl: normalized.sourceUrl,
           sourceProductId: normalized.sourceProductId,
-          tags: ['technolife', ...(normalized.sourceProductId ? [`tl:${normalized.sourceProductId}`] : [])],
+          sourceUpdatedAt: DateTime.now(),
+          tags: [],
         }
         fieldsChanged.push('source')
 
@@ -307,7 +338,7 @@ export default class TechnolifeImportService {
           patch.title = normalized.title
           patch.shortName = normalized.shortName
           patch.shortDesc = normalized.shortDesc
-          patch.description = normalized.description
+          patch.description = description
           fieldsChanged.push('description')
         }
         if (policy.updatePrice) {
@@ -318,6 +349,7 @@ export default class TechnolifeImportService {
         if (policy.updateImages && imageUrls.length) {
           patch.image = primaryImage
           patch.gallery = gallery
+          patch.colors = normalized.colors
           fieldsChanged.push('images')
         }
         if (policy.updateSpecs && normalized.specs.length) {
@@ -325,15 +357,11 @@ export default class TechnolifeImportService {
           fieldsChanged.push('specs')
         }
 
-        const stock = policy.updateInventory
-          ? normalized.availability === 'in_stock'
-            ? 1
-            : 0
-          : undefined
+        const stock = policy.updateInventory ? normalized.stock : undefined
 
         const updated = await this.listings.updateListing(duplicate.productId, {
           product: patch as never,
-          ...(stock != null ? { stock } : {}),
+          ...(stock !== undefined ? { stock } : {}),
         })
 
         return {
@@ -348,9 +376,10 @@ export default class TechnolifeImportService {
 
       // create
       logger.info({ title: normalized.title }, '[TechnolifeImporter] Creating product')
+      const productId = await uniqueProductId(normalized.suggestedProductId)
       const created = await this.listings.createListing({
         product: {
-          id: normalized.suggestedProductId || undefined,
+          id: productId,
           title: normalized.title,
           shortName: normalized.shortName,
           brand: brand.name,
@@ -360,23 +389,23 @@ export default class TechnolifeImportService {
           oldPrice: normalized.oldPriceToman,
           image: primaryImage,
           gallery: gallery.length ? gallery : null,
+          colors: normalized.colors.length
+            ? normalized.colors.map(({ name, hex }) => ({ name, hex }))
+            : null,
           shortDesc: normalized.shortDesc,
-          description: normalized.description,
+          description,
           specs: normalized.specs,
           sku: normalized.sku,
-          inStock: false,
+          inStock: normalized.stock > 0,
           published: true,
-          tags: [
-            'technolife',
-            ...(normalized.sourceProductId ? [`tl:${normalized.sourceProductId}`] : []),
-          ],
+          tags: [],
           source: 'technolife',
           sourceUrl: normalized.sourceUrl,
           sourceProductId: normalized.sourceProductId,
           sourceImportedAt: DateTime.now(),
           sourceUpdatedAt: DateTime.now(),
         },
-        stock: 0,
+        stock: normalized.stock,
         status: options.listingStatus || 'pending',
       })
 

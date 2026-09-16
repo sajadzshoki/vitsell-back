@@ -22,8 +22,28 @@ function isRetryableStatus(status: number) {
   return status === 408 || status === 429 || status >= 500
 }
 
+function assertAllowedTechnolifeApiUrl(inputUrl: string): URL {
+  let parsed: URL
+  try {
+    parsed = new URL(inputUrl)
+  } catch {
+    throw new TechnolifeFetchError('VALIDATION_ERROR', 'آدرس API نامعتبر است')
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new TechnolifeFetchError('SSRF_BLOCKED', 'فقط http/https مجاز است')
+  }
+  const host = parsed.hostname.toLowerCase()
+  if (!technolifeConfig.allowedHosts.has(host)) {
+    throw new TechnolifeFetchError('SSRF_BLOCKED', 'فقط دامنه technolife مجاز است')
+  }
+  if (!/^\/shop_plp\/?$/i.test(parsed.pathname)) {
+    throw new TechnolifeFetchError('SSRF_BLOCKED', 'فقط endpoint لیست محصولات مجاز است')
+  }
+  return parsed
+}
+
 /**
- * Safe Technolife HTML fetcher.
+ * Safe Technolife HTML/JSON fetcher.
  * No stealth/evasion — realistic browser-like Accept headers only.
  */
 export default class TechnolifeClient {
@@ -39,6 +59,54 @@ export default class TechnolifeClient {
       throw new TechnolifeFetchError(validated.code, validated.message)
     }
 
+    const text = await this.requestText(validated.normalized, {
+      headers: {
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'fa-IR,fa;q=0.9,en-US;q=0.8,en;q=0.7',
+      },
+    })
+
+    if (!text || text.length < 200) {
+      throw new TechnolifeFetchError('PARSE_ERROR', 'محتوای صفحه خالی یا ناقص است')
+    }
+
+    return {
+      url: validated.normalized,
+      html: text,
+      sourceProductId: validated.sourceProductId!,
+    }
+  }
+
+  async fetchJson(
+    inputUrl: string,
+    init: { method?: string; body?: string; headers?: Record<string, string> } = {}
+  ): Promise<unknown> {
+    if (!technolifeConfig.enabled) {
+      throw new TechnolifeFetchError('DISABLED', 'ایمپورت تکنولایف غیرفعال است')
+    }
+
+    const parsed = assertAllowedTechnolifeApiUrl(inputUrl)
+    const text = await this.requestText(parsed.toString(), {
+      method: init.method || 'POST',
+      body: init.body,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...(init.headers || {}),
+      },
+    })
+
+    try {
+      return JSON.parse(text) as unknown
+    } catch {
+      throw new TechnolifeFetchError('PARSE_ERROR', 'پاسخ JSON نامعتبر است')
+    }
+  }
+
+  private async requestText(
+    url: string,
+    init: { method?: string; body?: string; headers?: Record<string, string> }
+  ): Promise<string> {
     await this.pace()
 
     const maxRetries = technolifeConfig.maxRetries
@@ -51,16 +119,16 @@ export default class TechnolifeClient {
       const timer = setTimeout(() => controller.abort(), technolifeConfig.timeoutMs)
 
       try {
-        logger.info({ url: validated.normalized, attempt }, '[TechnolifeImporter] Fetching URL')
-        const res = await fetch(validated.normalized, {
-          method: 'GET',
+        logger.info({ url, attempt, method: init.method || 'GET' }, '[TechnolifeImporter] Fetching URL')
+        const res = await fetch(url, {
+          method: init.method || 'GET',
+          body: init.body,
           redirect: 'follow',
           signal: controller.signal,
           headers: {
-            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'fa-IR,fa;q=0.9,en-US;q=0.8,en;q=0.7',
             'User-Agent':
               'VitsellTechnolifeImporter/1.0 (+internal catalog sync; respectful crawler)',
+            ...(init.headers || {}),
           },
         })
 
@@ -77,16 +145,7 @@ export default class TechnolifeClient {
           )
         }
 
-        const html = await res.text()
-        if (!html || html.length < 200) {
-          throw new TechnolifeFetchError('PARSE_ERROR', 'محتوای صفحه خالی یا ناقص است')
-        }
-
-        return {
-          url: validated.normalized,
-          html,
-          sourceProductId: validated.sourceProductId!,
-        }
+        return await res.text()
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err))
         if (err instanceof TechnolifeFetchError) {

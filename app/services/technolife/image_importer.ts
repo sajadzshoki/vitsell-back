@@ -36,9 +36,14 @@ export async function importRemoteImages(
   imageUrls: string[],
   pageUrl: string,
   opts?: { alt?: string }
-): Promise<{ urls: string[]; warnings: string[] }> {
+): Promise<{
+  urls: string[]
+  items: Array<{ sourceUrl: string; storedUrl: string }>
+  warnings: string[]
+}> {
   const warnings: string[] = []
   const imported: string[] = []
+  const items: Array<{ sourceUrl: string; storedUrl: string }> = []
   const seen = new Set<string>()
 
   for (const raw of imageUrls) {
@@ -50,6 +55,7 @@ export async function importRemoteImages(
     const existing = await MediaAsset.query().where('description', `source:${abs}`).first()
     if (existing) {
       imported.push(existing.url)
+      items.push({ sourceUrl: abs, storedUrl: existing.url })
       continue
     }
 
@@ -59,7 +65,8 @@ export async function importRemoteImages(
         try {
           const u = new URL(abs)
           const host = u.hostname.toLowerCase()
-          if (host === 'localhost' || host.startsWith('127.') || host.startsWith('10.')) return false
+          if (host === 'localhost' || host.startsWith('127.') || host.startsWith('10.'))
+            return false
           if (host.startsWith('192.168.') || host.startsWith('169.254.')) return false
           return u.protocol === 'https:' || u.protocol === 'http:'
         } catch {
@@ -84,9 +91,9 @@ export async function importRemoteImages(
           redirect: 'follow',
           signal: controller.signal,
           headers: {
-            Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+            'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
             'User-Agent': 'VitsellTechnolifeImporter/1.0',
-            Referer: pageUrl,
+            'Referer': pageUrl,
           },
         })
       } finally {
@@ -137,13 +144,34 @@ export async function importRemoteImages(
       })
 
       imported.push(url)
+      items.push({ sourceUrl: abs, storedUrl: url })
       logger.info({ url, source: abs }, '[TechnolifeImporter] Downloading images')
     } catch (err) {
       warnings.push(`خطای تصویر: ${err instanceof Error ? err.message : String(err)}`)
     }
   }
 
-  return { urls: imported, warnings }
+  return { urls: imported, items, warnings }
+}
+
+export function rewriteImportedHtmlImages(
+  html: string | null,
+  pageUrl: string,
+  items: Array<{ sourceUrl: string; storedUrl: string }>,
+  removeMissing = false
+): string | null {
+  if (!html) return null
+  const bySource = new Map(items.map((item) => [item.sourceUrl, item.storedUrl]))
+  const rewritten = html.replace(
+    /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi,
+    (tag, raw: string) => {
+      const sourceUrl = normalizeImageUrl(raw, pageUrl)
+      const storedUrl = sourceUrl ? bySource.get(sourceUrl) : null
+      if (!storedUrl) return removeMissing ? '' : tag
+      return tag.replace(/(\bsrc=["'])[^"']+(["'])/i, `$1${storedUrl}$2`)
+    }
+  )
+  return rewritten.trim() || null
 }
 
 /** Ensure product URL allowlist helper remains imported for callers that need it */

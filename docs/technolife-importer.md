@@ -9,7 +9,7 @@ Internal importer that fetches selected Technolife product pages and creates/upd
 | Stack | AdonisJS 7 + Lucid + Postgres; single-tenant admin under `/api/v1/seller` |
 | Product create | `POST /seller/listings` → `SellerController.storeListing` / `ListingWriteService` |
 | Price unit | **تومان** integer (`bigInteger`). Zarinpal converts ×10 to ریال |
-| Technolife price | JSON-LD `priceCurrency: IRR` (ریال) → store as `Math.round(rial / 10)` تومان |
+| Technolife price | Next state `discounted_price` is the same integer rendered as تومان; JSON-LD's `IRR` label is currently incorrect |
 | Variants | JSON on `products.variants` + `variantAxes` (not separate table) |
 | Specs | `products.specs: { key, value }[]` |
 | Brand | `brands` table + `products.brand` as **name string** (not FK) |
@@ -27,8 +27,8 @@ Internal importer that fetches selected Technolife product pages and creates/upd
 Technolife URL
   → URL validate (SSRF / allowlist)
   → TechnolifeClient (fetch, retry, delay)
-  → TechnolifeParser (JSON-LD → HTML fallbacks)
-  → Normalizer (Persian text, price IRR→toman)
+  → TechnolifeParser (__NEXT_DATA__ → JSON-LD/HTML fallbacks)
+  → Normalizer (Persian text, safe rich review HTML, تومان)
   → Brand / category mappers
   → Duplicate detection
   → (optional) image download → Drive + MediaAsset
@@ -44,7 +44,11 @@ TECHNOLIFE_REQUEST_DELAY_MS=1500
 TECHNOLIFE_TIMEOUT_MS=15000
 TECHNOLIFE_MAX_RETRIES=3
 TECHNOLIFE_CONCURRENCY=1
+TECHNOLIFE_MAX_IMAGES=20
+TECHNOLIFE_DEFAULT_STOCK=10
 TECHNOLIFE_DEFAULT_CATEGORY_ID=mobile
+TECHNOLIFE_DEFAULT_CATEGORY_URL=https://www.technolife.com/category/mobile/mobile-phone
+TECHNOLIFE_MAX_CATEGORY_IMPORT=100
 TECHNOLIFE_UPDATE_PRICE=false
 TECHNOLIFE_UPDATE_INVENTORY=false
 TECHNOLIFE_UPDATE_DESCRIPTION=true
@@ -62,6 +66,24 @@ TECHNOLIFE_UPDATE_SPECS=true
 
 Safe defaults: do **not** overwrite price or inventory on update.
 
+## Category import
+
+Pass a Technolife category URL (with optional filters) or a numeric limit.
+Discovery uses the public `shop_plp` GraphQL list (`get_menu_products`) with the same
+`filterObj` as the site (`brand_filters` from `manufacturer_id`, `attribute_filters` from `af`).
+
+```bash
+# Import 20 products from the default category URL
+npm run technolife:import -- 20
+node ace technolife:import 20
+
+# Explicit category + limit
+node ace technolife:import --category="https://www.technolife.com/category/mobile/mobile-phone?manufacturer_id=26&af=195" --limit=20
+node ace technolife:import "https://www.technolife.com/category/mobile/mobile-phone" --limit=10
+```
+
+Hard cap: `TECHNOLIFE_MAX_CATEGORY_IMPORT` (default 100).
+
 ## Duplicate strategy
 
 1. `source = technolife` + `source_product_id`
@@ -73,11 +95,21 @@ Safe defaults: do **not** overwrite price or inventory on update.
 ## CLI
 
 ```bash
-node ace technolife:import <url>
+node ace technolife:import 20
+node ace technolife:import <product-url>
+node ace technolife:import <category-url> --limit=20
+node ace technolife:import --category=<category-url> --limit=20
 node ace technolife:import --file=urls.txt
 node ace technolife:import --dry-run <url>
 node ace technolife:import --mode=upsert <url>
+node ace technolife:import --mode=upsert --update-all 20
+node ace products:clear --force
+node ace products:clear --technolife-only --force
 ```
+
+NPM shortcuts: `technolife:preview`, `technolife:import`, `technolife:import:file`, `technolife:update`,
+`technolife:refresh`, `technolife:refresh-source`, `technolife:clear`, and `products:clear`.
+Product clearing is refused when `NODE_ENV=production`.
 
 ## Admin API
 
@@ -95,11 +127,15 @@ node ace technolife:import --mode=upsert <url>
 
 ## Pricing
 
-Technolife JSON-LD exposes **IRR**. Vitsell stores **تومان**. Conversion is explicit ÷10; no other FX.
+Technolife's Next state exposes `price` and `discounted_price` as the exact integers rendered
+with **تومان** on the page. The importer therefore stores those values unchanged. JSON-LD is
+only a fallback because its current `priceCurrency: IRR` label conflicts with the visible page.
 
 ## Inventory
 
-Technolife in-stock / out-of-stock is stored on the import item as informational availability. Listing stock defaults to `0` unless `updateInventory` is enabled (still does not copy Technlife quantities).
+The selected offer's `in_stock` quantity is copied when present. If the product is available but
+no reliable quantity exists, listing stock defaults to `TECHNOLIFE_DEFAULT_STOCK` (`10`); an
+explicitly unavailable product gets `0`.
 
 ## Security
 

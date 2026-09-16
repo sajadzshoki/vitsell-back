@@ -1,10 +1,7 @@
-import {
-  normalizePersianText,
-  splitTechnolifeBrand,
-  stripTags,
-} from '#services/technolife/persian'
+import { normalizePersianText, splitTechnolifeBrand, stripTags } from '#services/technolife/persian'
 import { parsePriceNumber } from '#services/technolife/price'
 import { extractTechnolifeProductId, normalizeImageUrl } from '#services/technolife/url'
+import { parseTechnolifeNextState } from '#services/technolife/next_state'
 import type {
   TechnolifeAvailability,
   TechnolifeParsedProduct,
@@ -87,8 +84,8 @@ function parseAvailability(raw: unknown): TechnolifeAvailability {
 }
 
 function collectOffer(product: Record<string, unknown>): {
-  priceRial: number | null
-  oldPriceRial: number | null
+  priceAmount: number | null
+  oldPriceAmount: number | null
   currency: string | null
   availability: TechnolifeAvailability
   availabilityText: string | null
@@ -97,8 +94,8 @@ function collectOffer(product: Record<string, unknown>): {
   const offerObj = Array.isArray(offers) ? asRecord(offers[0]) : asRecord(offers)
   if (!offerObj) {
     return {
-      priceRial: null,
-      oldPriceRial: null,
+      priceAmount: null,
+      oldPriceAmount: null,
       currency: null,
       availability: 'unknown',
       availabilityText: null,
@@ -106,7 +103,8 @@ function collectOffer(product: Record<string, unknown>): {
   }
 
   const currency = String(offerObj.priceCurrency || 'IRR')
-  let priceRial = parsePriceNumber(offerObj.lowPrice as never) ?? parsePriceNumber(offerObj.price as never)
+  let priceAmount =
+    parsePriceNumber(offerObj.lowPrice as never) ?? parsePriceNumber(offerObj.price as never)
   const high = parsePriceNumber(offerObj.highPrice as never)
 
   let nestedAvailability: TechnolifeAvailability = 'unknown'
@@ -116,7 +114,7 @@ function collectOffer(product: Record<string, unknown>): {
   if (nestedOffers.length) {
     const first = asRecord(nestedOffers[0])
     if (first) {
-      priceRial = parsePriceNumber(first.price as never) ?? priceRial
+      priceAmount = parsePriceNumber(first.price as never) ?? priceAmount
       nestedAvailability = parseAvailability(first.availability)
       availabilityText = first.availability ? String(first.availability) : null
     }
@@ -125,12 +123,11 @@ function collectOffer(product: Record<string, unknown>): {
     availabilityText = offerObj.availability ? String(offerObj.availability) : null
   }
 
-  const oldPriceRial =
-    high != null && priceRial != null && high > priceRial ? high : null
+  const oldPriceAmount = high !== null && priceAmount !== null && high > priceAmount ? high : null
 
   return {
-    priceRial,
-    oldPriceRial,
+    priceAmount,
+    oldPriceAmount,
     currency,
     availability: nestedAvailability,
     availabilityText,
@@ -154,8 +151,7 @@ function extractSpecsFromHtml(html: string): TechnolifeSpec[] {
   // Prefer rows inside tables near specification headings
   const tableChunks = html.match(/<table[\s\S]*?<\/table>/gi) || []
   const sources = tableChunks.length ? tableChunks : [html]
-  const rowRe =
-    /<tr[^>]*>\s*<t[hd][^>]*>([\s\S]*?)<\/t[hd]>\s*<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/gi
+  const rowRe = /<tr[^>]*>\s*<t[hd][^>]*>([\s\S]*?)<\/t[hd]>\s*<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/gi
   const blocked = /ورود|ثبت نام|سبد خرید|جستجو|منو|footer|header|login|cart/i
 
   for (const chunk of sources) {
@@ -211,55 +207,59 @@ function titleTag(html: string): string | null {
 }
 
 /**
- * Prefer JSON-LD Product, then meta/HTML fallbacks.
+ * Prefer Technolife's Next.js product state, then JSON-LD and HTML fallbacks.
  */
 export function parseTechnolifeHtml(html: string, pageUrl: string): TechnolifeParsedProduct {
   const jsonLd = extractJsonLdBlocks(html)
   const product = findProductNode(jsonLd)
+  const next = parseTechnolifeNextState(html, pageUrl)
   const categoryPath = findBreadcrumbPath(jsonLd)
   const offer = product
     ? collectOffer(product)
     : {
-        priceRial: null,
-        oldPriceRial: null,
+        priceAmount: null,
+        oldPriceAmount: null,
         currency: null,
         availability: 'unknown' as const,
         availabilityText: null,
       }
 
-  const brandRaw = product
-    ? String(asRecord(product.brand)?.name || product.brand || '')
-    : ''
+  const brandRawFromLd = product ? String(asRecord(product.brand)?.name || product.brand || '') : ''
+  const brandRaw = next?.brandRaw || brandRawFromLd
   const brandParts = splitTechnolifeBrand(brandRaw)
 
   const nameFromLd = product ? normalizePersianText(String(product.name || '')) : ''
-  const name =
-    nameFromLd ||
-    metaContent(html, 'og:title') ||
-    titleTag(html) ||
-    null
+  const name = next?.title || nameFromLd || metaContent(html, 'og:title') || titleTag(html) || null
 
   const descriptionRaw = product
     ? String(product.description || '')
     : metaContent(html, 'og:description') || ''
-  const description = descriptionRaw ? normalizePersianText(descriptionRaw) : null
+  const description =
+    next?.shortDescription || (descriptionRaw ? normalizePersianText(descriptionRaw) : null)
 
-  const images = product
-    ? extractImages(product, pageUrl)
-    : (() => {
-        const og = metaContent(html, 'og:image')
-        const abs = og ? normalizeImageUrl(og, pageUrl) : null
-        return abs ? [abs] : []
-      })()
+  const images = next?.images.length
+    ? next.images
+    : product
+      ? extractImages(product, pageUrl).filter(
+          (url) => !/\/video\/hls\/|\/thumbnail\.(?:jpe?g|png|webp)(?:\?|$)/i.test(url)
+        )
+      : (() => {
+          const og = metaContent(html, 'og:image')
+          const abs = og ? normalizeImageUrl(og, pageUrl) : null
+          return abs ? [abs] : []
+        })()
 
-  const sku = product ? normalizePersianText(String(product.sku || product.mpn || '')) || null : null
+  const jsonLdSku = product
+    ? normalizePersianText(String(product.sku || product.mpn || '')) || null
+    : null
   const sourceProductId =
-    sku && /^\d+$/.test(sku)
-      ? sku
+    jsonLdSku && /^\d+$/.test(jsonLdSku)
+      ? jsonLdSku
       : extractTechnolifeProductId(new URL(pageUrl).pathname)
+  const sku = next?.sku || (jsonLdSku !== sourceProductId ? jsonLdSku : null)
 
   // SPA / soft-found pages often return site chrome without Product JSON-LD
-  if (!product) {
+  if (!product && !next) {
     return {
       sourceUrl: pageUrl,
       sourceProductId,
@@ -269,14 +269,18 @@ export function parseTechnolifeHtml(html: string, pageUrl: string): TechnolifePa
       brandEn: null,
       model: null,
       description: null,
+      reviewHtml: null,
+      reviewImages: [],
       shortDescription: null,
-      priceRial: null,
-      oldPriceRial: null,
+      priceAmount: null,
+      oldPriceAmount: null,
       priceCurrency: null,
       discountPercent: null,
       availability: 'unknown',
       availabilityText: null,
+      stock: null,
       images: [],
+      colors: [],
       specs: [],
       variants: [],
       categoryPath,
@@ -284,50 +288,45 @@ export function parseTechnolifeHtml(html: string, pageUrl: string): TechnolifePa
     }
   }
 
-  const specs = extractSpecsFromHtml(html)
-  const variants = extractVariantsFromHtml(html)
+  const specs = next?.specs.length ? next.specs : extractSpecsFromHtml(html)
+  const variants = next?.variants.length ? next.variants : extractVariantsFromHtml(html)
 
   // Model heuristic from title
-  let model: string | null = null
-  if (name) {
-    const modelMatch = name.match(
-      /(?:مدل|Model)\s+([A-Za-z0-9][A-Za-z0-9\-_. ]{1,40})/i
-    )
+  let model: string | null = next?.model || null
+  if (!model && name) {
+    const modelMatch = name.match(/(?:مدل|Model)\s+([A-Za-z0-9][A-Za-z0-9\-_. ]{1,40})/i)
     if (modelMatch) model = normalizePersianText(modelMatch[1])
   }
 
-  let availability = offer.availability
+  let availability = next?.availability || offer.availability
   if (availability === 'unknown') {
     if (/ناموجود|اتمام موجودی/i.test(html)) availability = 'out_of_stock'
     else if (/افزودن به سبد|موجود در انبار/i.test(html)) availability = 'in_stock'
   }
 
-  let priceRial = offer.priceRial
-  let oldPriceRial = offer.oldPriceRial
-  let priceCurrency = offer.currency
-  if (priceRial == null) {
+  let priceAmount = next?.priceAmount ?? offer.priceAmount
+  let oldPriceAmount = next?.oldPriceAmount ?? offer.oldPriceAmount
+  // Technolife renders its current JSON-LD integer unchanged as تومان despite an IRR label.
+  let priceCurrency: string | null = next?.priceCurrency || (offer.currency ? 'IRT' : null)
+  if (priceAmount === null) {
     // Fallback: meta product:price:amount or visible تومان/ریال text near price widgets
     const metaPrice =
-      metaContent(html, 'product:price:amount') ||
-      metaContent(html, 'og:price:amount')
+      metaContent(html, 'product:price:amount') || metaContent(html, 'og:price:amount')
     const parsedMeta = parsePriceNumber(metaPrice)
-    if (parsedMeta != null) {
-      priceRial = parsedMeta
-      priceCurrency =
-        metaContent(html, 'product:price:currency') ||
-        metaContent(html, 'og:price:currency') ||
-        'IRR'
+    if (parsedMeta !== null) {
+      priceAmount = parsedMeta
+      priceCurrency = 'IRT'
     } else {
       const tomanMatch = html.match(/([\d٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹,]{4,})\s*تومان/)
       const rialMatch = html.match(/([\d٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹,]{5,})\s*ریال/)
       if (tomanMatch) {
         const toman = parsePriceNumber(tomanMatch[1])
-        if (toman != null) {
-          priceRial = toman * 10
-          priceCurrency = 'IRR'
+        if (toman !== null) {
+          priceAmount = toman
+          priceCurrency = 'IRT'
         }
       } else if (rialMatch) {
-        priceRial = parsePriceNumber(rialMatch[1])
+        priceAmount = parsePriceNumber(rialMatch[1])
         priceCurrency = 'IRR'
       }
     }
@@ -342,14 +341,18 @@ export function parseTechnolifeHtml(html: string, pageUrl: string): TechnolifePa
     brandEn: brandParts.en,
     model,
     description,
-    shortDescription: description ? description.slice(0, 220) : null,
-    priceRial,
-    oldPriceRial,
+    reviewHtml: next?.reviewHtml || null,
+    reviewImages: next?.reviewImages || [],
+    shortDescription: next?.shortDescription || (description ? description.slice(0, 220) : null),
+    priceAmount,
+    oldPriceAmount,
     priceCurrency,
     discountPercent: null,
     availability,
-    availabilityText: offer.availabilityText,
+    availabilityText: next?.availabilityText || offer.availabilityText,
+    stock: next?.stock ?? null,
     images,
+    colors: next?.colors || [],
     specs,
     variants,
     categoryPath,

@@ -15,7 +15,17 @@
     "test": "node ace test",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "products:clear": "node ace products:clear --force",
+    "technolife:clear": "node ace products:clear --technolife-only --force",
+    "technolife:preview": "node ace technolife:import --file=urls.txt --dry-run",
+    "technolife:import": "node ace technolife:import",
+    "technolife:import:file": "node ace technolife:import --file=urls.txt",
+    "technolife:import:no-images": "node ace technolife:import --skip-images",
+    "technolife:update": "node ace technolife:import --mode=upsert --update-all",
+    "technolife:refresh": "npm run products:clear && npm run technolife:import -- 20",
+    "technolife:refresh-source": "npm run technolife:clear && npm run technolife:import -- 20",
+    "test:technolife": "node ace test --files=tests/unit/technolife/parser.spec.ts"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",

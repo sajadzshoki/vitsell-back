@@ -243,7 +243,7 @@ export default class Product extends BaseModel {
       category: this.category,
       categoryLabel: this.categoryLabel,
       price: Number(this.price),
-      ...(this.oldPrice != null ? { oldPrice: Number(this.oldPrice) } : {}),
+      ...(this.oldPrice !== null ? { oldPrice: Number(this.oldPrice) } : {}),
       rating: this.rating,
       reviews: this.reviews,
       image: this.image,
@@ -271,15 +271,6 @@ export default class Product extends BaseModel {
       ...(this.buyNotes?.length ? { buyNotes: this.buyNotes } : {}),
       seo: this.seo ? { ...emptySeo(), ...this.seo } : null,
       tags: Array.isArray(this.tags) ? this.tags : [],
-      ...(this.source
-        ? {
-            source: this.source,
-            sourceUrl: this.sourceUrl,
-            sourceProductId: this.sourceProductId,
-            sourceImportedAt: this.sourceImportedAt?.toISO() ?? null,
-            sourceUpdatedAt: this.sourceUpdatedAt?.toISO() ?? null,
-          }
-        : {}),
     }
   }
 }
