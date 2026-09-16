@@ -105,16 +105,31 @@ export async function saveUploadedMediaFile(file: MultipartFile, opts?: { maxSiz
 
 /**
  * Public URL for clients.
- * - With S3_PUBLIC_URL (MinIO/CDN): direct object URL
+ * - With S3_PUBLIC_URL (MinIO/CDN): direct object URL for Drive uploads
  * - Otherwise: `/uploads/{name}` served by the API (streams from Drive)
+ * - Non-upload paths (`/images/...`, external CDNs, bare mock filenames) stay unchanged
  */
 export function toPublicMediaUrl(url: string) {
-  const name = parseStoredUploadName(url)
-  if (!name) return url
+  const raw = String(url || '').trim()
+  if (!raw) return raw
+
+  const name = parseStoredUploadName(raw)
+  if (!name) return raw
 
   const publicBase = String(env.get('S3_PUBLIC_URL') || '')
     .trim()
     .replace(/\/+$/, '')
+
+  if (publicBase && (raw === `${publicBase}/${name}` || raw.startsWith(`${publicBase}/`))) {
+    return `${publicBase}/${name}`
+  }
+
+  const isDriveUpload =
+    raw.startsWith('/uploads/')
+    || /(?:^|\/)uploads\/[\w.-]+\.(?:jpe?g|png|webp|gif|svg|mp4|webm|mov|pdf|txt|docx?)$/i.test(raw)
+
+  if (!isDriveUpload) return raw
+
   if (publicBase && env.get('DRIVE_DISK') === 's3') {
     return `${publicBase}/${name}`
   }

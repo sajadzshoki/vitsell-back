@@ -5,6 +5,7 @@ import Category from '#models/category'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
 import type { SeoMeta } from '#models/blog_post'
+import { toPublicMediaUrl } from '#utils/media_upload'
 
 export type ProductColor = { name: string; hex: string }
 export type ProductSpec = { key: string; value: string }
@@ -236,6 +237,19 @@ export default class Product extends BaseModel {
 
   /** Frontend Product shape */
   toCatalogJSON() {
+    const gallery = (this.gallery || [])
+      .map((url) => toPublicMediaUrl(String(url || '').trim()))
+      .filter(Boolean)
+    const variants = Array.isArray(this.variants)
+      ? this.variants.map((variant) => {
+          const row = variant as Record<string, unknown>
+          const image = typeof row.image === 'string' ? row.image.trim() : ''
+          return image
+            ? { ...row, image: toPublicMediaUrl(image) }
+            : row
+        })
+      : []
+
     return {
       id: this.id,
       title: this.title,
@@ -246,9 +260,9 @@ export default class Product extends BaseModel {
       ...(this.oldPrice !== null ? { oldPrice: Number(this.oldPrice) } : {}),
       rating: this.rating,
       reviews: this.reviews,
-      image: this.image,
-      ...(this.imageDark ? { imageDark: this.imageDark } : {}),
-      ...(this.gallery?.length ? { gallery: this.gallery } : {}),
+      image: toPublicMediaUrl(this.image),
+      ...(this.imageDark ? { imageDark: toPublicMediaUrl(this.imageDark) } : {}),
+      ...(gallery.length ? { gallery } : {}),
       ...(this.badge ? { badge: this.badge } : {}),
       ...(this.colors?.length ? { colors: this.colors } : {}),
       inStock: this.inStock,
@@ -261,7 +275,7 @@ export default class Product extends BaseModel {
       weight: this.weight || '',
       lowStockThreshold: Number(this.lowStockThreshold) || 5,
       variantAxes: Array.isArray(this.variantAxes) ? this.variantAxes : [],
-      variants: Array.isArray(this.variants) ? this.variants : [],
+      variants,
       ...(this.shortDesc ? { shortDesc: this.shortDesc } : {}),
       ...(this.shortName ? { shortName: this.shortName } : {}),
       ...(this.scores ? { scores: this.scores } : {}),
@@ -269,7 +283,14 @@ export default class Product extends BaseModel {
       ...(this.description ? { description: this.description } : {}),
       ...(this.features?.length ? { features: this.features } : {}),
       ...(this.buyNotes?.length ? { buyNotes: this.buyNotes } : {}),
-      seo: this.seo ? { ...emptySeo(), ...this.seo } : null,
+      seo: this.seo
+        ? {
+            ...emptySeo(),
+            ...this.seo,
+            ...(this.seo.ogImage ? { ogImage: toPublicMediaUrl(this.seo.ogImage) } : {}),
+            ...(this.seo.twitterImage ? { twitterImage: toPublicMediaUrl(this.seo.twitterImage) } : {}),
+          }
+        : null,
       tags: Array.isArray(this.tags) ? this.tags : [],
     }
   }

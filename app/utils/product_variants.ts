@@ -1,4 +1,5 @@
 import type Product from '#models/product'
+import { toPublicMediaUrl } from '#utils/media_upload'
 
 export type ProductVariantOption = {
   attributeId: string
@@ -61,7 +62,7 @@ export function catalogForVariant(product: Product, variant: ProductVariant | nu
     ...catalog,
     price,
     ...(oldPrice !== null && oldPrice > price ? { oldPrice } : {}),
-    image: variant.image || catalog.image,
+    image: toPublicMediaUrl(variant.image || '') || catalog.image,
     inStock: variant.status === 'active' && Number(variant.stock) > 0,
     stock: Math.max(0, Number(variant.stock) || 0),
     sku: variant.sku || catalog.sku,
