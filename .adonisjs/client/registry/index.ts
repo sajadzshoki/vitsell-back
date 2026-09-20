@@ -192,6 +192,18 @@ const routes = {
     tokens: [{"old":"/api/v1/navigation","type":0,"val":"api","end":""},{"old":"/api/v1/navigation","type":0,"val":"v1","end":""},{"old":"/api/v1/navigation","type":0,"val":"navigation","end":""}],
     types: placeholder as Registry['content.navigation']['types'],
   },
+  'content.seo': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/seo',
+    tokens: [{"old":"/api/v1/seo","type":0,"val":"api","end":""},{"old":"/api/v1/seo","type":0,"val":"v1","end":""},{"old":"/api/v1/seo","type":0,"val":"seo","end":""}],
+    types: placeholder as Registry['content.seo']['types'],
+  },
+  'content.seo_redirects': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/seo/redirects',
+    tokens: [{"old":"/api/v1/seo/redirects","type":0,"val":"api","end":""},{"old":"/api/v1/seo/redirects","type":0,"val":"v1","end":""},{"old":"/api/v1/seo/redirects","type":0,"val":"seo","end":""},{"old":"/api/v1/seo/redirects","type":0,"val":"redirects","end":""}],
+    types: placeholder as Registry['content.seo_redirects']['types'],
+  },
   'mega_menu.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/mega-menu',
@@ -254,14 +266,14 @@ const routes = {
   },
   'cart.update': {
     methods: ["PATCH"],
-    pattern: '/api/v1/cart/:productId',
-    tokens: [{"old":"/api/v1/cart/:productId","type":0,"val":"api","end":""},{"old":"/api/v1/cart/:productId","type":0,"val":"v1","end":""},{"old":"/api/v1/cart/:productId","type":0,"val":"cart","end":""},{"old":"/api/v1/cart/:productId","type":1,"val":"productId","end":""}],
+    pattern: '/api/v1/cart/:lineId',
+    tokens: [{"old":"/api/v1/cart/:lineId","type":0,"val":"api","end":""},{"old":"/api/v1/cart/:lineId","type":0,"val":"v1","end":""},{"old":"/api/v1/cart/:lineId","type":0,"val":"cart","end":""},{"old":"/api/v1/cart/:lineId","type":1,"val":"lineId","end":""}],
     types: placeholder as Registry['cart.update']['types'],
   },
   'cart.destroy': {
     methods: ["DELETE"],
-    pattern: '/api/v1/cart/:productId',
-    tokens: [{"old":"/api/v1/cart/:productId","type":0,"val":"api","end":""},{"old":"/api/v1/cart/:productId","type":0,"val":"v1","end":""},{"old":"/api/v1/cart/:productId","type":0,"val":"cart","end":""},{"old":"/api/v1/cart/:productId","type":1,"val":"productId","end":""}],
+    pattern: '/api/v1/cart/:lineId',
+    tokens: [{"old":"/api/v1/cart/:lineId","type":0,"val":"api","end":""},{"old":"/api/v1/cart/:lineId","type":0,"val":"v1","end":""},{"old":"/api/v1/cart/:lineId","type":0,"val":"cart","end":""},{"old":"/api/v1/cart/:lineId","type":1,"val":"lineId","end":""}],
     types: placeholder as Registry['cart.destroy']['types'],
   },
   'cart.clear': {
@@ -671,6 +683,12 @@ const routes = {
     pattern: '/api/v1/seller/categories',
     tokens: [{"old":"/api/v1/seller/categories","type":0,"val":"api","end":""},{"old":"/api/v1/seller/categories","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/categories","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/categories","type":0,"val":"categories","end":""}],
     types: placeholder as Registry['categories.admin_index']['types'],
+  },
+  'categories.spec_keys': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/seller/categories/:id/spec-keys',
+    tokens: [{"old":"/api/v1/seller/categories/:id/spec-keys","type":0,"val":"api","end":""},{"old":"/api/v1/seller/categories/:id/spec-keys","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/categories/:id/spec-keys","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/categories/:id/spec-keys","type":0,"val":"categories","end":""},{"old":"/api/v1/seller/categories/:id/spec-keys","type":1,"val":"id","end":""},{"old":"/api/v1/seller/categories/:id/spec-keys","type":0,"val":"spec-keys","end":""}],
+    types: placeholder as Registry['categories.spec_keys']['types'],
   },
   'categories.admin_show': {
     methods: ["GET","HEAD"],
@@ -1601,6 +1619,36 @@ const routes = {
     pattern: '/api/v1/seller/customers/:id/status',
     tokens: [{"old":"/api/v1/seller/customers/:id/status","type":0,"val":"api","end":""},{"old":"/api/v1/seller/customers/:id/status","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/customers/:id/status","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/customers/:id/status","type":0,"val":"customers","end":""},{"old":"/api/v1/seller/customers/:id/status","type":1,"val":"id","end":""},{"old":"/api/v1/seller/customers/:id/status","type":0,"val":"status","end":""}],
     types: placeholder as Registry['seller_customers.set_status']['types'],
+  },
+  'seller_technolife_importer.preview': {
+    methods: ["POST"],
+    pattern: '/api/v1/seller/importers/technolife/preview',
+    tokens: [{"old":"/api/v1/seller/importers/technolife/preview","type":0,"val":"api","end":""},{"old":"/api/v1/seller/importers/technolife/preview","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/importers/technolife/preview","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/importers/technolife/preview","type":0,"val":"importers","end":""},{"old":"/api/v1/seller/importers/technolife/preview","type":0,"val":"technolife","end":""},{"old":"/api/v1/seller/importers/technolife/preview","type":0,"val":"preview","end":""}],
+    types: placeholder as Registry['seller_technolife_importer.preview']['types'],
+  },
+  'seller_technolife_importer.import': {
+    methods: ["POST"],
+    pattern: '/api/v1/seller/importers/technolife/import',
+    tokens: [{"old":"/api/v1/seller/importers/technolife/import","type":0,"val":"api","end":""},{"old":"/api/v1/seller/importers/technolife/import","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/importers/technolife/import","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/importers/technolife/import","type":0,"val":"importers","end":""},{"old":"/api/v1/seller/importers/technolife/import","type":0,"val":"technolife","end":""},{"old":"/api/v1/seller/importers/technolife/import","type":0,"val":"import","end":""}],
+    types: placeholder as Registry['seller_technolife_importer.import']['types'],
+  },
+  'seller_technolife_importer.imports': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/seller/importers/technolife/imports',
+    tokens: [{"old":"/api/v1/seller/importers/technolife/imports","type":0,"val":"api","end":""},{"old":"/api/v1/seller/importers/technolife/imports","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/importers/technolife/imports","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/importers/technolife/imports","type":0,"val":"importers","end":""},{"old":"/api/v1/seller/importers/technolife/imports","type":0,"val":"technolife","end":""},{"old":"/api/v1/seller/importers/technolife/imports","type":0,"val":"imports","end":""}],
+    types: placeholder as Registry['seller_technolife_importer.imports']['types'],
+  },
+  'seller_technolife_importer.show_import': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/seller/importers/technolife/imports/:id',
+    tokens: [{"old":"/api/v1/seller/importers/technolife/imports/:id","type":0,"val":"api","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id","type":0,"val":"importers","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id","type":0,"val":"technolife","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id","type":0,"val":"imports","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['seller_technolife_importer.show_import']['types'],
+  },
+  'seller_technolife_importer.retry_import': {
+    methods: ["POST"],
+    pattern: '/api/v1/seller/importers/technolife/imports/:id/retry',
+    tokens: [{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":0,"val":"api","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":0,"val":"importers","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":0,"val":"technolife","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":0,"val":"imports","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":1,"val":"id","end":""},{"old":"/api/v1/seller/importers/technolife/imports/:id/retry","type":0,"val":"retry","end":""}],
+    types: placeholder as Registry['seller_technolife_importer.retry_import']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

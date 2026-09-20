@@ -68,7 +68,8 @@ export const technolifeConfig = {
     )
   },
   get maxCategoryImport() {
-    return Math.max(1, Math.min(500, Math.floor(numEnv('TECHNOLIFE_MAX_CATEGORY_IMPORT', 100))))
+    // Hard safety ceiling only — CLI `--limit` / numeric arg should win up to this.
+    return Math.max(1, Math.min(5000, Math.floor(numEnv('TECHNOLIFE_MAX_CATEGORY_IMPORT', 2000))))
   },
   get defaultFieldPolicy(): TechnolifeFieldPolicy {
     return {

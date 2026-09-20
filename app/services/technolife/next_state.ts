@@ -190,7 +190,17 @@ export function parseTechnolifeNextState(
       ? data.product_review.trim()
       : null
   const brandRecord = record(product.brand)
-  const brandRaw = normalizePersianText(String(brandRecord?.name || brandRecord?.enName || ''))
+  // Technolife may send "فا|En" in `name`, or separate Persian `name` + Latin `enName`.
+  const brandNameFa = normalizePersianText(String(brandRecord?.name || ''))
+  const brandNameEn = normalizePersianText(String(brandRecord?.enName || ''))
+  let brandRaw = brandNameFa
+  if (brandNameFa.includes('|')) {
+    brandRaw = brandNameFa
+  } else if (brandNameFa && brandNameEn && brandNameFa !== brandNameEn) {
+    brandRaw = `${brandNameFa}|${brandNameEn}`
+  } else {
+    brandRaw = brandNameFa || brandNameEn
+  }
   const brand = splitTechnolifeBrand(brandRaw)
   const technicalCode = normalizePersianText(String(product.technical_code || ''))
   const productCode = normalizePersianText(String(product.code || ''))

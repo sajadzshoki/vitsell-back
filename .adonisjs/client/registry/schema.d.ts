@@ -379,6 +379,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/content_controller').default['navigation']>>>
     }
   }
+  'content.seo': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/seo'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/content_controller').default['seo']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/content_controller').default['seo']>>>
+    }
+  }
+  'content.seo_redirects': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/seo/redirects'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/content_controller').default['seoRedirects']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/content_controller').default['seoRedirects']>>>
+    }
+  }
   'mega_menu.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/mega-menu'
@@ -501,11 +525,11 @@ export interface Registry {
   }
   'cart.update': {
     methods: ["PATCH"]
-    pattern: '/api/v1/cart/:productId'
+    pattern: '/api/v1/cart/:lineId'
     types: {
       body: {}
       paramsTuple: [ParamValue]
-      params: { productId: ParamValue }
+      params: { lineId: ParamValue }
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/cart_controller').default['update']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cart_controller').default['update']>>>
@@ -513,11 +537,11 @@ export interface Registry {
   }
   'cart.destroy': {
     methods: ["DELETE"]
-    pattern: '/api/v1/cart/:productId'
+    pattern: '/api/v1/cart/:lineId'
     types: {
       body: {}
       paramsTuple: [ParamValue]
-      params: { productId: ParamValue }
+      params: { lineId: ParamValue }
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/cart_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cart_controller').default['destroy']>>>
@@ -1337,6 +1361,18 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/categories').categoriesQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['adminIndex']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['adminIndex']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'categories.spec_keys': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/seller/categories/:id/spec-keys'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['specKeys']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['specKeys']>>>
     }
   }
   'categories.admin_show': {
@@ -3197,6 +3233,66 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/customers').updateCustomerStatusValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_customers_controller').default['setStatus']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_customers_controller').default['setStatus']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_technolife_importer.preview': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/importers/technolife/preview'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['preview']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['preview']>>>
+    }
+  }
+  'seller_technolife_importer.import': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/importers/technolife/import'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['import']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['import']>>>
+    }
+  }
+  'seller_technolife_importer.imports': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/seller/importers/technolife/imports'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['imports']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['imports']>>>
+    }
+  }
+  'seller_technolife_importer.show_import': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/seller/importers/technolife/imports/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['showImport']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['showImport']>>>
+    }
+  }
+  'seller_technolife_importer.retry_import': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/importers/technolife/imports/:id/retry'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['retryImport']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_technolife_importer_controller').default['retryImport']>>>
     }
   }
 }

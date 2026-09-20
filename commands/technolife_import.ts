@@ -139,7 +139,14 @@ export default class TechnolifeImport extends BaseCommand {
     }
 
     if (categoryUrl) {
-      const max = Math.max(1, Math.floor(limit || 20))
+      const requested = Math.max(1, Math.floor(limit || 20))
+      const hardCap = technolifeConfig.maxCategoryImport
+      if (requested > hardCap) {
+        this.logger.warning(
+          `Requested ${requested} products but TECHNOLIFE_MAX_CATEGORY_IMPORT=${hardCap}; capping discovery`
+        )
+      }
+      const max = Math.min(requested, hardCap)
       this.logger.info(`Discovering up to ${max} products from category…`)
       const discoverer = new TechnolifeCategoryDiscoverer()
       const discovered = await discoverer.discover(categoryUrl, max)

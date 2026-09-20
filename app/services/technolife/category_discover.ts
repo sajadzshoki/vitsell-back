@@ -59,7 +59,7 @@ export function buildCategoryFilterObj(
     limit: Math.max(1, Math.min(PAGE_SIZE, Math.floor(limit))),
   }
 
-  if (skip !== undefined && skip > 0) {
+  if (skip !== undefined && skip >= 0) {
     filterObj.skip = Math.floor(skip)
   }
 
@@ -123,23 +123,30 @@ export default class TechnolifeCategoryDiscoverer {
 
     while (productUrls.length < maxLimit) {
       const remaining = maxLimit - productUrls.length
-      const filterObj = buildCategoryFilterObj(validated.url, remaining, pageIndex || undefined)
+      // Technolife `skip` is a 0-based page index (not an item offset).
+      const filterObj = buildCategoryFilterObj(validated.url, remaining, pageIndex)
       const page = await this.fetchMenuPage(validated.url.origin, listingPath, filterObj)
       totalCount = page.count || totalCount
 
       if (!page.results.length) break
 
+      let added = 0
       for (const row of page.results) {
         const productId = productIdFromCode(row.code)
         if (!productId || seen.has(productId)) continue
         seen.add(productId)
         productUrls.push(buildTechnolifeProductUrl(validated.url.origin, productId))
+        added += 1
         if (productUrls.length >= maxLimit) break
       }
 
       if (page.results.length < filterObj.limit) break
+      if (added === 0) {
+        warnings.push('pagination stalled (no new products); stopping')
+        break
+      }
       pageIndex += 1
-      if (pageIndex > 200) {
+      if (pageIndex > 500) {
         warnings.push('pagination aborted after safety cap')
         break
       }

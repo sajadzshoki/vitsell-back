@@ -22,6 +22,7 @@ export interface ApiDefinition {
     show: typeof routes['categories.show']
     pageMeta: typeof routes['categories.page_meta']
     adminIndex: typeof routes['categories.admin_index']
+    specKeys: typeof routes['categories.spec_keys']
     adminShow: typeof routes['categories.admin_show']
     store: typeof routes['categories.store']
     update: typeof routes['categories.update']
@@ -44,6 +45,8 @@ export interface ApiDefinition {
     compareTemplates: typeof routes['content.compare_templates']
     footer: typeof routes['content.footer']
     navigation: typeof routes['content.navigation']
+    seo: typeof routes['content.seo']
+    seoRedirects: typeof routes['content.seo_redirects']
     discountCodes: typeof routes['content.discount_codes']
     blogIndex: typeof routes['content.blog_index']
     blogShow: typeof routes['content.blog_show']
@@ -369,5 +372,12 @@ export interface ApiDefinition {
     show: typeof routes['seller_customers.show']
     update: typeof routes['seller_customers.update']
     setStatus: typeof routes['seller_customers.set_status']
+  }
+  sellerTechnolifeImporter: {
+    preview: typeof routes['seller_technolife_importer.preview']
+    import: typeof routes['seller_technolife_importer.import']
+    imports: typeof routes['seller_technolife_importer.imports']
+    showImport: typeof routes['seller_technolife_importer.show_import']
+    retryImport: typeof routes['seller_technolife_importer.retry_import']
   }
 }

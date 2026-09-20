@@ -3,8 +3,9 @@ import { normalizeBrandKey, normalizePersianText } from '#services/technolife/pe
 
 const BRAND_ALIASES: Record<string, string[]> = {
   سامسونگ: ['samsung', 'سامسونگ'],
-  اپل: ['apple', 'اپل', 'آیفون'],
+  اپل: ['apple', 'اپل', 'آیفون', 'iphone'],
   شیائومی: ['xiaomi', 'شیائومی', 'شیاومی'],
+  پوکو: ['poco', 'پوکو'],
   هوآوی: ['huawei', 'هوآوی', 'هواوی'],
   آنر: ['honor', 'آنر', 'انر'],
   نوکیا: ['nokia', 'نوکیا'],
@@ -15,16 +16,29 @@ const BRAND_ALIASES: Record<string, string[]> = {
   اوپو: ['oppo', 'اوپو'],
   ویوو: ['vivo', 'ویوو'],
   موتورولا: ['motorola', 'موتورولا'],
+  ایسوس: ['asus', 'ایسوس'],
+  لنوو: ['lenovo', 'لنوو'],
+  اچ‌پی: ['hp', 'اچ پی', 'اچ‌پی'],
+  دل: ['dell', 'دل'],
+  سونی: ['sony', 'سونی'],
+  ال‌جی: ['lg', 'ال جی', 'ال‌جی'],
+  جی‌بی‌ال: ['jbl', 'جی بی ال', 'جی‌بی‌ال'],
+}
+
+/** Exact alias hit only — never substring (avoids empty/short keys mapping to Apple). */
+function aliasCanonical(key: string): string | null {
+  if (!key) return null
+  for (const [canonical, aliases] of Object.entries(BRAND_ALIASES)) {
+    if (aliases.some((a) => normalizeBrandKey(a) === key)) {
+      return canonical
+    }
+  }
+  return null
 }
 
 function canonicalBrandName(name: string): string {
   const key = normalizeBrandKey(name)
-  for (const [canonical, aliases] of Object.entries(BRAND_ALIASES)) {
-    if (aliases.some((a) => normalizeBrandKey(a) === key || key.includes(normalizeBrandKey(a)))) {
-      return canonical
-    }
-  }
-  return normalizePersianText(name) || name
+  return aliasCanonical(key) || normalizePersianText(name) || name
 }
 
 function slugifyBrand(name: string): string {
@@ -34,11 +48,11 @@ function slugifyBrand(name: string): string {
     .replace(/^-+|-+$/g, '')
     .slice(0, 48)
   if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(ascii)) return ascii
-  // Fallback for Persian-only names
   const map: Record<string, string> = {
     سامسونگ: 'samsung',
     اپل: 'apple',
     شیائومی: 'xiaomi',
+    پوکو: 'poco',
     هوآوی: 'huawei',
     آنر: 'honor',
     نوکیا: 'nokia',
@@ -48,6 +62,13 @@ function slugifyBrand(name: string): string {
     اوپو: 'oppo',
     ویوو: 'vivo',
     موتورولا: 'motorola',
+    ایسوس: 'asus',
+    لنوو: 'lenovo',
+    اچ‌پی: 'hp',
+    دل: 'dell',
+    سونی: 'sony',
+    ال‌جی: 'lg',
+    جی‌بی‌ال: 'jbl',
     متفرقه: 'other',
   }
   return map[name] || `brand-${Date.now().toString(36)}`
@@ -66,23 +87,21 @@ export async function resolveBrand(
   const createIfMissing = opts?.createIfMissing !== false
   const display = canonicalBrandName(rawName || 'متفرقه')
   const key = normalizeBrandKey(display)
+  if (!key) {
+    return { id: '', name: 'متفرقه', created: false }
+  }
 
-  const brands = await Brand.query().limit(500)
+  const brands = await Brand.query().orderBy('sort_order', 'asc').limit(500)
   for (const b of brands) {
     const n = normalizeBrandKey(b.name)
+    if (!n) continue
     if (n === key) {
       return { id: b.id, name: display, created: false }
     }
-    for (const [canonical, aliases] of Object.entries(BRAND_ALIASES)) {
-      const aliasHit =
-        aliases.some((a) => normalizeBrandKey(a) === key) &&
-        aliases.some((a) => normalizeBrandKey(a) === n)
-      if (aliasHit) {
-        return { id: b.id, name: canonical, created: false }
-      }
-    }
-    if (n.includes(key) || key.includes(n)) {
-      return { id: b.id, name: display, created: false }
+    const keyCanonical = aliasCanonical(key)
+    const brandCanonical = aliasCanonical(n)
+    if (keyCanonical && brandCanonical && keyCanonical === brandCanonical) {
+      return { id: b.id, name: keyCanonical, created: false }
     }
   }
 

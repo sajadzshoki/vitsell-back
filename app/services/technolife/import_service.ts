@@ -10,6 +10,7 @@ import { parseTechnolifeHtml } from '#services/technolife/parser'
 import { normalizeTechnolifeProduct } from '#services/technolife/normalizer'
 import { resolveBrand } from '#services/technolife/brand_mapper'
 import { resolveCategory } from '#services/technolife/category_mapper'
+import { buildImportVariants } from '#services/technolife/variant_builder'
 import { findDuplicateProduct } from '#services/technolife/duplicate'
 import { importRemoteImages, rewriteImportedHtmlImages } from '#services/technolife/image_importer'
 import { validateTechnolifeUrl } from '#services/technolife/url'
@@ -237,7 +238,25 @@ export default class TechnolifeImportService {
       })
       logger.info({ brand: brand.name }, '[TechnolifeImporter] Brand resolved')
 
-      const category = await resolveCategory(normalized.categoryHints)
+      const category = await resolveCategory(normalized.categoryHints, {
+        brandName: brand.name,
+        model: normalized.model,
+        title: normalized.title,
+        createIfMissing: options.mode !== 'preview',
+      })
+      if (category.created.length) {
+        warnings.push(`دسته‌های ساخته‌شده: ${category.created.join(' ← ')}`)
+      }
+      logger.info(
+        {
+          category: category.id,
+          rootId: category.rootId,
+          brandCategoryId: category.brandCategoryId,
+          productLine: category.productLine,
+        },
+        '[TechnolifeImporter] Category resolved'
+      )
+
       const duplicate = await findDuplicateProduct(normalized)
       logger.info({ duplicate }, '[TechnolifeImporter] Duplicate check')
 
@@ -321,6 +340,32 @@ export default class TechnolifeImportService {
       const gallery = imageUrls.slice(1)
       const fieldsChanged: string[] = []
 
+      const variantPack = await buildImportVariants({
+        colors: normalized.colors,
+        specs: normalized.specs,
+        title: normalized.title,
+        categoryIds: [
+          category.id,
+          category.rootId,
+          category.brandCategoryId,
+        ].filter(Boolean) as string[],
+        price: normalized.priceToman,
+        oldPrice: normalized.oldPriceToman,
+        stock: normalized.stock,
+        sku: normalized.sku,
+        primaryImage,
+        createIfMissing: true,
+      })
+      warnings.push(...variantPack.warnings)
+      if (variantPack.createdAttributeIds.length) {
+        warnings.push(`ویژگی‌های ساخته‌شده: ${variantPack.createdAttributeIds.join(', ')}`)
+      }
+
+      const tagSet = new Set<string>()
+      if (brand.name) tagSet.add(brand.name)
+      if (category.productLine) tagSet.add(category.productLine)
+      const tags = [...tagSet]
+
       if (duplicate && options.mode === 'upsert') {
         const patch: Record<string, unknown> = {
           brand: brand.name,
@@ -330,7 +375,11 @@ export default class TechnolifeImportService {
           sourceUrl: normalized.sourceUrl,
           sourceProductId: normalized.sourceProductId,
           sourceUpdatedAt: DateTime.now(),
-          tags: [],
+          tags,
+          hasVariants: variantPack.hasVariants,
+          variantAxes: variantPack.hasVariants ? variantPack.variantAxes : null,
+          variants: variantPack.hasVariants ? variantPack.variants : null,
+          colors: variantPack.colors.length ? variantPack.colors : null,
         }
         fieldsChanged.push('source')
 
@@ -349,7 +398,6 @@ export default class TechnolifeImportService {
         if (policy.updateImages && imageUrls.length) {
           patch.image = primaryImage
           patch.gallery = gallery
-          patch.colors = normalized.colors
           fieldsChanged.push('images')
         }
         if (policy.updateSpecs && normalized.specs.length) {
@@ -389,16 +437,17 @@ export default class TechnolifeImportService {
           oldPrice: normalized.oldPriceToman,
           image: primaryImage,
           gallery: gallery.length ? gallery : null,
-          colors: normalized.colors.length
-            ? normalized.colors.map(({ name, hex }) => ({ name, hex }))
-            : null,
+          colors: variantPack.colors.length ? variantPack.colors : null,
           shortDesc: normalized.shortDesc,
           description,
           specs: normalized.specs,
           sku: normalized.sku,
           inStock: normalized.stock > 0,
           published: true,
-          tags: [],
+          hasVariants: variantPack.hasVariants,
+          variantAxes: variantPack.hasVariants ? variantPack.variantAxes : null,
+          variants: variantPack.hasVariants ? variantPack.variants : null,
+          tags,
           source: 'technolife',
           sourceUrl: normalized.sourceUrl,
           sourceProductId: normalized.sourceProductId,

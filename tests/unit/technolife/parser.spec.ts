@@ -12,6 +12,7 @@ import {
 import { rialToToman, normalizeToToman, parsePersianPriceToToman } from '#services/technolife/price'
 import { validateTechnolifeUrl, validateTechnolifeCategoryUrl, validateTechnolifeInputUrl } from '#services/technolife/url'
 import { buildCategoryFilterObj } from '#services/technolife/category_discover'
+import { extractProductLine, slugifyTaxonomyPart, extractStorageLabel } from '#services/technolife/series'
 
 const dir = dirname(fileURLToPath(import.meta.url))
 const fixture = readFileSync(join(dir, '../../fixtures/technolife/phone-s25.html'), 'utf8')
@@ -104,6 +105,49 @@ test.group('Technolife category filters', () => {
     const filter = buildCategoryFilterObj(url, 30, 2)
     assert.equal(filter.skip, 2)
     assert.equal(filter.limit, 30)
+  })
+
+  test('includes skip=0 for the first page', ({ assert }) => {
+    const url = new URL('https://www.technolife.com/category/mobile/mobile-phone')
+    const filter = buildCategoryFilterObj(url, 30, 0)
+    assert.equal(filter.skip, 0)
+    assert.equal(filter.limit, 30)
+  })
+})
+
+test.group('Technolife series / taxonomy helpers', () => {
+  test('extracts coarse product lines, not full SKUs', ({ assert }) => {
+    assert.equal(
+      extractProductLine({
+        brandName: 'اپل',
+        model: 'iPhone 16 Pro Max',
+        title: 'گوشی موبایل اپل iPhone 16 Pro Max ظرفیت ۲۵۶ گیگابایت',
+      }),
+      'iPhone Pro Max'
+    )
+    assert.equal(
+      extractProductLine({
+        brandName: 'شیائومی',
+        model: null,
+        title: 'گوشی موبایل شیائومی مدل Redmi 13C 4G ظرفیت 256 گیگابایت رم 8 گیگابایت',
+      }),
+      'Redmi'
+    )
+    assert.equal(
+      extractProductLine({
+        brandName: 'سامسونگ',
+        model: 'Galaxy A17 4G',
+        title: 'گوشی موبایل سامسونگ مدل Galaxy A17 4G',
+      }),
+      'Galaxy A'
+    )
+    assert.equal(slugifyTaxonomyPart('iPhone Pro Max'), 'iphone-pro-max')
+  })
+
+  test('extracts storage label from specs', ({ assert }) => {
+    const storage = extractStorageLabel([{ key: 'حافظه داخلی', value: '256 گیگابایت' }])
+    assert.equal(storage?.value, '256gb')
+    assert.include(storage?.label || '', 'گیگابایت')
   })
 })
 

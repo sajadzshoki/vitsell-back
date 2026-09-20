@@ -236,12 +236,20 @@ export default class ListingWriteService {
         ...(p.image != null ? { image: p.image } : {}),
         ...(p.imageDark !== undefined ? { imageDark: p.imageDark } : {}),
         ...(p.gallery !== undefined ? { gallery: p.gallery?.length ? p.gallery : null } : {}),
+        ...(p.colors !== undefined ? { colors: p.colors?.length ? p.colors : null } : {}),
         ...(p.shortDesc !== undefined ? { shortDesc: p.shortDesc } : {}),
         ...(p.shortName !== undefined ? { shortName: p.shortName } : {}),
         ...(p.description !== undefined ? { description: p.description } : {}),
         ...(p.features !== undefined ? { features: p.features?.length ? p.features : null } : {}),
         ...(p.specs !== undefined ? { specs: p.specs?.length ? p.specs : null } : {}),
         ...(p.sku !== undefined ? { sku: p.sku?.trim() || null } : {}),
+        ...(p.hasVariants !== undefined ? { hasVariants: Boolean(p.hasVariants) } : {}),
+        ...(p.variantAxes !== undefined
+          ? { variantAxes: Array.isArray(p.variantAxes) && p.variantAxes.length ? p.variantAxes : null }
+          : {}),
+        ...(p.variants !== undefined
+          ? { variants: Array.isArray(p.variants) && p.variants.length ? p.variants : null }
+          : {}),
         ...(p.tags !== undefined ? { tags: p.tags } : {}),
         ...(p.source != null ? { source: p.source } : {}),
         ...(p.sourceUrl != null ? { sourceUrl: p.sourceUrl } : {}),

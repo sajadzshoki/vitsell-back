@@ -48,7 +48,7 @@ TECHNOLIFE_MAX_IMAGES=20
 TECHNOLIFE_DEFAULT_STOCK=10
 TECHNOLIFE_DEFAULT_CATEGORY_ID=mobile
 TECHNOLIFE_DEFAULT_CATEGORY_URL=https://www.technolife.com/category/mobile/mobile-phone
-TECHNOLIFE_MAX_CATEGORY_IMPORT=100
+TECHNOLIFE_MAX_CATEGORY_IMPORT=2000
 TECHNOLIFE_UPDATE_PRICE=false
 TECHNOLIFE_UPDATE_INVENTORY=false
 TECHNOLIFE_UPDATE_DESCRIPTION=true
@@ -82,7 +82,8 @@ node ace technolife:import --category="https://www.technolife.com/category/mobil
 node ace technolife:import "https://www.technolife.com/category/mobile/mobile-phone" --limit=10
 ```
 
-Hard cap: `TECHNOLIFE_MAX_CATEGORY_IMPORT` (default 100).
+Hard cap: `TECHNOLIFE_MAX_CATEGORY_IMPORT` (default **2000**, max 5000).
+The CLI numeric arg / `--limit` is honored up to that ceiling.
 
 ## Duplicate strategy
 
@@ -155,11 +156,25 @@ Sequential requests (`CONCURRENCY=1`), configurable delay, timeout, exponential 
 
 ## Known limitations (v1)
 
-- Optimized for mobile phones (`category` → `mobile`)
-- Variant axes imported only when page exposes clear selectable options
+- Variant axes imported from Technolife color options (+ storage from specs when present)
 - No Redis/Bull queue — background `void processBatch()`
 - HTML description sanitized to a small tag allowlist
 - Specs are free-form `{ key, value }` (category spec keys upserted)
+
+## Taxonomy auto-create
+
+On import the mapper ensures a **general** tree and wires the product to the brand leaf:
+
+```text
+موبایل (root)
+  └─ شیائومی / اپل / سامسونگ (brand category)
+```
+
+SKU-level names (`Redmi 13C 256/8`, `iPhone 16 Pro Max 256GB`, …) are **not** categories.
+They become product tags via a coarse line when recognized (`Redmi Note`, `Galaxy A`, `iPhone Pro Max`).
+
+Missing roots, brand categories, brands, and variant attributes (`رنگ`, `حافظه داخلی`)
+are still created automatically.
 
 ## Extending to another marketplace
 
