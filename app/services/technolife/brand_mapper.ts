@@ -96,11 +96,17 @@ export async function resolveBrand(
     const n = normalizeBrandKey(b.name)
     if (!n) continue
     if (n === key) {
-      return { id: b.id, name: display, created: false }
+      return { id: b.id, name: b.name, created: false }
     }
     const keyCanonical = aliasCanonical(key)
     const brandCanonical = aliasCanonical(n)
     if (keyCanonical && brandCanonical && keyCanonical === brandCanonical) {
+      // Keep brands.name aligned with product.brand (Persian canonical), otherwise
+      // seller brand selects (English seed names) look empty for imported products.
+      if (b.name !== keyCanonical) {
+        b.name = keyCanonical
+        await b.save()
+      }
       return { id: b.id, name: keyCanonical, created: false }
     }
   }

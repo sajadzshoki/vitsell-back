@@ -166,6 +166,8 @@ test.group('Technolife parser fixture', () => {
     assert.isFalse(parsed.images.some((image) => image.includes('/video/hls/')))
     assert.equal(parsed.reviewImages.length, 1)
     assert.equal(parsed.specs.length, 3)
+    assert.isTrue(parsed.specs.every((s) => Boolean(s.group)))
+    assert.equal(parsed.specs[0]?.group, 'مشخصات کلی')
     assert.isTrue(parsed.categoryPath.some((c) => /موبایل|گوشی/.test(c)))
   })
 

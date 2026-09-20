@@ -15,6 +15,8 @@ export type TechnolifeAvailability = 'in_stock' | 'out_of_stock' | 'unknown'
 export type TechnolifeSpec = {
   key: string
   value: string
+  /** Technolife configurations_component group title (e.g. حافظه، دوربین) */
+  group?: string
 }
 
 export type TechnolifeVariantOption = {

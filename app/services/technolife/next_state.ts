@@ -113,15 +113,17 @@ function extractSpecs(groups: unknown): TechnolifeSpec[] {
 
   for (const rawGroup of array(groups)) {
     const group = record(rawGroup)
+    const groupTitle =
+      normalizePersianText(String(group?.title || group?.name || group?.subject || '')) || undefined
     for (const rawInfo of array(group?.info)) {
       const info = record(rawInfo)
-      const key = normalizePersianText(String(info?.item || '')).replace(/\s*:\s*$/, '')
-      const value = normalizePersianText(String(info?.value || ''))
+      const key = normalizePersianText(String(info?.item || info?.title || '')).replace(/\s*:\s*$/, '')
+      const value = normalizePersianText(String(info?.value || info?.text || ''))
       if (!key || !value) continue
-      const signature = `${key}\u0000${value}`
+      const signature = `${groupTitle || ''}\u0000${key}\u0000${value}`
       if (seen.has(signature)) continue
       seen.add(signature)
-      specs.push({ key, value })
+      specs.push(groupTitle ? { key, value, group: groupTitle } : { key, value })
     }
   }
   return specs

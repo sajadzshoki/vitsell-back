@@ -159,7 +159,8 @@ Sequential requests (`CONCURRENCY=1`), configurable delay, timeout, exponential 
 - Variant axes imported from Technolife color options (+ storage from specs when present)
 - No Redis/Bull queue — background `void processBatch()`
 - HTML description sanitized to a small tag allowlist
-- Specs are free-form `{ key, value }` (category spec keys upserted)
+- Specs keep Technolife group titles in `{ key, value, group? }` and render as storefront sections
+  (برند + حافظه / دوربین / …). Re-import with upsert + specs update to refresh older flat rows.
 
 ## Taxonomy auto-create
 

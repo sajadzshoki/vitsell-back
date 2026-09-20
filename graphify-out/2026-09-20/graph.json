@@ -1407,8 +1407,8 @@
       "source_location": "L251",
       "_origin": "ast",
       "id": "app_controllers_content_controller_contentcontroller_discountcodes",
-      "community": 6,
-      "community_name": "BlogPost",
+      "community": 80,
+      "community_name": "resolveDiscountAmount",
       "norm_label": ".discountcodes()"
     },
     {
@@ -1451,8 +1451,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_controllers_content_promos_controller",
-      "community": 271,
-      "community_name": "content_promos_controller.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "content_promos_controller.ts"
     },
     {
@@ -1462,8 +1462,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_controllers_content_promos_controller_idrule",
-      "community": 271,
-      "community_name": "content_promos_controller.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "idrule"
     },
     {
@@ -1473,8 +1473,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "app_controllers_content_promos_controller_storevalidator",
-      "community": 271,
-      "community_name": "content_promos_controller.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "storevalidator"
     },
     {
@@ -1484,8 +1484,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "app_controllers_content_promos_controller_updatevalidator",
-      "community": 271,
-      "community_name": "content_promos_controller.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "updatevalidator"
     },
     {
@@ -1495,8 +1495,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "app_controllers_content_promos_controller_activevalidator",
-      "community": 271,
-      "community_name": "content_promos_controller.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "activevalidator"
     },
     {
@@ -1770,8 +1770,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_controllers_discount_codes_controller",
-      "community": 272,
-      "community_name": "discount_codes_controller.ts",
+      "community": 32,
+      "community_name": "DiscountCode",
       "norm_label": "discount_codes_controller.ts"
     },
     {
@@ -1781,8 +1781,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "app_controllers_discount_codes_controller_coderule",
-      "community": 272,
-      "community_name": "discount_codes_controller.ts",
+      "community": 32,
+      "community_name": "DiscountCode",
       "norm_label": "coderule"
     },
     {
@@ -1792,8 +1792,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "app_controllers_discount_codes_controller_storevalidator",
-      "community": 272,
-      "community_name": "discount_codes_controller.ts",
+      "community": 32,
+      "community_name": "DiscountCode",
       "norm_label": "storevalidator"
     },
     {
@@ -1803,8 +1803,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "app_controllers_discount_codes_controller_updatevalidator",
-      "community": 272,
-      "community_name": "discount_codes_controller.ts",
+      "community": 32,
+      "community_name": "DiscountCode",
       "norm_label": "updatevalidator"
     },
     {
@@ -1814,8 +1814,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "app_controllers_discount_codes_controller_activevalidator",
-      "community": 272,
-      "community_name": "discount_codes_controller.ts",
+      "community": 32,
+      "community_name": "DiscountCode",
       "norm_label": "activevalidator"
     },
     {
@@ -2889,7 +2889,7 @@
       "label": "emptySeo()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_emptyseo",
       "community": 22,
@@ -2900,7 +2900,7 @@
       "label": "normalizeSeo()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_normalizeseo",
       "community": 22,
@@ -2911,7 +2911,7 @@
       "label": "slugify()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_slugify",
       "community": 22,
@@ -2922,7 +2922,7 @@
       "label": "listedProductCountByBrand()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_listedproductcountbybrand",
       "community": 22,
@@ -2933,7 +2933,7 @@
       "label": "SellerBrandsController",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L64",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_sellerbrandscontroller",
       "community": 22,
@@ -2944,7 +2944,7 @@
       "label": ".index()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_sellerbrandscontroller_index",
       "community": 22,
@@ -2955,7 +2955,7 @@
       "label": ".show()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L81",
+      "source_location": "L82",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_sellerbrandscontroller_show",
       "community": 22,
@@ -2966,7 +2966,7 @@
       "label": ".store()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L90",
+      "source_location": "L91",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_sellerbrandscontroller_store",
       "community": 22,
@@ -2977,7 +2977,7 @@
       "label": ".update()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L122",
+      "source_location": "L123",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_sellerbrandscontroller_update",
       "community": 22,
@@ -2988,7 +2988,7 @@
       "label": ".setStatus()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_sellerbrandscontroller_setstatus",
       "community": 22,
@@ -2999,12 +2999,45 @@
       "label": ".destroy()",
       "file_type": "code",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L152",
+      "source_location": "L153",
       "_origin": "ast",
       "id": "app_controllers_seller_brands_controller_sellerbrandscontroller_destroy",
       "community": 22,
       "community_name": "Brand",
       "norm_label": ".destroy()"
+    },
+    {
+      "label": ".bulkDestroy()",
+      "file_type": "code",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L164",
+      "_origin": "ast",
+      "id": "app_controllers_seller_brands_controller_sellerbrandscontroller_bulkdestroy",
+      "community": 22,
+      "community_name": "Brand",
+      "norm_label": ".bulkdestroy()"
+    },
+    {
+      "label": "DeleteBrandResult",
+      "file_type": "code",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L188",
+      "_origin": "ast",
+      "id": "app_controllers_seller_brands_controller_deletebrandresult",
+      "community": 22,
+      "community_name": "Brand",
+      "norm_label": "deletebrandresult"
+    },
+    {
+      "label": "deleteBrandRecord()",
+      "file_type": "code",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L192",
+      "_origin": "ast",
+      "id": "app_controllers_seller_brands_controller_deletebrandrecord",
+      "community": 22,
+      "community_name": "Brand",
+      "norm_label": "deletebrandrecord()"
     },
     {
       "label": "seller_campaigns_controller.ts",
@@ -3409,8 +3442,8 @@
       "source_location": "L354",
       "_origin": "ast",
       "id": "app_controllers_seller_controller_sellercontroller_showlisting",
-      "community": 53,
-      "community_name": "utils/seo_redirects.ts",
+      "community": 45,
+      "community_name": ".place",
       "norm_label": ".showlisting()"
     },
     {
@@ -3585,8 +3618,8 @@
       "source_location": "L798",
       "_origin": "ast",
       "id": "app_controllers_seller_controller_sellercontroller_destroyquestion",
-      "community": 25,
-      "community_name": "SellerController",
+      "community": 26,
+      "community_name": "ProductQuestion",
       "norm_label": ".destroyquestion()"
     },
     {
@@ -7743,8 +7776,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_models_discount_code",
-      "community": 32,
-      "community_name": "DiscountCode",
+      "community": 80,
+      "community_name": "resolveDiscountAmount",
       "norm_label": "discount_code.ts"
     },
     {
@@ -7754,8 +7787,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_models_discount_code_discountcode",
-      "community": 32,
-      "community_name": "DiscountCode",
+      "community": 80,
+      "community_name": "resolveDiscountAmount",
       "norm_label": "discountcode"
     },
     {
@@ -7765,8 +7798,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_discount_code_ts_column",
-      "community": 32,
-      "community_name": "DiscountCode",
+      "community": 80,
+      "community_name": "resolveDiscountAmount",
       "norm_label": "column"
     },
     {
@@ -7776,8 +7809,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_discount_code_ts_datetime",
-      "community": 32,
-      "community_name": "DiscountCode",
+      "community": 80,
+      "community_name": "resolveDiscountAmount",
       "norm_label": "datetime"
     },
     {
@@ -7787,8 +7820,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "app_models_discount_code_discountcode_percentint",
-      "community": 32,
-      "community_name": "DiscountCode",
+      "community": 80,
+      "community_name": "resolveDiscountAmount",
       "norm_label": ".percentint()"
     },
     {
@@ -7831,8 +7864,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "app_models_discount_code_discountcode_toadminjson",
-      "community": 32,
-      "community_name": "DiscountCode",
+      "community": 80,
+      "community_name": "resolveDiscountAmount",
       "norm_label": ".toadminjson()"
     },
     {
@@ -8348,8 +8381,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_models_order",
-      "community": 51,
-      "community_name": "SellerListing",
+      "community": 262,
+      "community_name": "order.ts",
       "norm_label": "order.ts"
     },
     {
@@ -8359,8 +8392,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "app_models_order_orderitem",
-      "community": 51,
-      "community_name": "SellerListing",
+      "community": 262,
+      "community_name": "order.ts",
       "norm_label": "orderitem"
     },
     {
@@ -8370,8 +8403,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_models_order_orderaddress",
-      "community": 51,
-      "community_name": "SellerListing",
+      "community": 262,
+      "community_name": "order.ts",
       "norm_label": "orderaddress"
     },
     {
@@ -8381,8 +8414,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "app_models_order_orderstatus",
-      "community": 51,
-      "community_name": "SellerListing",
+      "community": 262,
+      "community_name": "order.ts",
       "norm_label": "orderstatus"
     },
     {
@@ -8392,8 +8425,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "app_models_order_order_transitions",
-      "community": 51,
-      "community_name": "SellerListing",
+      "community": 262,
+      "community_name": "order.ts",
       "norm_label": "order_transitions"
     },
     {
@@ -9206,8 +9239,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_models_seller_listing",
-      "community": 53,
-      "community_name": "utils/seo_redirects.ts",
+      "community": 45,
+      "community_name": ".place",
       "norm_label": "seller_listing.ts"
     },
     {
@@ -9217,8 +9250,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_models_seller_listing_sellerlisting",
-      "community": 53,
-      "community_name": "utils/seo_redirects.ts",
+      "community": 45,
+      "community_name": ".place",
       "norm_label": "sellerlisting"
     },
     {
@@ -9228,8 +9261,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_seller_listing_ts_column",
-      "community": 53,
-      "community_name": "utils/seo_redirects.ts",
+      "community": 45,
+      "community_name": ".place",
       "norm_label": "column"
     },
     {
@@ -9239,8 +9272,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_seller_listing_ts_datetime",
-      "community": 53,
-      "community_name": "utils/seo_redirects.ts",
+      "community": 45,
+      "community_name": ".place",
       "norm_label": "datetime"
     },
     {
@@ -9250,8 +9283,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_seller_listing_ts_belongsto",
-      "community": 53,
-      "community_name": "utils/seo_redirects.ts",
+      "community": 45,
+      "community_name": ".place",
       "norm_label": "belongsto"
     },
     {
@@ -9261,8 +9294,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "app_models_seller_listing_sellerlisting_tojson",
-      "community": 53,
-      "community_name": "utils/seo_redirects.ts",
+      "community": 45,
+      "community_name": ".place",
       "norm_label": ".tojson()"
     },
     {
@@ -15619,8 +15652,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "seller_marketing_query.ts"
     },
     {
@@ -15630,8 +15663,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_countbucket",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "countbucket"
     },
     {
@@ -15641,8 +15674,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_parsebound",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "parsebound()"
     },
     {
@@ -15652,8 +15685,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_applyscheduleoverlap",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "applyscheduleoverlap()"
     },
     {
@@ -15663,8 +15696,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_applycreatedoverlap",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "applycreatedoverlap()"
     },
     {
@@ -15674,8 +15707,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_countrows",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "countrows()"
     },
     {
@@ -15685,8 +15718,8 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_bucketscheduled",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "bucketscheduled()"
     },
     {
@@ -15696,8 +15729,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_inschedulerange",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "inschedulerange()"
     },
     {
@@ -15707,8 +15740,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "app_utils_seller_marketing_query_querymarketingsummary",
-      "community": 266,
-      "community_name": "queryMarketingSummary",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "querymarketingsummary()"
     },
     {
@@ -16345,8 +16378,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_promotions_query",
-      "community": 269,
-      "community_name": "seller_promotions_query.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "seller_promotions_query.ts"
     },
     {
@@ -16356,8 +16389,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "app_utils_seller_promotions_query_codequery",
-      "community": 269,
-      "community_name": "seller_promotions_query.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "codequery"
     },
     {
@@ -16367,8 +16400,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "app_utils_seller_promotions_query_promoquery",
-      "community": 269,
-      "community_name": "seller_promotions_query.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "promoquery"
     },
     {
@@ -16378,8 +16411,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_utils_seller_promotions_query_applycodefilters",
-      "community": 269,
-      "community_name": "seller_promotions_query.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "applycodefilters()"
     },
     {
@@ -16389,8 +16422,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "app_utils_seller_promotions_query_querysellerdiscountcodes",
-      "community": 269,
-      "community_name": "seller_promotions_query.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "querysellerdiscountcodes()"
     },
     {
@@ -16400,8 +16433,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "app_utils_seller_promotions_query_applypromofilters",
-      "community": 269,
-      "community_name": "seller_promotions_query.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "applypromofilters()"
     },
     {
@@ -16411,8 +16444,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "app_utils_seller_promotions_query_querysellercontentpromos",
-      "community": 269,
-      "community_name": "seller_promotions_query.ts",
+      "community": 42,
+      "community_name": "ContentPromo",
       "norm_label": "querysellercontentpromos()"
     },
     {
@@ -16422,8 +16455,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_questions_query",
-      "community": 270,
-      "community_name": "footer.ts",
+      "community": 26,
+      "community_name": "ProductQuestion",
       "norm_label": "seller_questions_query.ts"
     },
     {
@@ -16433,8 +16466,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_utils_seller_questions_query_questionquery",
-      "community": 270,
-      "community_name": "footer.ts",
+      "community": 26,
+      "community_name": "ProductQuestion",
       "norm_label": "questionquery"
     },
     {
@@ -16444,8 +16477,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_utils_seller_questions_query_applyfilters",
-      "community": 270,
-      "community_name": "footer.ts",
+      "community": 26,
+      "community_name": "ProductQuestion",
       "norm_label": "applyfilters()"
     },
     {
@@ -16455,8 +16488,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "app_utils_seller_questions_query_statuscounts",
-      "community": 270,
-      "community_name": "footer.ts",
+      "community": 26,
+      "community_name": "ProductQuestion",
       "norm_label": "statuscounts()"
     },
     {
@@ -16466,8 +16499,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "app_utils_seller_questions_query_querysellerquestions",
-      "community": 270,
-      "community_name": "footer.ts",
+      "community": 26,
+      "community_name": "ProductQuestion",
       "norm_label": "querysellerquestions()"
     },
     {
@@ -17005,8 +17038,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_sales",
-      "community": 277,
-      "community_name": "seller_sales.ts",
+      "community": 25,
+      "community_name": "SellerController",
       "norm_label": "seller_sales.ts"
     },
     {
@@ -17016,8 +17049,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "app_utils_seller_sales_weekday_fa",
-      "community": 277,
-      "community_name": "seller_sales.ts",
+      "community": 25,
+      "community_name": "SellerController",
       "norm_label": "weekday_fa"
     },
     {
@@ -17027,8 +17060,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "app_utils_seller_sales_computesellersalespoints",
-      "community": 277,
-      "community_name": "seller_sales.ts",
+      "community": 25,
+      "community_name": "SellerController",
       "norm_label": "computesellersalespoints()"
     },
     {
@@ -18561,10 +18594,21 @@
       "norm_label": "brandsqueryvalidator"
     },
     {
-      "label": "BrandsQuery",
+      "label": "bulkBrandDeleteValidator",
       "file_type": "code",
       "source_file": "app/validators/brand.ts",
       "source_location": "L61",
+      "_origin": "ast",
+      "id": "app_validators_brand_bulkbranddeletevalidator",
+      "community": 69,
+      "community_name": "validators/brand.ts",
+      "norm_label": "bulkbranddeletevalidator"
+    },
+    {
+      "label": "BrandsQuery",
+      "file_type": "code",
+      "source_file": "app/validators/brand.ts",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "app_validators_brand_brandsquery",
       "community": 69,
@@ -32801,7 +32845,29 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L13",
+      "source_location": "L192",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_controllers_seller_brands_controller",
+      "target": "app_controllers_seller_brands_controller_deletebrandrecord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L188",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_controllers_seller_brands_controller",
+      "target": "app_controllers_seller_brands_controller_deletebrandresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller",
@@ -32812,7 +32878,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller",
@@ -32823,7 +32889,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller",
@@ -32834,7 +32900,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller",
@@ -32845,7 +32911,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller",
@@ -32857,7 +32923,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_normalizeseo",
@@ -32869,7 +32935,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L116",
+      "source_location": "L117",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_store",
@@ -32881,7 +32947,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L134",
+      "source_location": "L135",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_update",
@@ -32893,7 +32959,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L92",
+      "source_location": "L93",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_store",
@@ -32905,10 +32971,10 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L158",
+      "source_location": "L198",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_destroy",
+      "source": "app_controllers_seller_brands_controller_deletebrandrecord",
       "target": "app_controllers_seller_brands_controller_listedproductcountbybrand",
       "confidence_score": 1.0
     },
@@ -32917,7 +32983,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L86",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_show",
@@ -32929,7 +32995,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L137",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_update",
@@ -32940,7 +33006,18 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L152",
+      "source_location": "L164",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_controllers_seller_brands_controller_sellerbrandscontroller",
+      "target": "app_controllers_seller_brands_controller_sellerbrandscontroller_bulkdestroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L153",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller",
@@ -32951,7 +33028,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller",
@@ -32962,7 +33039,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller",
@@ -32973,7 +33050,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L81",
+      "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller",
@@ -32984,7 +33061,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L90",
+      "source_location": "L91",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller",
@@ -32995,7 +33072,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L122",
+      "source_location": "L123",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller",
@@ -33008,7 +33085,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_show",
@@ -33020,7 +33097,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_store",
@@ -33032,7 +33109,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L123",
+      "source_location": "L124",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_update",
@@ -33044,11 +33121,35 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L142",
+      "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_setstatus",
       "target": "app_models_brand_brand"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_destroy",
+      "target": "app_controllers_seller_brands_controller_deletebrandrecord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/controllers/seller_brands_controller.ts",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_bulkdestroy",
+      "target": "app_controllers_seller_brands_controller_deletebrandrecord",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -33056,10 +33157,10 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/controllers/seller_brands_controller.ts",
-      "source_location": "L153",
+      "source_location": "L193",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "app_controllers_seller_brands_controller_sellerbrandscontroller_destroy",
+      "source": "app_controllers_seller_brands_controller_deletebrandrecord",
       "target": "app_models_brand_brand"
     },
     {
@@ -57107,7 +57208,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/validators/brand.ts",
-      "source_location": "L61",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_validators_brand",
@@ -57134,6 +57235,17 @@
       "_origin": "ast",
       "source": "app_validators_brand",
       "target": "app_validators_brand_brandstatusvalidator",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/validators/brand.ts",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_validators_brand",
+      "target": "app_validators_brand_bulkbranddeletevalidator",
       "confidence_score": 1.0
     },
     {

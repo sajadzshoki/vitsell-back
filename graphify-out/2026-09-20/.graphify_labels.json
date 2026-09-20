@@ -261,16 +261,11 @@
   "259": "allowScripts",
   "260": "boundaries",
   "261": "normalizer.ts",
+  "262": "order.ts",
   "263": "1788600000001_alter_products_add_source_metadata.ts",
   "264": "1788600000002_create_product_imports_tables.ts",
   "265": "parser.spec.ts",
-  "266": "queryMarketingSummary",
   "267": "seller_reconciliation.ts",
   "268": "seller_inventory_query.ts",
-  "269": "seller_promotions_query.ts",
-  "270": "footer.ts",
-  "271": "content_promos_controller.ts",
-  "272": "discount_codes_controller.ts",
-  "275": "account_controller.ts",
-  "277": "seller_sales.ts"
+  "275": "account_controller.ts"
 }

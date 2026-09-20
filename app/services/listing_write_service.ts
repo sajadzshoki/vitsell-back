@@ -24,7 +24,7 @@ export type ListingProductInput = {
   shortDesc?: string | null
   description?: string | null
   features?: string[] | null
-  specs?: Array<{ key: string; value: string }> | null
+  specs?: Array<{ key: string; value: string; group?: string }> | null
   badge?: string | null
   inStock?: boolean
   fastDelivery?: boolean

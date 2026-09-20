@@ -175,8 +175,8 @@
     "semantic_hash": ""
   },
   "app/controllers/seller_brands_controller.ts": {
-    "mtime": 1789198654.8486886,
-    "ast_hash": "c088fdd78d8b0e715074525d5706ea79",
+    "mtime": 1789895924.8119504,
+    "ast_hash": "e488eee19dd51292418c387521c6ab89",
     "semantic_hash": ""
   },
   "app/controllers/seller_campaigns_controller.ts": {
@@ -965,8 +965,8 @@
     "semantic_hash": ""
   },
   "app/validators/brand.ts": {
-    "mtime": 1788768021.5103648,
-    "ast_hash": "afc7b49545b4b10af442882aecf25ffb",
+    "mtime": 1789895916.6161942,
+    "ast_hash": "a60c85396c54bd29dc0579a7fec1bf8b",
     "semantic_hash": ""
   },
   "app/validators/campaign.ts": {
@@ -1560,7 +1560,7 @@
     "semantic_hash": ""
   },
   "database/schema.ts": {
-    "mtime": 1789885070.8984032,
+    "mtime": 1789895986.6199787,
     "ast_hash": "f7c8e70c36ed55efe24aea5fb60c931c",
     "semantic_hash": ""
   },
@@ -1675,8 +1675,8 @@
     "semantic_hash": ""
   },
   "start/routes.ts": {
-    "mtime": 1789894940.164477,
-    "ast_hash": "821ac3eeadec0d00cac5363740828e0b",
+    "mtime": 1789895929.8956552,
+    "ast_hash": "e009799fcf35b5231ce66fb56a9fe511",
     "semantic_hash": ""
   },
   "start/validator.ts": {

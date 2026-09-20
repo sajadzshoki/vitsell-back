@@ -129,11 +129,14 @@ export function normalizeTechnolifeProduct(
   const suggestedProductId = slugifyProductTitle(title) || null
 
   const specs = parsed.specs
-    .map((s) => ({
-      key: normalizePersianText(s.key),
-      value: normalizePersianText(s.value),
-    }))
-    .filter((s) => s.key && s.value)
+    .map((s) => {
+      const key = normalizePersianText(s.key)
+      const value = normalizePersianText(s.value)
+      const group = s.group ? normalizePersianText(s.group) : ''
+      if (!key || !value) return null
+      return group ? { key, value, group } : { key, value }
+    })
+    .filter((s): s is NonNullable<typeof s> => Boolean(s))
 
   return {
     source: 'technolife',

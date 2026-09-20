@@ -8,7 +8,7 @@ import type { SeoMeta } from '#models/blog_post'
 import { toPublicMediaUrl } from '#utils/media_upload'
 
 export type ProductColor = { name: string; hex: string }
-export type ProductSpec = { key: string; value: string }
+export type ProductSpec = { key: string; value: string; group?: string }
 
 function emptySeo(): SeoMeta {
   return {
