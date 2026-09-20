@@ -2,6 +2,7 @@ import Brand from '#models/brand'
 import {
   brandStatusValidator,
   brandsQueryValidator,
+  bulkBrandDeleteValidator,
   storeBrandValidator,
   updateBrandValidator,
 } from '#validators/brand'
@@ -150,24 +151,59 @@ export default class SellerBrandsController {
   }
 
   async destroy({ params, response }: HttpContext) {
-    const brand = await Brand.find(params.id)
-    if (!brand) {
-      return response.notFound({ errors: [{ field: 'id', message: 'برند یافت نشد' }] })
+    const result = await deleteBrandRecord(String(params.id || ''))
+    if (!result.ok) {
+      if (result.code === 'not_found') {
+        return response.notFound({ errors: [{ field: 'id', message: result.message }] })
+      }
+      return response.conflict({ errors: [{ field: 'id', message: result.message }] })
     }
-
-    const total = await listedProductCountByBrand(brand.name)
-    if (total > 0) {
-      return response.conflict({
-        errors: [
-          {
-            field: 'id',
-            message: `این برند ${total} محصول دارد و قابل حذف نیست`,
-          },
-        ],
-      })
-    }
-
-    await brand.delete()
     return response.ok({ message: 'برند حذف شد' })
   }
+
+  async bulkDestroy({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(bulkBrandDeleteValidator)
+    const ids = [...new Set(payload.ids.map((id) => id.trim()).filter(Boolean))]
+    const deleted: string[] = []
+    const failed: Array<{ id: string; message: string }> = []
+
+    for (const id of ids) {
+      const result = await deleteBrandRecord(id)
+      if (result.ok) {
+        deleted.push(id)
+        continue
+      }
+      if (result.code === 'not_found') continue
+      failed.push({ id, message: result.message })
+    }
+
+    return response.ok({
+      deleted: deleted.length,
+      failed,
+      deletedIds: deleted,
+    })
+  }
+}
+
+type DeleteBrandResult =
+  | { ok: true }
+  | { ok: false; code: 'not_found' | 'conflict'; message: string }
+
+async function deleteBrandRecord(id: string): Promise<DeleteBrandResult> {
+  const brand = await Brand.find(id)
+  if (!brand) {
+    return { ok: false, code: 'not_found', message: 'برند یافت نشد' }
+  }
+
+  const total = await listedProductCountByBrand(brand.name)
+  if (total > 0) {
+    return {
+      ok: false,
+      code: 'conflict',
+      message: `این برند ${total} محصول دارد و قابل حذف نیست`,
+    }
+  }
+
+  await brand.delete()
+  return { ok: true }
 }

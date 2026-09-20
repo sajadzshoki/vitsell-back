@@ -20,7 +20,7 @@ import {
   type OrderInternalNote,
   type OrderRefundRecord,
 } from '#utils/seller_order_detail'
-import { listingsQueryValidator } from '#validators/listings'
+import { listingsQueryValidator, bulkListingsDeleteValidator } from '#validators/listings'
 import { ordersQueryValidator } from '#validators/orders'
 import {
   orderNoteValidator,
@@ -843,23 +843,46 @@ export default class SellerController {
   }
 
   async destroyListing({ params, response }: HttpContext) {
-    const listing = await SellerListing.query().where('product_id', params.productId).first()
-    if (!listing) {
-      return response.notFound({ errors: [{ field: 'productId', message: 'محصول یافت نشد' }] })
+    const result = await deleteListingRecord(String(params.productId || ''))
+    if (!result.ok) {
+      if (result.code === 'not_found') {
+        return response.notFound({
+          errors: [{ field: 'productId', message: result.message }],
+        })
+      }
+      return response.conflict({
+        errors: [{ field: 'productId', message: result.message }],
+      })
     }
+    return response.ok({
+      message: 'محصول حذف شد',
+      productId: result.productId,
+    })
+  }
 
-    const productId = listing.productId
-    await listing.delete()
+  async bulkDestroyListings({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(bulkListingsDeleteValidator)
+    const ids = [...new Set(payload.ids.map((id) => id.trim()).filter(Boolean))]
+    const deleted: string[] = []
+    const failed: Array<{ id: string; message: string }> = []
 
-    const product = await Product.find(productId)
-    if (product) {
-      // Hard-delete so category/brand counts and storefront stay in sync
-      await product.delete()
+    for (const id of ids) {
+      const result = await deleteListingRecord(id)
+      if (result.ok) {
+        deleted.push(result.productId)
+        continue
+      }
+      if (result.code === 'not_found') {
+        // Treat missing as already gone for bulk UX
+        continue
+      }
+      failed.push({ id, message: result.message })
     }
 
     return response.ok({
-      message: 'محصول حذف شد',
-      productId,
+      deleted: deleted.length,
+      failed,
+      deletedIds: deleted,
     })
   }
 
@@ -872,4 +895,36 @@ export default class SellerController {
     )
     return response.ok(points)
   }
+}
+
+type DeleteListingResult =
+  | { ok: true; productId: string }
+  | { ok: false; code: 'not_found' | 'conflict'; message: string }
+
+async function deleteListingRecord(productId: string): Promise<DeleteListingResult> {
+  const id = String(productId || '').trim()
+  if (!id) {
+    return { ok: false, code: 'not_found', message: 'محصول یافت نشد' }
+  }
+
+  const listing = await SellerListing.query().where('product_id', id).first()
+  if (!listing) {
+    return { ok: false, code: 'not_found', message: 'محصول یافت نشد' }
+  }
+
+  try {
+    await listing.delete()
+    const product = await Product.find(id)
+    if (product) {
+      await product.delete()
+    }
+  } catch {
+    return {
+      ok: false,
+      code: 'conflict',
+      message: 'حذف محصول ممکن نیست؛ هنوز ارجاعی به این محصول وجود دارد',
+    }
+  }
+
+  return { ok: true, productId: id }
 }

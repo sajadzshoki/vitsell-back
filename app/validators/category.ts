@@ -77,3 +77,9 @@ export const storeCategoryValidator = vine.compile(
 )
 
 export const updateCategoryValidator = vine.compile(vine.object(categoryFields))
+
+export const bulkCategoryDeleteValidator = vine.compile(
+  vine.object({
+    ids: vine.array(vine.string().trim().minLength(1)).minLength(1).maxLength(500),
+  })
+)

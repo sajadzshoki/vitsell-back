@@ -30,3 +30,9 @@ export const listingsQueryValidator = vine.compile(
 export type ListingsQuery = Awaited<
   ReturnType<(typeof listingsQueryValidator)['validate']>
 >
+
+export const bulkListingsDeleteValidator = vine.compile(
+  vine.object({
+    ids: vine.array(vine.string().trim().minLength(1)).minLength(1).maxLength(500),
+  })
+)

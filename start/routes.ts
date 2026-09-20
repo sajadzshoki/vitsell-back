@@ -186,6 +186,7 @@ router
         router.get('footer', [SellerController, 'footer'])
         router.put('footer', [SellerController, 'updateFooter'])
         router.get('listings', [SellerController, 'listings'])
+        router.post('listings/bulk-delete', [SellerController, 'bulkDestroyListings'])
         router.get('listings/:productId', [SellerController, 'showListing'])
         router.post('listings', [SellerController, 'storeListing'])
         router.patch('listings/:productId', [SellerController, 'updateListing'])
@@ -228,6 +229,7 @@ router
         router.post('adjustments', [SellerAdjustmentsController, 'store'])
         router.get('reports', [SellerReportsController, 'index'])
         router.get('categories', [CategoriesController, 'adminIndex'])
+        router.post('categories/bulk-delete', [CategoriesController, 'bulkDestroy'])
         router.get('categories/:id/spec-keys', [CategoriesController, 'specKeys'])
         router.get('categories/:id', [CategoriesController, 'adminShow'])
         router.post('categories', [CategoriesController, 'store'])
@@ -369,6 +371,7 @@ router
         router.delete('banners/:id', [SellerBannersController, 'destroy'])
 
         router.get('brands', [SellerBrandsController, 'index'])
+        router.post('brands/bulk-delete', [SellerBrandsController, 'bulkDestroy'])
         router.get('brands/:id', [SellerBrandsController, 'show'])
         router.post('brands', [SellerBrandsController, 'store'])
         router.put('brands/:id', [SellerBrandsController, 'update'])

@@ -58,4 +58,10 @@ export const brandsQueryValidator = vine.compile(
   })
 )
 
+export const bulkBrandDeleteValidator = vine.compile(
+  vine.object({
+    ids: vine.array(vine.string().trim().minLength(1)).minLength(1).maxLength(500),
+  })
+)
+
 export type BrandsQuery = Awaited<ReturnType<(typeof brandsQueryValidator)['validate']>>

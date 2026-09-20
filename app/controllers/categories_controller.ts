@@ -4,6 +4,7 @@ import Product from '#models/product'
 import {
   storeCategoryValidator,
   updateCategoryValidator,
+  bulkCategoryDeleteValidator,
 } from '#validators/category'
 import { categoriesQueryValidator } from '#validators/categories'
 import { querySellerCategories } from '#utils/seller_categories_query'
@@ -320,92 +321,133 @@ export default class CategoriesController {
   }
 
   async destroy({ params, response }: HttpContext) {
-    const category = await Category.find(params.id)
-    if (!category) {
-      return response.notFound({ errors: [{ field: 'id', message: 'دسته‌بندی یافت نشد' }] })
-    }
-
-    const childRow = await Category.query()
-      .where('parent_id', category.id)
-      .count('* as total')
-      .first()
-    const childTotal = Number((childRow as any)?.$extras?.total ?? (childRow as any)?.total ?? 0)
-    if (childTotal > 0) {
-      return response.conflict({
-        errors: [
-          {
-            field: 'id',
-            message: `این دسته ${childTotal} زیردسته دارد و قابل حذف نیست`,
-          },
-        ],
-      })
-    }
-
-    // Products still listed in seller panel block delete
-    const listed = await db
-      .from('products')
-      .innerJoin('seller_listings', 'seller_listings.product_id', 'products.id')
-      .where('products.category', category.id)
-      .count('* as total')
-      .first()
-    const listedTotal = Number((listed as any)?.total ?? 0)
-    if (listedTotal > 0) {
-      return response.conflict({
-        errors: [
-          {
-            field: 'id',
-            message: `این دسته ${listedTotal} محصول دارد و قابل حذف نیست`,
-          },
-        ],
-      })
-    }
-
-    // Seed / leftover product rows without a listing still hold the FK.
-    // Remove safe orphans; block if any are referenced by orders.
-    const orphanRows = await db
-      .from('products')
-      .leftJoin('seller_listings', 'seller_listings.product_id', 'products.id')
-      .where('products.category', category.id)
-      .whereNull('seller_listings.id')
-      .select('products.id')
-
-    const orphanIds = (orphanRows as Array<{ id: string }>).map((row) => row.id).filter(Boolean)
-
-    if (orphanIds.length) {
-      const [orderRef, sellerOrderRef] = await Promise.all([
-        db.from('order_items').whereIn('product_id', orphanIds).count('* as total').first(),
-        db.from('seller_order_items').whereIn('product_id', orphanIds).count('* as total').first(),
-      ])
-      const orderTotal
-        = Number((orderRef as any)?.total ?? 0) + Number((sellerOrderRef as any)?.total ?? 0)
-      if (orderTotal > 0) {
-        return response.conflict({
-          errors: [
-            {
-              field: 'id',
-              message:
-                'محصولات این دسته در سفارش‌ها استفاده شده‌اند و قابل حذف نیست',
-            },
-          ],
-        })
+    const result = await deleteCategoryRecord(String(params.id || ''))
+    if (!result.ok) {
+      if (result.code === 'not_found') {
+        return response.notFound({ errors: [{ field: 'id', message: result.message }] })
       }
-
-      await Product.query().whereIn('id', orphanIds).delete()
+      return response.conflict({ errors: [{ field: 'id', message: result.message }] })
     }
-
-    try {
-      await category.delete()
-    } catch {
-      return response.conflict({
-        errors: [
-          {
-            field: 'id',
-            message: 'حذف دسته‌بندی ممکن نیست؛ هنوز ارجاعی به این دسته وجود دارد',
-          },
-        ],
-      })
-    }
-
     return response.ok({ message: 'دسته‌بندی حذف شد' })
   }
+
+  async bulkDestroy({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(bulkCategoryDeleteValidator)
+    const ids = [...new Set(payload.ids.map((id) => id.trim()).filter(Boolean))]
+    const deleted: string[] = []
+    const failed: Array<{ id: string; message: string }> = []
+
+    // Multiple passes: deleting children first unlocks parents in the same batch.
+    let progress = true
+    const pending = new Set(ids)
+    while (pending.size && progress) {
+      progress = false
+      for (const id of [...pending]) {
+        const result = await deleteCategoryRecord(id)
+        if (result.ok) {
+          deleted.push(id)
+          pending.delete(id)
+          progress = true
+          continue
+        }
+        if (result.code === 'not_found') {
+          pending.delete(id)
+          progress = true
+        }
+      }
+    }
+
+    for (const id of pending) {
+      const result = await deleteCategoryRecord(id)
+      if (result.ok) {
+        deleted.push(id)
+        continue
+      }
+      if (result.code === 'not_found') continue
+      failed.push({ id, message: result.message })
+    }
+
+    return response.ok({
+      deleted: deleted.length,
+      failed,
+      deletedIds: deleted,
+    })
+  }
+}
+type DeleteCategoryResult =
+  | { ok: true }
+  | { ok: false; code: 'not_found' | 'conflict'; message: string }
+
+async function deleteCategoryRecord(id: string): Promise<DeleteCategoryResult> {
+  const category = await Category.find(id)
+  if (!category) {
+    return { ok: false, code: 'not_found', message: 'دسته‌بندی یافت نشد' }
+  }
+
+  const childRow = await Category.query()
+    .where('parent_id', category.id)
+    .count('* as total')
+    .first()
+  const childTotal = Number((childRow as any)?.$extras?.total ?? (childRow as any)?.total ?? 0)
+  if (childTotal > 0) {
+    return {
+      ok: false,
+      code: 'conflict',
+      message: `این دسته ${childTotal} زیردسته دارد و قابل حذف نیست`,
+    }
+  }
+
+  const listed = await db
+    .from('products')
+    .innerJoin('seller_listings', 'seller_listings.product_id', 'products.id')
+    .where('products.category', category.id)
+    .count('* as total')
+    .first()
+  const listedTotal = Number((listed as any)?.total ?? 0)
+  if (listedTotal > 0) {
+    return {
+      ok: false,
+      code: 'conflict',
+      message: `این دسته ${listedTotal} محصول دارد و قابل حذف نیست`,
+    }
+  }
+
+  const orphanRows = await db
+    .from('products')
+    .leftJoin('seller_listings', 'seller_listings.product_id', 'products.id')
+    .where('products.category', category.id)
+    .whereNull('seller_listings.id')
+    .select('products.id')
+
+  const orphanIds = (orphanRows as Array<{ id: string }>).map((row) => row.id).filter(Boolean)
+
+  if (orphanIds.length) {
+    const [orderRef, sellerOrderRef] = await Promise.all([
+      db.from('order_items').whereIn('product_id', orphanIds).count('* as total').first(),
+      db.from('seller_order_items').whereIn('product_id', orphanIds).count('* as total').first(),
+    ])
+    const orderTotal =
+      Number((orderRef as any)?.total ?? 0) + Number((sellerOrderRef as any)?.total ?? 0)
+    if (orderTotal > 0) {
+      return {
+        ok: false,
+        code: 'conflict',
+        message: 'محصولات این دسته در سفارش‌ها استفاده شده‌اند و قابل حذف نیست',
+      }
+    }
+
+    await Product.query().whereIn('id', orphanIds).delete()
+  }
+
+  try {
+    await category.delete()
+  } catch {
+    return {
+      ok: false,
+      code: 'conflict',
+      message: 'حذف دسته‌بندی ممکن نیست؛ هنوز ارجاعی به این دسته وجود دارد',
+    }
+  }
+
+  return { ok: true }
 }

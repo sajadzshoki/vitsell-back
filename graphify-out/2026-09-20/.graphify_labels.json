@@ -107,8 +107,8 @@
   "105": "content_promos_controller.ts",
   "106": "discount_codes_controller.ts",
   "107": "SellerReconciliationController",
-  "108": "SellerListing",
-  "109": "seller_order.ts",
+  "108": "seller_order.ts",
+  "109": "ProductsClear",
   "110": "seller_questions_query.ts",
   "111": "media.ts",
   "112": "notifications_query.ts",
@@ -261,7 +261,6 @@
   "259": "allowScripts",
   "260": "boundaries",
   "261": "normalizer.ts",
-  "262": "seller_listings_query.ts",
   "263": "1788600000001_alter_products_add_source_metadata.ts",
   "264": "1788600000002_create_product_imports_tables.ts",
   "265": "parser.spec.ts",
@@ -272,9 +271,6 @@
   "270": "footer.ts",
   "271": "content_promos_controller.ts",
   "272": "discount_codes_controller.ts",
-  "273": "OrderItemRow",
-  "274": "seller_payout.ts",
   "275": "account_controller.ts",
-  "276": "catalog_stock.ts",
   "277": "seller_sales.ts"
 }
