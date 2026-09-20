@@ -10,6 +10,7 @@ import {
   applyCatalogFilters,
   loadFilterableAttributes,
   parseAttrFilters,
+  resolveCategoryTreeIds,
 } from '#utils/catalog_filters'
 import { loadPlatformSettings } from '#utils/platform_settings'
 import {
@@ -106,16 +107,15 @@ export default class ProductsController {
     const page = Math.max(1, Number(request.input('page', 1)) || 1)
     const pageSize = Math.min(48, Math.max(1, Number(request.input('pageSize', 12)) || 12))
 
-    const attributeMeta = Object.keys(attrs).length
-      ? await loadFilterableAttributes(category)
-      : []
-
     const platform = await loadPlatformSettings()
     const forceInStock = platform.outOfStockBehavior === 'hide' || onlyInStock
+
+    const categoryIds = category ? await resolveCategoryTreeIds(category) : undefined
 
     let query = applyCatalogFilters(Product.query(), {
       q,
       category,
+      categoryIds,
       brands,
       minPrice,
       maxPrice,
@@ -124,7 +124,7 @@ export default class ProductsController {
       fastDelivery,
       minRating,
       attrs,
-    }, { attributeMeta })
+    })
 
     switch (sort) {
       case 'viewed':
@@ -187,9 +187,10 @@ export default class ProductsController {
     const forceInStock = platform.outOfStockBehavior === 'hide' || onlyInStock
 
     // Price/brand facets ignore price + brand + attr selections so ranges stay stable.
+    const categoryIds = category ? await resolveCategoryTreeIds(category) : undefined
     const base = applyCatalogFilters(
       Product.query(),
-      { q, category, onlyDiscount, onlyInStock: forceInStock, fastDelivery, minRating },
+      { q, category, categoryIds, onlyDiscount, onlyInStock: forceInStock, fastDelivery, minRating },
       { skipPrice: true, skipBrands: true, skipAttrs: true }
     )
 

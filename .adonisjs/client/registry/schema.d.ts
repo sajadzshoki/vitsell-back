@@ -859,6 +859,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_controller').default['listings']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'seller.bulk_destroy_listings': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/listings/bulk-delete'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/listings').bulkListingsDeleteValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/listings').bulkListingsDeleteValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_controller').default['bulkDestroyListings']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_controller').default['bulkDestroyListings']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'seller.show_listing': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/seller/listings/:productId'
@@ -1361,6 +1373,18 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/categories').categoriesQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['adminIndex']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['adminIndex']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'categories.bulk_destroy': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/categories/bulk-delete'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/category').bulkCategoryDeleteValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/category').bulkCategoryDeleteValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['bulkDestroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['bulkDestroy']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'categories.spec_keys': {
@@ -2777,6 +2801,18 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/brand').brandsQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_brands_controller').default['index']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_brands_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'seller_brands.bulk_destroy': {
+    methods: ["POST"]
+    pattern: '/api/v1/seller/brands/bulk-delete'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/brand').bulkBrandDeleteValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/brand').bulkBrandDeleteValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/seller_brands_controller').default['bulkDestroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/seller_brands_controller').default['bulkDestroy']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'seller_brands.show': {

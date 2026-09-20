@@ -265,7 +265,18 @@
   "263": "1788600000001_alter_products_add_source_metadata.ts",
   "264": "1788600000002_create_product_imports_tables.ts",
   "265": "parser.spec.ts",
+  "266": "queryMarketingSummary",
   "267": "seller_reconciliation.ts",
   "268": "seller_inventory_query.ts",
-  "275": "account_controller.ts"
+  "269": "product.ts",
+  "270": "category_mapper.ts",
+  "271": "seller_categories_query.ts",
+  "272": "seller_promotions_query.ts",
+  "273": "discount_codes_controller.ts",
+  "274": "footer.ts",
+  "275": "account_controller.ts",
+  "276": "seller_questions_query.ts",
+  "277": ".run",
+  "278": "seller_sales.ts",
+  "279": "mega_menu.spec.ts"
 }

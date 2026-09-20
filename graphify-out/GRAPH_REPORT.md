@@ -1,16 +1,16 @@
 # Graph Report - digishop-back  (2026-09-20)
 
 ## Corpus Check
-- 372 files · ~143,358 words
+- 373 files · ~144,354 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2535 nodes · 3366 edges · 269 communities (218 shown, 51 thin omitted)
+- 2546 nodes · 3384 edges · 280 communities (226 shown, 54 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0d5fd207`
+- Built from commit: `adb6ed40`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -202,16 +202,27 @@
 - normalizer.ts
 - order.ts
 - parser.spec.ts
+- queryMarketingSummary
 - seller_reconciliation.ts
 - seller_inventory_query.ts
+- product.ts
+- category_mapper.ts
+- seller_categories_query.ts
+- seller_promotions_query.ts
+- discount_codes_controller.ts
+- footer.ts
 - account_controller.ts
+- seller_questions_query.ts
+- .run
+- seller_sales.ts
+- mega_menu.spec.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `Product` - 37 edges
-2. `Category` - 31 edges
+1. `Product` - 38 edges
+2. `Category` - 33 edges
 3. `SellerController` - 28 edges
 4. `SellerOrder` - 27 edges
-5. `ContentBlock` - 25 edges
+5. `ContentBlock` - 26 edges
 6. `ProductQuestion` - 23 edges
 7. `SellerListing` - 20 edges
 8. `imports` - 20 edges
@@ -219,6 +230,8 @@
 10. `Banner` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ensureMobileCategory()` --references--> `Category`  [EXTRACTED]
+  tests/functional/mega_menu.spec.ts → app/models/category.ts
 - `makeProduct()` --references--> `Product`  [EXTRACTED]
   tests/functional/checkout_seller.spec.ts → app/models/product.ts
 - `run()` --references--> `AmazingDeal`  [EXTRACTED]
@@ -227,13 +240,11 @@
   database/seeders/main_seeder.ts → app/models/blog_post.ts
 - `run()` --references--> `Category`  [EXTRACTED]
   database/seeders/main_seeder.ts → app/models/category.ts
-- `ensureMobileCategory()` --references--> `Category`  [EXTRACTED]
-  tests/functional/mega_menu.spec.ts → app/models/category.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (269 total, 51 thin omitted)
+## Communities (280 total, 54 thin omitted)
 
 ### Community 0 - "SellerMegaMenusController"
 Cohesion: 0.05
@@ -248,8 +259,8 @@ Cohesion: 0.06
 Nodes (28): filenameFromUrl(), optionalInt(), SellerMediaController, MediaAsset, MediaKind, column, dateTime, extFromUrl() (+20 more)
 
 ### Community 4 - "Category"
-Cohesion: 0.05
-Nodes (45): asText(), CategoriesController, deleteCategoryRecord(), DeleteCategoryResult, emptySeo(), normalizePageMeta(), normalizeSeo(), normalizeSubs() (+37 more)
+Cohesion: 0.20
+Nodes (7): CategoriesController, deleteCategoryRecord(), Category, belongsTo, column, dateTime, hasMany
 
 ### Community 5 - "imports"
 Cohesion: 0.10
@@ -261,23 +272,23 @@ Nodes (19): block(), chunkBannerRows(), ContentController, deriveActive(), empty
 
 ### Community 7 - "SellerPayout"
 Cohesion: 0.07
-Nodes (31): jalaliishDate(), nextSettlementId(), resolveSiteShop(), SellerSettlementsController, SellerPayout, SellerSettlementSource, SellerSettlementStatus, belongsTo (+23 more)
+Nodes (29): jalaliishDate(), nextSettlementId(), resolveSiteShop(), SellerSettlementsController, SellerPayout, SellerSettlementSource, SellerSettlementStatus, belongsTo (+21 more)
 
 ### Community 8 - "AdminRole"
 Cohesion: 0.07
 Nodes (19): SellerRolesController, AdminRole, column, dateTime, manyToMany, countActiveSuperAdmins(), ensureSystemAdminRoles(), applyAdminFilters() (+11 more)
 
 ### Community 9 - "SellerRefund"
-Cohesion: 0.09
-Nodes (27): nextRefundId(), SellerRefundsController, SELLER_REFUND_TRANSITIONS, SellerRefund, SellerRefundItem, SellerRefundStatus, column, dateTime (+19 more)
+Cohesion: 0.08
+Nodes (29): nextRefundId(), SellerRefundsController, SELLER_REFUND_TRANSITIONS, SellerRefund, SellerRefundItem, SellerRefundStatus, column, dateTime (+21 more)
 
 ### Community 10 - "AuthController"
 Cohesion: 0.08
 Nodes (18): adminProfilePayload(), AuthController, ensureProfile(), loginPasswordValidator, phoneRule, rejectAdminOnStore(), requestOtpValidator, resetPasswordValidator (+10 more)
 
 ### Community 11 - "Order"
-Cohesion: 0.16
-Nodes (5): AccountController, Address, belongsTo, column, dateTime
+Cohesion: 0.12
+Nodes (8): AccountController, addressValidator, passwordValidator, profileValidator, Address, belongsTo, column, dateTime
 
 ### Community 12 - "devDependencies"
 Cohesion: 0.06
@@ -288,8 +299,8 @@ Cohesion: 0.06
 Nodes (33): @adonisjs/auth, @adonisjs/core, @adonisjs/cors, @adonisjs/drive, @adonisjs/lucid, @adonisjs/session, @adonisjs/shield, @aws-sdk/client-s3 (+25 more)
 
 ### Community 14 - "ProductAttribute"
-Cohesion: 0.08
-Nodes (23): normalizeValues(), SellerAttributesController, slugify(), AttributeStatus, AttributeType, AttributeValue, ProductAttribute, column (+15 more)
+Cohesion: 0.07
+Nodes (29): normalizeValues(), SellerAttributesController, slugify(), AttributeStatus, AttributeType, AttributeValue, ProductAttribute, column (+21 more)
 
 ### Community 15 - "StoreCampaign"
 Cohesion: 0.12
@@ -312,32 +323,32 @@ Cohesion: 0.10
 Nodes (20): storeValidator, WishlistController, ActivityEventType, belongsTo, column, dateTime, UserActivity, belongsTo (+12 more)
 
 ### Community 20 - "WalletTransaction"
-Cohesion: 0.09
-Nodes (21): buildSummary(), ensureWallet(), jalaliishDateTime(), maskCardNumber(), topUpValidator, WalletController, withdrawValidator, belongsTo (+13 more)
+Cohesion: 0.12
+Nodes (18): buildSummary(), ensureWallet(), jalaliishDateTime(), maskCardNumber(), topUpValidator, WalletController, withdrawValidator, belongsTo (+10 more)
 
 ### Community 21 - "Profile"
-Cohesion: 0.07
-Nodes (24): ensureProfile(), loadStaff(), rolesIncludeSuper(), SellerAdminsController, SellerCustomersController, AuditAction, AuditEntity, AuditLog (+16 more)
+Cohesion: 0.13
+Nodes (9): ensureProfile(), loadStaff(), rolesIncludeSuper(), SellerAdminsController, SellerCustomersController, Profile, belongsTo, column (+1 more)
 
 ### Community 22 - "Brand"
-Cohesion: 0.10
+Cohesion: 0.09
 Nodes (23): deleteBrandRecord(), DeleteBrandResult, emptySeo(), listedProductCountByBrand(), normalizeSeo(), SellerBrandsController, slugify(), Brand (+15 more)
 
 ### Community 23 - "StaticPage"
-Cohesion: 0.12
-Nodes (13): parseOptionalDate(), SellerBannersController, slugify(), syncHeroSlidesFromBanners(), Banner, BannerLinkType, BannerPlacement, BannerType (+5 more)
+Cohesion: 0.06
+Nodes (32): parseOptionalDate(), SellerBannersController, slugify(), syncHeroSlidesFromBanners(), AuditAction, AuditEntity, AuditLog, belongsTo (+24 more)
 
 ### Community 24 - "AmazingDeal"
 Cohesion: 0.13
 Nodes (12): activeValidator, bulkStoreValidator, DealsController, idRule, makeDealId(), parseDate(), storeValidator, updateValidator (+4 more)
 
 ### Community 25 - "SellerController"
-Cohesion: 0.11
-Nodes (9): deleteListingRecord(), SellerController, SellerOrder, belongsTo, column, dateTime, hasMany, computeSellerSalesPoints() (+1 more)
+Cohesion: 0.12
+Nodes (7): deleteListingRecord(), SellerController, SellerOrder, belongsTo, column, dateTime, hasMany
 
 ### Community 26 - "ProductQuestion"
-Cohesion: 0.11
-Nodes (11): jalaliishDate(), SellerQuestionsController, ProductQuestion, ProductQuestionAnswer, belongsTo, column, dateTime, applyFilters() (+3 more)
+Cohesion: 0.13
+Nodes (7): jalaliishDate(), SellerQuestionsController, ProductQuestion, ProductQuestionAnswer, belongsTo, column, dateTime
 
 ### Community 27 - "Warehouse"
 Cohesion: 0.14
@@ -360,16 +371,16 @@ Cohesion: 0.21
 Nodes (17): asBool(), asNumber(), asString(), CLEARABLE_IMAGE_KEYS, clearedImageValue(), defaultPlatformSettings, emailHref(), hasOwn() (+9 more)
 
 ### Community 32 - "DiscountCode"
-Cohesion: 0.17
-Nodes (7): activeValidator, codeRule, DiscountCodesController, parseDate(), parseOptionalDate(), storeValidator, updateValidator
+Cohesion: 0.18
+Nodes (5): DiscountCodesController, parseOptionalDate(), DiscountCode, column, dateTime
 
 ### Community 33 - "SellerReturn"
 Cohesion: 0.14
 Nodes (12): nextReturnId(), SellerReturnsController, SELLER_RETURN_TRANSITIONS, SellerReturn, SellerReturnItem, SellerReturnStatus, column, dateTime (+4 more)
 
 ### Community 34 - "seller_order_detail.ts"
-Cohesion: 0.06
-Nodes (36): CartController, upsertValidator, CheckoutController, isPaymentMethodEnabled(), jalaliishDate(), paymentLabel(), placeValidator, shippingLabel() (+28 more)
+Cohesion: 0.23
+Nodes (14): asArray(), attachOrderListCommerce(), buildCommerceSnapshot(), buildSellerOrderDetail(), ensureTimeline(), mapPaymentStatus(), mapRefundStatus(), mapReturnStatus() (+6 more)
 
 ### Community 35 - "seller_customers_query.ts"
 Cohesion: 0.27
@@ -400,8 +411,8 @@ Cohesion: 0.13
 Nodes (14): bulkDiscountDeleteValidator, bulkDiscountStatusValidator, discountBody, DiscountsQuery, discountsQueryValidator, discountStatuses, discountStatusValidator, discountTypes (+6 more)
 
 ### Community 42 - "ContentPromo"
-Cohesion: 0.09
-Nodes (23): activeValidator, applyFields(), ContentPromosController, idRule, storeValidator, updateValidator, ContentPromo, column (+15 more)
+Cohesion: 0.24
+Nodes (5): applyFields(), ContentPromosController, ContentPromo, column, dateTime
 
 ### Community 43 - "SellerShippingMethod"
 Cohesion: 0.20
@@ -409,11 +420,11 @@ Nodes (6): SellerShippingController, slugifyIdPart(), SellerShippingMethod, Sell
 
 ### Community 44 - "ContentBlock"
 Cohesion: 0.18
-Nodes (10): ContentBlock, column, dateTime, loadAboutPage(), saveAboutPage(), block(), emptyContact, FooterPayload (+2 more)
+Nodes (11): ContentBlock, column, dateTime, loadAboutPage(), saveAboutPage(), asString(), defaultSeoSettings, loadSeoSettings() (+3 more)
 
 ### Community 45 - ".place"
-Cohesion: 0.13
-Nodes (13): SellerListing, belongsTo, column, dateTime, CartLine, CheckoutError, CheckoutService, dateKey() (+5 more)
+Cohesion: 0.05
+Nodes (43): OrderItemRow, belongsTo, column, dateTime, SellerListing, belongsTo, column, dateTime (+35 more)
 
 ### Community 46 - "validators/mega_menu.ts"
 Cohesion: 0.14
@@ -436,16 +447,16 @@ Cohesion: 0.15
 Nodes (12): @adonisjs/tsconfig/tsconfig.app.json, bin/verify_prod_fail_closed.ts, build, node_modules, scripts, tests, compilerOptions, jsx (+4 more)
 
 ### Community 51 - "SellerListing"
-Cohesion: 0.22
-Nodes (8): Order, belongsTo, column, dateTime, hasMany, hasOne, listNotificationUsers(), resolveAudienceUserIds()
+Cohesion: 0.14
+Nodes (12): Order, ORDER_TRANSITIONS, OrderAddress, OrderItem, OrderStatus, belongsTo, column, dateTime (+4 more)
 
 ### Community 52 - "utils/navigation_settings.ts"
 Cohesion: 0.35
 Nodes (12): asRecord(), collectOffer(), extractImages(), extractJsonLdBlocks(), extractSpecsFromHtml(), extractVariantsFromHtml(), findBreadcrumbPath(), findProductNode() (+4 more)
 
 ### Community 53 - "utils/seo_redirects.ts"
-Cohesion: 0.83
-Nodes (3): productsToCatalogWithStock(), productToCatalogWithStock(), stockByProductIds()
+Cohesion: 0.19
+Nodes (11): CheckoutController, isPaymentMethodEnabled(), jalaliishDate(), paymentLabel(), placeValidator, shippingLabel(), shippingPrice(), Payment (+3 more)
 
 ### Community 54 - "Notification"
 Cohesion: 0.18
@@ -472,8 +483,8 @@ Cohesion: 0.20
 Nodes (6): column, dateTime, hasOne, manyToMany, User, beforeSave
 
 ### Community 60 - "seller_listings_query.ts"
-Cohesion: 0.29
-Nodes (8): assertActiveCategory(), emptySeo(), ListingProductInput, ListingWriteResult, ListingWriteService, normalizeProductSeo(), resolveSiteShop(), slugify()
+Cohesion: 0.21
+Nodes (6): CartController, upsertValidator, CartItem, belongsTo, column, dateTime
 
 ### Community 61 - "seller_orders_query.ts"
 Cohesion: 0.47
@@ -496,16 +507,16 @@ Cohesion: 0.22
 Nodes (3): AdminRoleStatus, AdminStaffStatus, SYSTEM_ROLE_META
 
 ### Community 66 - "product_variants.ts"
-Cohesion: 0.14
-Nodes (12): emptySeo(), ProductColor, ProductSpec, applyDealToCatalog(), dealPriceFrom(), catalogForVariant(), findProductVariant(), ProductVariant (+4 more)
+Cohesion: 0.28
+Nodes (7): catalogForVariant(), findProductVariant(), ProductVariant, ProductVariantAxis, ProductVariantOption, productVariantPrice(), productVariants()
 
 ### Community 67 - "queryMarketingSummary"
-Cohesion: 0.36
-Nodes (8): applyListingFilters(), applyListingSort(), applyProductJoin(), ListingQuery, listingStatusCounts(), parseDayEnd(), parseDayStart(), querySellerListings()
+Cohesion: 0.23
+Nodes (10): CategoryPageMeta, CategoryStatus, CategorySub, CategorySuggestedItem, emptySeo(), looksLikeMediaUrl(), publicCategoryIcon(), publicPageMeta() (+2 more)
 
 ### Community 68 - "seller_reconciliation.ts"
-Cohesion: 0.10
-Nodes (17): emptySeo(), normalizePath(), parseOptionalDate(), SellerPagesController, emptySeo(), PageStatus, StaticPage, column (+9 more)
+Cohesion: 0.12
+Nodes (13): emptySeo(), normalizePath(), parseOptionalDate(), SellerPagesController, emptySeo(), PageStatus, StaticPage, column (+5 more)
 
 ### Community 69 - "validators/brand.ts"
 Cohesion: 0.20
@@ -532,8 +543,8 @@ Cohesion: 0.26
 Nodes (12): asString(), defaultNavigationSettings, healCategoryBrowseLink(), loadNavigationSettings(), loadPublicNavigation(), NavBottomLinkPayload, NavigationSettingsPayload, NavQuickLinkPayload (+4 more)
 
 ### Community 76 - "SellerCustomersController"
-Cohesion: 0.46
-Nodes (7): applyListFilters(), countRows(), inventoryCountQuery(), ListingQuery, querySellerInventory(), rowStatus(), statusCounts()
+Cohesion: 0.40
+Nodes (8): asText(), DeleteCategoryResult, emptySeo(), normalizePageMeta(), normalizeSeo(), normalizeSubs(), normalizeSuggested(), resolveParentId()
 
 ### Community 77 - "customers.ts"
 Cohesion: 0.25
@@ -548,16 +559,16 @@ Cohesion: 0.29
 Nodes (3): ActivityController, eventSchema, storeValidator
 
 ### Community 80 - "resolveDiscountAmount"
-Cohesion: 0.18
-Nodes (6): DiscountCode, column, dateTime, DiscountResolveError, isDiscountLive(), resolveDiscountAmount()
+Cohesion: 0.33
+Nodes (3): DiscountResolveError, isDiscountLive(), resolveDiscountAmount()
 
 ### Community 81 - "mega_menu_filter.ts"
 Cohesion: 0.48
 Nodes (5): asAttrs(), asStringArray(), MegaMenuFilterDefinition, normalizeMegaMenuFilter(), parseStoredFilter()
 
 ### Community 82 - "seller_promotions_query.ts"
-Cohesion: 0.43
-Nodes (6): asString(), defaultSeoSettings, loadSeoSettings(), normalizeSeoSettings(), saveSeoSettings(), SeoSettingsPayload
+Cohesion: 0.22
+Nodes (5): NotificationsController, Notification, belongsTo, column, dateTime
 
 ### Community 83 - "seller_schedule_filters.ts"
 Cohesion: 0.33
@@ -644,8 +655,8 @@ Cohesion: 0.67
 Nodes (3): applyFilters(), DealQuery, querySellerDeals()
 
 ### Community 106 - "discount_codes_controller.ts"
-Cohesion: 0.40
-Nodes (4): OrderItemRow, belongsTo, column, dateTime
+Cohesion: 0.36
+Nodes (3): ZarinpalRequestResult, ZarinpalService, ZarinpalVerifyResult
 
 ### Community 108 - "seller_order.ts"
 Cohesion: 0.40
@@ -776,8 +787,12 @@ Cohesion: 0.52
 Nodes (6): escapeHtmlAttribute(), makeShortName(), normalizeTechnolifeProduct(), sanitizeProductHtml(), slugifyProductTitle(), storageLabel()
 
 ### Community 262 - "order.ts"
-Cohesion: 0.40
-Nodes (4): ORDER_TRANSITIONS, OrderAddress, OrderItem, OrderStatus
+Cohesion: 0.28
+Nodes (6): CategorySpecKey, slugifyKey(), belongsTo, column, dateTime, upsertCategorySpecKeys()
+
+### Community 266 - "queryMarketingSummary"
+Cohesion: 0.44
+Nodes (8): applyCreatedOverlap(), applyScheduleOverlap(), bucketScheduled(), CountBucket, countRows(), inScheduleRange(), parseBound(), queryMarketingSummary()
 
 ### Community 267 - "seller_reconciliation.ts"
 Cohesion: 0.39
@@ -787,26 +802,54 @@ Nodes (8): detectDiscrepancies(), FinanceDiscrepancyRow, FinanceDiscrepancySever
 Cohesion: 0.33
 Nodes (4): SellerOrderItemRow, belongsTo, column, dateTime
 
+### Community 269 - "product.ts"
+Cohesion: 0.29
+Nodes (5): emptySeo(), ProductColor, ProductSpec, applyDealToCatalog(), dealPriceFrom()
+
+### Community 270 - "category_mapper.ts"
+Cohesion: 0.39
+Nodes (7): appendSubItem(), ensureCategory(), pickRoot(), resolveCategory(), ResolvedCategory, ROOT_RULES, RootRule
+
+### Community 271 - "seller_categories_query.ts"
+Cohesion: 0.52
+Nodes (6): applyCategoryFilters(), CategoryQuery, childCountMap(), productCountMap(), querySellerCategories(), statusCounts()
+
+### Community 272 - "seller_promotions_query.ts"
+Cohesion: 0.38
+Nodes (6): applyCodeFilters(), applyPromoFilters(), CodeQuery, PromoQuery, querySellerContentPromos(), querySellerDiscountCodes()
+
+### Community 273 - "discount_codes_controller.ts"
+Cohesion: 0.33
+Nodes (5): activeValidator, codeRule, parseDate(), storeValidator, updateValidator
+
+### Community 274 - "footer.ts"
+Cohesion: 0.40
+Nodes (5): block(), emptyContact, FooterPayload, loadFooterPayload(), saveFooterPayload()
+
 ### Community 275 - "account_controller.ts"
-Cohesion: 0.50
-Nodes (3): addressValidator, passwordValidator, profileValidator
+Cohesion: 0.40
+Nodes (4): activeValidator, idRule, storeValidator, updateValidator
+
+### Community 276 - "seller_questions_query.ts"
+Cohesion: 0.70
+Nodes (4): applyFilters(), querySellerQuestions(), QuestionQuery, statusCounts()
 
 ## Knowledge Gaps
-- **639 isolated node(s):** `Data`, `User`, `Variants`, `placeholder`, `registry` (+634 more)
+- **641 isolated node(s):** `Data`, `User`, `Variants`, `placeholder`, `registry` (+636 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **51 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **54 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `run()` connect `run` to `Category`, `seller_reconciliation.ts`, `BlogPost`, `SellerPayout`, `ContentPromo`, `ContentBlock`, `.place`, `resolveDiscountAmount`, `SellerShop`, `AmazingDeal`, `SellerController`, `ProductQuestion`, `Product`, `SellerReview`?**
+- **Why does `run()` connect `run` to `DiscountCode`, `Category`, `seller_reconciliation.ts`, `BlogPost`, `SellerPayout`, `ContentPromo`, `ContentBlock`, `.place`, `SellerShop`, `AmazingDeal`, `SellerController`, `ProductQuestion`, `Product`, `SellerReview`?**
   _High betweenness centrality (0.123) - this node is a cross-community bridge._
-- **Why does `Product` connect `Product` to `SellerReturn`, `seller_order_detail.ts`, `product_variants.ts`, `Category`, `seller_reconciliation.ts`, `BlogPost`, `StockMovement`, `media_upload.ts`, `.place`, `ProductsClear`, `run`, `recommendation_service.ts`, `SellerShop`, `AmazingDeal`, `SellerController`, `seller_listings_query.ts`, `seller_controller.ts`?**
-  _High betweenness centrality (0.088) - this node is a cross-community bridge._
-- **Why does `SellerOrder` connect `SellerController` to `SellerReturn`, `seller_order_detail.ts`, `seller_reconciliation.ts`, `SellerPayout`, `SellerRefund`, `seller_reconciliation.ts`, `seller_order.ts`, `seller_inventory_query.ts`, `.place`, `run`, `seller_payments_query.ts`, `seller_orders_query.ts`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Why does `Product` connect `Product` to `SellerReturn`, `Category`, `order.ts`, `BlogPost`, `StockMovement`, `media_upload.ts`, `product.ts`, `.place`, `ProductsClear`, `run`, `recommendation_service.ts`, `.run`, `SellerShop`, `StaticPage`, `AmazingDeal`, `SellerController`, `seller_listings_query.ts`, `seller_controller.ts`?**
+  _High betweenness centrality (0.092) - this node is a cross-community bridge._
+- **Why does `Category` connect `Category` to `SellerMegaMenusController`, `queryMarketingSummary`, `order.ts`, `BlogPost`, `SellerCustomersController`, `.place`, `category_mapper.ts`, `ProductAttribute`, `seller_categories_query.ts`, `run`, `.run`, `mega_menu.spec.ts`, `seller_controller.ts`?**
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
 - **What connects `Data`, `User`, `Variants` to the rest of the system?**
-  _639 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _641 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `SellerMegaMenusController` be split into smaller, more focused modules?**
   _Cohesion score 0.05094905094905095 - nodes in this community are weakly interconnected._
 - **Should `schema.ts` be split into smaller, more focused modules?**

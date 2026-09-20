@@ -1,11 +1,11 @@
 {
   ".adonisjs/client/data.d.ts": {
-    "mtime": 1789894007.4788256,
+    "mtime": 1789902396.111641,
     "ast_hash": "12fca2c440690056895ea09f7273bdbc",
     "semantic_hash": ""
   },
   ".adonisjs/client/manifest.d.ts": {
-    "mtime": 1789894007.479855,
+    "mtime": 1789902396.1141574,
     "ast_hash": "fdb086c90c96261e58dfce0c9ff14705",
     "semantic_hash": ""
   },
@@ -25,17 +25,17 @@
     "semantic_hash": ""
   },
   ".adonisjs/server/controllers.ts": {
-    "mtime": 1789894007.476314,
+    "mtime": 1789902396.10966,
     "ast_hash": "803bb71c1d003e45544a500b17482ff2",
     "semantic_hash": ""
   },
   ".adonisjs/server/events.ts": {
-    "mtime": 1789894007.468647,
+    "mtime": 1789902396.0810592,
     "ast_hash": "d30fbc483baa5c02e5686cab75f8fe2b",
     "semantic_hash": ""
   },
   ".adonisjs/server/listeners.ts": {
-    "mtime": 1789894007.469656,
+    "mtime": 1789902396.083067,
     "ast_hash": "11c1e641463e3b0e2d9990879ee24fd6",
     "semantic_hash": ""
   },
@@ -490,8 +490,8 @@
     "semantic_hash": ""
   },
   "app/models/product.ts": {
-    "mtime": 1789569492.2016165,
-    "ast_hash": "ce6babf637f6795cfd0133414a48f00c",
+    "mtime": 1789902346.5442772,
+    "ast_hash": "d88ce71ea93ad5c585daa0f5977f2def",
     "semantic_hash": ""
   },
   "app/models/product_attribute.ts": {
@@ -1560,7 +1560,7 @@
     "semantic_hash": ""
   },
   "database/schema.ts": {
-    "mtime": 1789895986.6199787,
+    "mtime": 1789902496.7150028,
     "ast_hash": "f7c8e70c36ed55efe24aea5fb60c931c",
     "semantic_hash": ""
   },
@@ -1755,13 +1755,13 @@
     "semantic_hash": ""
   },
   "app/services/listing_write_service.ts": {
-    "mtime": 1789892859.6426764,
-    "ast_hash": "b8aa4e38fee0cce1d274102c71a33280",
+    "mtime": 1789902414.1478627,
+    "ast_hash": "4fc4dee7e2de696f3e0dec51171b107c",
     "semantic_hash": ""
   },
   "app/services/technolife/brand_mapper.ts": {
-    "mtime": 1789890600.2010312,
-    "ast_hash": "bd7a320fc6b4196b1cc58885e8977849",
+    "mtime": 1789902336.756173,
+    "ast_hash": "efad215109fa38eb9f8ee3b71090204c",
     "semantic_hash": ""
   },
   "app/services/technolife/category_mapper.ts": {
@@ -1790,8 +1790,8 @@
     "semantic_hash": ""
   },
   "app/services/technolife/normalizer.ts": {
-    "mtime": 1789560748.7737167,
-    "ast_hash": "c194fee79e58fad1c280b982f487bb51",
+    "mtime": 1789902345.4241676,
+    "ast_hash": "ff0ed71cbbd44e7a57db02988de602b8",
     "semantic_hash": ""
   },
   "app/services/technolife/parser.ts": {
@@ -1810,8 +1810,8 @@
     "semantic_hash": ""
   },
   "app/services/technolife/types.ts": {
-    "mtime": 1789560155.1804996,
-    "ast_hash": "f60690c1dd827b376e8c35d6f131b4e9",
+    "mtime": 1789902342.3672884,
+    "ast_hash": "bd001ffbab2d9e7f63df966986298338",
     "semantic_hash": ""
   },
   "app/services/technolife/url.ts": {
@@ -1840,8 +1840,8 @@
     "semantic_hash": ""
   },
   "tests/unit/technolife/parser.spec.ts": {
-    "mtime": 1789893952.165404,
-    "ast_hash": "1936cb6993fbc146b0e4fd97cdc59c37",
+    "mtime": 1789902370.2223806,
+    "ast_hash": "395d2060ef514f0c78c4b4f8324036fc",
     "semantic_hash": ""
   },
   "docs/technolife-importer.md": {
@@ -1855,8 +1855,8 @@
     "semantic_hash": ""
   },
   "app/services/technolife/next_state.ts": {
-    "mtime": 1789890627.3955653,
-    "ast_hash": "1bb03524ce30e3d58558d4f016bb7fc6",
+    "mtime": 1789902344.610995,
+    "ast_hash": "01684706690a938238476300c8a282ca",
     "semantic_hash": ""
   },
   "commands/products_clear.ts": {

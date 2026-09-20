@@ -1,47 +1,47 @@
 {
   ".adonisjs/client/data.d.ts": {
-    "mtime": 1789902396.111641,
+    "mtime": 1789907778.238782,
     "ast_hash": "12fca2c440690056895ea09f7273bdbc",
     "semantic_hash": ""
   },
   ".adonisjs/client/manifest.d.ts": {
-    "mtime": 1789902396.1141574,
+    "mtime": 1789907778.2402937,
     "ast_hash": "fdb086c90c96261e58dfce0c9ff14705",
     "semantic_hash": ""
   },
   ".adonisjs/client/registry/index.ts": {
-    "mtime": 1789884995.6063406,
-    "ast_hash": "5956398963f0116c9f36198d75dc9c10",
+    "mtime": 1789908051.1791031,
+    "ast_hash": "5d5935cb46ebebdc3644d5cf73d45509",
     "semantic_hash": ""
   },
   ".adonisjs/client/registry/schema.d.ts": {
-    "mtime": 1789884995.6063406,
-    "ast_hash": "22514a8ecd98cdf4c1a779cf9e806c08",
+    "mtime": 1789908051.1800714,
+    "ast_hash": "bbeac8177d649ee99704808b388eb616",
     "semantic_hash": ""
   },
   ".adonisjs/client/registry/tree.d.ts": {
-    "mtime": 1789884995.6063406,
-    "ast_hash": "d6eb290a2116e646fbe2d474ba94c098",
+    "mtime": 1789908051.1800714,
+    "ast_hash": "969dab49f32ddf3b14017f3c41f2faa9",
     "semantic_hash": ""
   },
   ".adonisjs/server/controllers.ts": {
-    "mtime": 1789902396.10966,
+    "mtime": 1789907778.23578,
     "ast_hash": "803bb71c1d003e45544a500b17482ff2",
     "semantic_hash": ""
   },
   ".adonisjs/server/events.ts": {
-    "mtime": 1789902396.0810592,
+    "mtime": 1789907778.2272227,
     "ast_hash": "d30fbc483baa5c02e5686cab75f8fe2b",
     "semantic_hash": ""
   },
   ".adonisjs/server/listeners.ts": {
-    "mtime": 1789902396.083067,
+    "mtime": 1789907778.2282217,
     "ast_hash": "11c1e641463e3b0e2d9990879ee24fd6",
     "semantic_hash": ""
   },
   ".adonisjs/server/routes.d.ts": {
-    "mtime": 1789884994.864128,
-    "ast_hash": "1980f39bfe28719c896f8933d58ab854",
+    "mtime": 1789907781.020625,
+    "ast_hash": "2e1c69c164ffb715553679807dfbf1d2",
     "semantic_hash": ""
   },
   "ace.js": {
@@ -80,8 +80,8 @@
     "semantic_hash": ""
   },
   "app/controllers/categories_controller.ts": {
-    "mtime": 1789895062.3759086,
-    "ast_hash": "27ceb670cd2f772a00e9265bfe0ce2b0",
+    "mtime": 1789907583.3938296,
+    "ast_hash": "53b72f713d4d8cdd0978e7d84f691482",
     "semantic_hash": ""
   },
   "app/controllers/checkout_controller.ts": {
@@ -95,8 +95,8 @@
     "semantic_hash": ""
   },
   "app/controllers/content_controller.ts": {
-    "mtime": 1789478505.924013,
-    "ast_hash": "c8f56e14cfbb8ba512544f029ff478e2",
+    "mtime": 1789907595.0882335,
+    "ast_hash": "ee70182854b71bd1138fd13e79ee1206",
     "semantic_hash": ""
   },
   "app/controllers/content_promos_controller.ts": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "app/controllers/products_controller.ts": {
-    "mtime": 1789381619.334361,
-    "ast_hash": "f797686679a79c8b2a143c2f011663c7",
+    "mtime": 1789908051.123745,
+    "ast_hash": "311ec809d753cc8d7f1a1bb6d128957f",
     "semantic_hash": ""
   },
   "app/controllers/profile_controller.ts": {
@@ -660,8 +660,8 @@
     "semantic_hash": ""
   },
   "app/utils/catalog_filters.ts": {
-    "mtime": 1788851892.5422125,
-    "ast_hash": "c01e9168f276de6d53f87bacb39b6713",
+    "mtime": 1789908055.8668017,
+    "ast_hash": "5b7456bd0facf16c388c21d60a8fba1e",
     "semantic_hash": ""
   },
   "app/utils/catalog_stock.ts": {
@@ -1560,7 +1560,7 @@
     "semantic_hash": ""
   },
   "database/schema.ts": {
-    "mtime": 1789902496.7150028,
+    "mtime": 1789907877.038059,
     "ast_hash": "f7c8e70c36ed55efe24aea5fb60c931c",
     "semantic_hash": ""
   },
@@ -1580,8 +1580,8 @@
     "semantic_hash": ""
   },
   "database/seed_data/content.json": {
-    "mtime": 1789298147.2995799,
-    "ast_hash": "4d54345c7ce6378d8601846ed7760251",
+    "mtime": 1789907622.2244473,
+    "ast_hash": "8f09293903b9a12648c734842779340b",
     "semantic_hash": ""
   },
   "database/seed_data/mega-menu.json": {
@@ -1760,8 +1760,8 @@
     "semantic_hash": ""
   },
   "app/services/technolife/brand_mapper.ts": {
-    "mtime": 1789902336.756173,
-    "ast_hash": "efad215109fa38eb9f8ee3b71090204c",
+    "mtime": 1789907546.7950203,
+    "ast_hash": "6b6100457a11de36a049574ceff518c1",
     "semantic_hash": ""
   },
   "app/services/technolife/category_mapper.ts": {
@@ -1845,8 +1845,8 @@
     "semantic_hash": ""
   },
   "docs/technolife-importer.md": {
-    "mtime": 1789893944.2827783,
-    "ast_hash": "2bc96c861462c7135e6df4f20a43766a",
+    "mtime": 1789902523.4751,
+    "ast_hash": "17ab63152cde5af3334aebd411ad3ffd",
     "semantic_hash": ""
   },
   "tests/fixtures/technolife/phone-s25.html": {
@@ -1882,6 +1882,11 @@
   "app/services/technolife/variant_builder.ts": {
     "mtime": 1789892885.8040826,
     "ast_hash": "bd65f5e0b5944c4b7eaf82811db3e496",
+    "semantic_hash": ""
+  },
+  "commands/catalog_fix_search_data.ts": {
+    "mtime": 1789907655.6883738,
+    "ast_hash": "6c7d979f3ac5cfb17a7990e172b07a09",
     "semantic_hash": ""
   }
 }

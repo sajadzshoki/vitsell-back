@@ -432,6 +432,12 @@ const routes = {
     tokens: [{"old":"/api/v1/seller/listings","type":0,"val":"api","end":""},{"old":"/api/v1/seller/listings","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/listings","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/listings","type":0,"val":"listings","end":""}],
     types: placeholder as Registry['seller.listings']['types'],
   },
+  'seller.bulk_destroy_listings': {
+    methods: ["POST"],
+    pattern: '/api/v1/seller/listings/bulk-delete',
+    tokens: [{"old":"/api/v1/seller/listings/bulk-delete","type":0,"val":"api","end":""},{"old":"/api/v1/seller/listings/bulk-delete","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/listings/bulk-delete","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/listings/bulk-delete","type":0,"val":"listings","end":""},{"old":"/api/v1/seller/listings/bulk-delete","type":0,"val":"bulk-delete","end":""}],
+    types: placeholder as Registry['seller.bulk_destroy_listings']['types'],
+  },
   'seller.show_listing': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/seller/listings/:productId',
@@ -683,6 +689,12 @@ const routes = {
     pattern: '/api/v1/seller/categories',
     tokens: [{"old":"/api/v1/seller/categories","type":0,"val":"api","end":""},{"old":"/api/v1/seller/categories","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/categories","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/categories","type":0,"val":"categories","end":""}],
     types: placeholder as Registry['categories.admin_index']['types'],
+  },
+  'categories.bulk_destroy': {
+    methods: ["POST"],
+    pattern: '/api/v1/seller/categories/bulk-delete',
+    tokens: [{"old":"/api/v1/seller/categories/bulk-delete","type":0,"val":"api","end":""},{"old":"/api/v1/seller/categories/bulk-delete","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/categories/bulk-delete","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/categories/bulk-delete","type":0,"val":"categories","end":""},{"old":"/api/v1/seller/categories/bulk-delete","type":0,"val":"bulk-delete","end":""}],
+    types: placeholder as Registry['categories.bulk_destroy']['types'],
   },
   'categories.spec_keys': {
     methods: ["GET","HEAD"],
@@ -1391,6 +1403,12 @@ const routes = {
     pattern: '/api/v1/seller/brands',
     tokens: [{"old":"/api/v1/seller/brands","type":0,"val":"api","end":""},{"old":"/api/v1/seller/brands","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/brands","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/brands","type":0,"val":"brands","end":""}],
     types: placeholder as Registry['seller_brands.index']['types'],
+  },
+  'seller_brands.bulk_destroy': {
+    methods: ["POST"],
+    pattern: '/api/v1/seller/brands/bulk-delete',
+    tokens: [{"old":"/api/v1/seller/brands/bulk-delete","type":0,"val":"api","end":""},{"old":"/api/v1/seller/brands/bulk-delete","type":0,"val":"v1","end":""},{"old":"/api/v1/seller/brands/bulk-delete","type":0,"val":"seller","end":""},{"old":"/api/v1/seller/brands/bulk-delete","type":0,"val":"brands","end":""},{"old":"/api/v1/seller/brands/bulk-delete","type":0,"val":"bulk-delete","end":""}],
+    types: placeholder as Registry['seller_brands.bulk_destroy']['types'],
   },
   'seller_brands.show': {
     methods: ["GET","HEAD"],

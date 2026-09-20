@@ -1,10 +1,15 @@
+import Category from '#models/category'
 import Product from '#models/product'
 import ProductAttribute from '#models/product_attribute'
+import { expandBrandNameAliases } from '#services/technolife/brand_mapper'
+import { normalizePersianText } from '#services/technolife/persian'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 
 export type CatalogFilterInput = {
   q?: string
   category?: string
+  /** Pre-resolved category tree ids (self + descendants). Prefer over exact `category`. */
+  categoryIds?: string[]
   brands?: string[]
   minPrice?: number
   maxPrice?: number
@@ -17,6 +22,16 @@ export type CatalogFilterInput = {
 }
 
 type ProductQuery = ModelQueryBuilderContract<typeof Product, Product>
+
+/** Coarse product-type synonyms (any hit expands to the whole group). */
+const CATEGORY_SYNONYM_GROUPS: string[][] = [
+  ['گوشی', 'موبایل', 'موبايل', 'mobile', 'phone'],
+  ['تبلت', 'tablet', 'ipad'],
+  ['لپ تاپ', 'لپ‌تاپ', 'لپتاپ', 'laptop', 'notebook', 'macbook'],
+  ['ساعت', 'ساعت هوشمند', 'watch', 'smartwatch'],
+  ['هدفون', 'هدفونی', 'ایرپاد', 'headphone', 'earbud', 'earbuds', 'airpods'],
+  ['کنسول', 'بازی', 'gaming', 'playstation', 'xbox', 'ps5'],
+]
 
 export function parseAttrFilters(raw: unknown): Record<string, string[]> {
   if (!raw) return {}
@@ -57,19 +72,115 @@ export function parseAttrFilters(raw: unknown): Record<string, string[]> {
   return out
 }
 
+/** Self + all descendant category ids (BFS on parent_id). */
+export async function resolveCategoryTreeIds(categoryId: string): Promise<string[]> {
+  const root = String(categoryId || '').trim()
+  if (!root) return []
+  const ids = new Set<string>([root])
+  let frontier = [root]
+  while (frontier.length) {
+    const children = await Category.query().whereIn('parent_id', frontier).select('id')
+    frontier = []
+    for (const child of children) {
+      if (ids.has(child.id)) continue
+      ids.add(child.id)
+      frontier.push(child.id)
+    }
+  }
+  return [...ids]
+}
+
+export function expandBrandFilterValues(brands: string[]): string[] {
+  const out = new Set<string>()
+  for (const brand of brands) {
+    for (const alias of expandBrandNameAliases(brand)) {
+      out.add(alias)
+    }
+  }
+  return [...out]
+}
+
+function expandSearchToken(token: string): string[] {
+  const normalized = normalizePersianText(token)
+  if (!normalized) return []
+  const key = normalized.toLowerCase()
+  const patterns = new Set<string>([normalized, token.trim()].filter(Boolean))
+
+  for (const group of CATEGORY_SYNONYM_GROUPS) {
+    if (group.some((g) => normalizePersianText(g).toLowerCase() === key)) {
+      for (const g of group) patterns.add(g)
+    }
+  }
+
+  for (const alias of expandBrandNameAliases(normalized)) {
+    patterns.add(alias)
+  }
+
+  return [...patterns].filter(Boolean)
+}
+
+function tokenizeSearchQuery(q: string): string[] {
+  const normalized = normalizePersianText(q)
+  if (!normalized) return []
+  return normalized
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter((t) => t.length >= 1)
+}
+
+function applyTokenMatch(
+  builder: ModelQueryBuilderContract<typeof Product, Product>,
+  patterns: string[]
+) {
+  builder.where((group) => {
+    for (const pattern of patterns) {
+      const like = `%${pattern}%`
+      group
+        .orWhereILike('title', like)
+        .orWhereILike('brand', like)
+        .orWhereILike('category_label', like)
+        .orWhereILike('short_name', like)
+        .orWhereRaw(
+          `EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements_text(COALESCE(tags, '[]'::jsonb)) AS t
+            WHERE t ILIKE ?
+          )`,
+          [like]
+        )
+    }
+  })
+}
+
+/**
+ * Apply catalog filters. Keep this function **synchronous** — Lucid/Knex
+ * query builders are thenable; returning them from `async` executes the query.
+ */
 export function applyCatalogFilters(
   query: ProductQuery,
   input: CatalogFilterInput,
   opts?: { skipPrice?: boolean; skipBrands?: boolean; skipAttrs?: boolean }
 ) {
   const category = String(input.category || '').trim()
+  const categoryIds = (input.categoryIds || []).map(String).filter(Boolean)
   const q = String(input.q || '').trim()
   const brands = (input.brands || []).map(String).filter(Boolean)
   const minPrice = Number(input.minPrice || 0) || 0
   const maxPrice = Number(input.maxPrice || 0) || 0
 
-  if (category) query = query.where('category', category)
-  if (!opts?.skipBrands && brands.length) query = query.whereIn('brand', brands)
+  if (categoryIds.length) {
+    query = categoryIds.length === 1
+      ? query.where('category', categoryIds[0]!)
+      : query.whereIn('category', categoryIds)
+  } else if (category) {
+    query = query.where('category', category)
+  }
+
+  if (!opts?.skipBrands && brands.length) {
+    const expanded = expandBrandFilterValues(brands)
+    query = query.whereIn('brand', expanded.length ? expanded : brands)
+  }
+
   if (!opts?.skipPrice) {
     if (minPrice > 0) query = query.where('price', '>=', minPrice)
     if (maxPrice > 0) query = query.where('price', '<=', maxPrice)
@@ -80,14 +191,18 @@ export function applyCatalogFilters(
   if ((input.minRating || 0) > 0) query = query.where('rating', '>=', input.minRating)
 
   if (q) {
-    const like = `%${q}%`
-    query = query.where((builder) => {
-      builder
-        .whereILike('title', like)
-        .orWhereILike('brand', like)
-        .orWhereILike('category_label', like)
-        .orWhereILike('short_name', like)
-    })
+    const tokens = tokenizeSearchQuery(q)
+    if (tokens.length) {
+      query = query.where((outer) => {
+        for (const token of tokens) {
+          const patterns = expandSearchToken(token)
+          if (!patterns.length) continue
+          outer.where((tokenGroup) => {
+            applyTokenMatch(tokenGroup, patterns)
+          })
+        }
+      })
+    }
   }
 
   if (!opts?.skipAttrs && input.attrs) {

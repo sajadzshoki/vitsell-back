@@ -88,13 +88,13 @@
       "id": "samsung-phone",
       "title": "گوشی سامسونگ",
       "image": "/images/mock/galaxy-s25-ultra.jpg",
-      "to": "/search?q=گوشی سامسونگ&category=mobile"
+      "to": "/search/category-mobile?brands=سامسونگ"
     },
     {
       "id": "smartwatch",
       "title": "ساعت هوشمند",
       "image": "/images/mock/apple-watch-ultra.jpg",
-      "to": "/search?q=ساعت هوشمند&category=watch"
+      "to": "/search/category-watch"
     },
     {
       "id": "iphone",
@@ -106,31 +106,31 @@
       "id": "tablet",
       "title": "تبلت",
       "image": "/images/mock/ipad-pro-m4.jpg",
-      "to": "/search?q=تبلت&category=laptop"
+      "to": "/search/category-tablet"
     },
     {
       "id": "headphones",
       "title": "هدفون",
       "image": "/images/mock/sony-xm5-midnight.jpg",
-      "to": "/search?q=هدفون&category=audio"
+      "to": "/search/category-audio?q=هدفون"
     },
     {
       "id": "console",
       "title": "کنسول بازی",
       "image": "/images/mock/ps5-pro.jpg",
-      "to": "/search?q=کنسول بازی&category=gaming"
+      "to": "/search/category-gaming"
     },
     {
       "id": "laptop",
       "title": "لپ‌تاپ",
       "image": "/images/mock/macbook-m4-spaceblack.jpg",
-      "to": "/search?q=لپ‌تاپ&category=laptop"
+      "to": "/search/category-laptop"
     },
     {
       "id": "xiaomi",
       "title": "شیائومی NFC کف قیمت بازار",
       "image": "/images/mock/galaxy-s25-ultra.jpg",
-      "to": "/search?q=شیائومی&category=mobile"
+      "to": "/search/category-mobile?brands=شیائومی"
     }
   ],
   "homePromos": [

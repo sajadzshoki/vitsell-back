@@ -22,6 +22,7 @@ export interface ApiDefinition {
     show: typeof routes['categories.show']
     pageMeta: typeof routes['categories.page_meta']
     adminIndex: typeof routes['categories.admin_index']
+    bulkDestroy: typeof routes['categories.bulk_destroy']
     specKeys: typeof routes['categories.spec_keys']
     adminShow: typeof routes['categories.admin_show']
     store: typeof routes['categories.store']
@@ -106,6 +107,7 @@ export interface ApiDefinition {
     footer: typeof routes['seller.footer']
     updateFooter: typeof routes['seller.update_footer']
     listings: typeof routes['seller.listings']
+    bulkDestroyListings: typeof routes['seller.bulk_destroy_listings']
     showListing: typeof routes['seller.show_listing']
     storeListing: typeof routes['seller.store_listing']
     updateListing: typeof routes['seller.update_listing']
@@ -318,6 +320,7 @@ export interface ApiDefinition {
   }
   sellerBrands: {
     index: typeof routes['seller_brands.index']
+    bulkDestroy: typeof routes['seller_brands.bulk_destroy']
     show: typeof routes['seller_brands.show']
     store: typeof routes['seller_brands.store']
     update: typeof routes['seller_brands.update']

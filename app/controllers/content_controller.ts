@@ -16,6 +16,7 @@ import { loadFooterWithSiteOverlay } from '#utils/site_settings'
 import { loadSeoSettings } from '#utils/seo_settings'
 import { loadSeoRedirects } from '#utils/seo_redirects'
 import { productsToCatalogWithStock, stockByProductIds } from '#utils/catalog_stock'
+import { resolveCategoryTreeIds } from '#utils/catalog_filters'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 
@@ -138,8 +139,9 @@ export default class ContentController {
     }[] = []
 
     for (const cat of rootCategories) {
+      const treeIds = await resolveCategoryTreeIds(cat.id)
       const shelfProducts = await Product.query()
-        .where('category', cat.id)
+        .whereIn('category', treeIds.length ? treeIds : [cat.id])
         .orderBy('sold_count', 'desc')
         .limit(12)
       if (shelfProducts.length < 1) continue
@@ -147,7 +149,7 @@ export default class ContentController {
         id: `shelf-${cat.id}`,
         title: `پرفروش‌ترین‌های ${cat.name}`,
         category: cat.id,
-        viewAllTo: `/search?category=${encodeURIComponent(cat.id)}`,
+        viewAllTo: `/search/category-${encodeURIComponent(cat.id)}`,
         products: await productsToCatalogWithStock(shelfProducts),
       })
       if (categoryShelves.length >= 3) break
@@ -180,7 +182,7 @@ export default class ContentController {
           id: brand?.id || key,
           name: brand?.name || brandName,
           image,
-          to: `/search?q=${encodeURIComponent(brandName)}&category=${encodeURIComponent(mobileShelf.category)}`,
+          to: `/search/category-${encodeURIComponent(mobileShelf.category)}?brands=${encodeURIComponent(brand?.name || brandName)}`,
         })
         if (topMobileBrands.length >= 5) break
       }
