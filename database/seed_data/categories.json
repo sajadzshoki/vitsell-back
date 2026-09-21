@@ -293,5 +293,71 @@
     },
     "image": "/images/mock/sony-xm5-midnight.jpg",
     "text": "محصولات اصل برندهای معتبر آرایشی و بهداشتی."
+  },
+  {
+    "id": "mobile-accessories",
+    "name": "لوازم جانبی موبایل",
+    "icon": "device-mobile",
+    "parentId": "mobile",
+    "sortOrder": 1,
+    "subs": [],
+    "image": "/images/mock/iphone16pro-desert.jpg",
+    "text": "قاب، گلس، شارژر، کابل و پاوربانک برای گوشی موبایل.",
+    "pageMeta": null
+  },
+  {
+    "id": "laptop-gaming",
+    "name": "لپ‌تاپ گیمینگ",
+    "icon": "device-laptop",
+    "parentId": "laptop",
+    "sortOrder": 1,
+    "subs": [],
+    "image": "/images/mock/macbook-m4-spaceblack.jpg",
+    "text": "لپ‌تاپ‌های مخصوص بازی با کارت گرافیک قدرتمند.",
+    "pageMeta": null
+  },
+  {
+    "id": "laptop-ultrabook",
+    "name": "اولترابوک",
+    "icon": "device-laptop",
+    "parentId": "laptop",
+    "sortOrder": 2,
+    "subs": [],
+    "image": "/images/mock/macbook-m4-spaceblack.jpg",
+    "text": "لپ‌تاپ‌های سبک و باریک برای حمل روزمره.",
+    "pageMeta": null
+  },
+  {
+    "id": "laptop-student",
+    "name": "لپ‌تاپ دانشجویی",
+    "icon": "device-laptop",
+    "parentId": "laptop",
+    "sortOrder": 3,
+    "subs": [],
+    "image": "/images/mock/macbook-m4-spaceblack.jpg",
+    "text": "گزینه‌های اقتصادی و مناسب تحصیل و کارهای روزمره.",
+    "pageMeta": null
+  },
+  {
+    "id": "audio-headphones",
+    "name": "هدفون و ایرپاد",
+    "icon": "headphones",
+    "parentId": "audio",
+    "sortOrder": 1,
+    "subs": [],
+    "image": "/images/mock/sony-xm5-midnight.jpg",
+    "text": "هدفون بلوتوثی، ایرپاد و هدست.",
+    "pageMeta": null
+  },
+  {
+    "id": "audio-speakers",
+    "name": "اسپیکر و ساندبار",
+    "icon": "headphones",
+    "parentId": "audio",
+    "sortOrder": 2,
+    "subs": [],
+    "image": "/images/mock/sony-xm5-midnight.jpg",
+    "text": "اسپیکر قابل حمل و ساندبار خانگی.",
+    "pageMeta": null
   }
 ]

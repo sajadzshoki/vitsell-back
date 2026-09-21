@@ -1,16 +1,16 @@
-# Graph Report - digishop-back  (2026-09-20)
+# Graph Report - digishop-back  (2026-09-21)
 
 ## Corpus Check
-- 373 files · ~144,354 words
+- 373 files · ~144,495 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2546 nodes · 3384 edges · 280 communities (226 shown, 54 thin omitted)
+- 2547 nodes · 3385 edges · 285 communities (231 shown, 54 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `adb6ed40`
+- Built from commit: `c8f0d337`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -216,6 +216,11 @@
 - .run
 - seller_sales.ts
 - mega_menu.spec.ts
+- seller_mega_menus_controller.ts
+- MegaMenuItem
+- MegaMenuSection
+- mega_menu_seeder.ts
+- utils/seo_settings.ts
 
 ## God Nodes (most connected - your core abstractions)
 1. `Product` - 38 edges
@@ -244,11 +249,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (280 total, 54 thin omitted)
+## Communities (285 total, 54 thin omitted)
 
 ### Community 0 - "SellerMegaMenusController"
-Cohesion: 0.05
-Nodes (51): applyReorder(), assertCategoryExists(), assertLatinSlug(), categoryRef(), newId(), SellerMegaMenusController, slugify(), uniqueItemSlug() (+43 more)
+Cohesion: 0.16
+Nodes (7): applyReorder(), SellerMegaMenusController, MegaMenu, MegaMenuStatus, column, dateTime, hasMany
 
 ### Community 1 - "schema.ts"
 Cohesion: 0.11
@@ -272,15 +277,15 @@ Nodes (19): block(), chunkBannerRows(), ContentController, deriveActive(), empty
 
 ### Community 7 - "SellerPayout"
 Cohesion: 0.07
-Nodes (29): jalaliishDate(), nextSettlementId(), resolveSiteShop(), SellerSettlementsController, SellerPayout, SellerSettlementSource, SellerSettlementStatus, belongsTo (+21 more)
+Nodes (31): jalaliishDate(), nextSettlementId(), resolveSiteShop(), SellerSettlementsController, SellerPayout, SellerSettlementSource, SellerSettlementStatus, belongsTo (+23 more)
 
 ### Community 8 - "AdminRole"
 Cohesion: 0.07
 Nodes (19): SellerRolesController, AdminRole, column, dateTime, manyToMany, countActiveSuperAdmins(), ensureSystemAdminRoles(), applyAdminFilters() (+11 more)
 
 ### Community 9 - "SellerRefund"
-Cohesion: 0.08
-Nodes (29): nextRefundId(), SellerRefundsController, SELLER_REFUND_TRANSITIONS, SellerRefund, SellerRefundItem, SellerRefundStatus, column, dateTime (+21 more)
+Cohesion: 0.09
+Nodes (27): nextRefundId(), SellerRefundsController, SELLER_REFUND_TRANSITIONS, SellerRefund, SellerRefundItem, SellerRefundStatus, column, dateTime (+19 more)
 
 ### Community 10 - "AuthController"
 Cohesion: 0.08
@@ -327,16 +332,16 @@ Cohesion: 0.12
 Nodes (18): buildSummary(), ensureWallet(), jalaliishDateTime(), maskCardNumber(), topUpValidator, WalletController, withdrawValidator, belongsTo (+10 more)
 
 ### Community 21 - "Profile"
-Cohesion: 0.13
-Nodes (9): ensureProfile(), loadStaff(), rolesIncludeSuper(), SellerAdminsController, SellerCustomersController, Profile, belongsTo, column (+1 more)
+Cohesion: 0.06
+Nodes (28): ensureProfile(), loadStaff(), rolesIncludeSuper(), SellerAdminsController, SellerCustomersController, AuditAction, AuditEntity, AuditLog (+20 more)
 
 ### Community 22 - "Brand"
 Cohesion: 0.09
 Nodes (23): deleteBrandRecord(), DeleteBrandResult, emptySeo(), listedProductCountByBrand(), normalizeSeo(), SellerBrandsController, slugify(), Brand (+15 more)
 
 ### Community 23 - "StaticPage"
-Cohesion: 0.06
-Nodes (32): parseOptionalDate(), SellerBannersController, slugify(), syncHeroSlidesFromBanners(), AuditAction, AuditEntity, AuditLog, belongsTo (+24 more)
+Cohesion: 0.12
+Nodes (13): parseOptionalDate(), SellerBannersController, slugify(), syncHeroSlidesFromBanners(), Banner, BannerLinkType, BannerPlacement, BannerType (+5 more)
 
 ### Community 24 - "AmazingDeal"
 Cohesion: 0.13
@@ -420,7 +425,7 @@ Nodes (6): SellerShippingController, slugifyIdPart(), SellerShippingMethod, Sell
 
 ### Community 44 - "ContentBlock"
 Cohesion: 0.18
-Nodes (11): ContentBlock, column, dateTime, loadAboutPage(), saveAboutPage(), asString(), defaultSeoSettings, loadSeoSettings() (+3 more)
+Nodes (10): ContentBlock, column, dateTime, loadAboutPage(), saveAboutPage(), block(), emptyContact, FooterPayload (+2 more)
 
 ### Community 45 - ".place"
 Cohesion: 0.05
@@ -823,8 +828,8 @@ Cohesion: 0.33
 Nodes (5): activeValidator, codeRule, parseDate(), storeValidator, updateValidator
 
 ### Community 274 - "footer.ts"
-Cohesion: 0.40
-Nodes (5): block(), emptyContact, FooterPayload, loadFooterPayload(), saveFooterPayload()
+Cohesion: 0.19
+Nodes (14): categoryLandingHref(), decodePathSegments(), filterToSearchHref(), findItemInTree(), firstCategoryId(), loadPublicMegaMenuTree(), MegaMenuResolveResult, PublicCategoryRef (+6 more)
 
 ### Community 275 - "account_controller.ts"
 Cohesion: 0.40
@@ -833,6 +838,26 @@ Nodes (4): activeValidator, idRule, storeValidator, updateValidator
 ### Community 276 - "seller_questions_query.ts"
 Cohesion: 0.70
 Nodes (4): applyFilters(), querySellerQuestions(), QuestionQuery, statusCounts()
+
+### Community 280 - "seller_mega_menus_controller.ts"
+Cohesion: 0.39
+Nodes (9): assertCategoryExists(), assertLatinSlug(), categoryRef(), newId(), slugify(), uniqueItemSlug(), uniqueMenuSlug(), uniqueSectionSlug() (+1 more)
+
+### Community 281 - "MegaMenuItem"
+Cohesion: 0.20
+Nodes (7): MegaMenuItem, MegaMenuItemStatus, MegaMenuItemType, belongsTo, column, dateTime, loadAdminMegaMenuTree()
+
+### Community 282 - "MegaMenuSection"
+Cohesion: 0.20
+Nodes (6): MegaMenuSection, MegaMenuSectionStatus, belongsTo, column, dateTime, hasMany
+
+### Community 283 - "mega_menu_seeder.ts"
+Cohesion: 0.24
+Nodes (9): __dirname, loadJson(), run(), seedDir, SeedFile, SeedItem, SeedMenu, SeedSection (+1 more)
+
+### Community 284 - "utils/seo_settings.ts"
+Cohesion: 0.43
+Nodes (6): asString(), defaultSeoSettings, loadSeoSettings(), normalizeSeoSettings(), saveSeoSettings(), SeoSettingsPayload
 
 ## Knowledge Gaps
 - **641 isolated node(s):** `Data`, `User`, `Variants`, `placeholder`, `registry` (+636 more)
@@ -843,16 +868,16 @@ Nodes (4): applyFilters(), querySellerQuestions(), QuestionQuery, statusCounts()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `run()` connect `run` to `DiscountCode`, `Category`, `seller_reconciliation.ts`, `BlogPost`, `SellerPayout`, `ContentPromo`, `ContentBlock`, `.place`, `SellerShop`, `AmazingDeal`, `SellerController`, `ProductQuestion`, `Product`, `SellerReview`?**
-  _High betweenness centrality (0.123) - this node is a cross-community bridge._
-- **Why does `Product` connect `Product` to `SellerReturn`, `Category`, `order.ts`, `BlogPost`, `StockMovement`, `media_upload.ts`, `product.ts`, `.place`, `ProductsClear`, `run`, `recommendation_service.ts`, `.run`, `SellerShop`, `StaticPage`, `AmazingDeal`, `SellerController`, `seller_listings_query.ts`, `seller_controller.ts`?**
-  _High betweenness centrality (0.092) - this node is a cross-community bridge._
-- **Why does `Category` connect `Category` to `SellerMegaMenusController`, `queryMarketingSummary`, `order.ts`, `BlogPost`, `SellerCustomersController`, `.place`, `category_mapper.ts`, `ProductAttribute`, `seller_categories_query.ts`, `run`, `.run`, `mega_menu.spec.ts`, `seller_controller.ts`?**
+  _High betweenness centrality (0.126) - this node is a cross-community bridge._
+- **Why does `Product` connect `Product` to `SellerReturn`, `Category`, `order.ts`, `BlogPost`, `StockMovement`, `media_upload.ts`, `product.ts`, `.place`, `ProductsClear`, `run`, `recommendation_service.ts`, `Profile`, `.run`, `SellerShop`, `AmazingDeal`, `SellerController`, `seller_listings_query.ts`, `seller_controller.ts`?**
+  _High betweenness centrality (0.091) - this node is a cross-community bridge._
+- **Why does `Category` connect `Category` to `queryMarketingSummary`, `order.ts`, `BlogPost`, `SellerCustomersController`, `.place`, `category_mapper.ts`, `ProductAttribute`, `seller_categories_query.ts`, `run`, `footer.ts`, `.run`, `mega_menu.spec.ts`, `seller_mega_menus_controller.ts`, `MegaMenuItem`, `seller_controller.ts`?**
   _High betweenness centrality (0.075) - this node is a cross-community bridge._
 - **What connects `Data`, `User`, `Variants` to the rest of the system?**
   _641 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `SellerMegaMenusController` be split into smaller, more focused modules?**
-  _Cohesion score 0.05094905094905095 - nodes in this community are weakly interconnected._
 - **Should `schema.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.10505050505050505 - nodes in this community are weakly interconnected._
 - **Should `routes.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.03773584905660377 - nodes in this community are weakly interconnected._
+- **Should `MediaAsset` be split into smaller, more focused modules?**
+  _Cohesion score 0.06290471785383904 - nodes in this community are weakly interconnected._

@@ -76,9 +76,40 @@ function slugOrId(slug: string | null | undefined, id: string) {
   return s || id
 }
 
-/** SEO path `/category/{menu}/{section}/…` — resolved by `/mega-menu/resolve`. */
-function joinCategoryPath(parts: string[]) {
-  return `/category/${parts.map((p) => encodeURIComponent(p)).join('/')}`
+/** Category hub / landing (not product listing). */
+function categoryLandingHref(categoryId: string) {
+  return `/category/${encodeURIComponent(categoryId)}`
+}
+
+/** Canonical catalog listing URL under `/search`. */
+function filterToSearchHref(
+  filter: MegaMenuFilterDefinition | null | undefined,
+  categoryFallback?: string | null
+): string {
+  const category = String(filter?.category || categoryFallback || '').trim()
+  const params = new URLSearchParams()
+  const q = filter?.q?.trim()
+  if (q) params.set('q', q)
+  const brands = (filter?.brands || []).map((b) => String(b).trim()).filter(Boolean)
+  if (brands.length) params.set('brands', brands.join(','))
+  const minPrice = Number(filter?.minPrice || 0) || 0
+  const maxPrice = Number(filter?.maxPrice || 0) || 0
+  if (minPrice > 0) params.set('minPrice', String(minPrice))
+  if (maxPrice > 0) params.set('maxPrice', String(maxPrice))
+  if (filter?.attrs && Object.keys(filter.attrs).length) {
+    params.set('attrs', JSON.stringify(filter.attrs))
+  }
+  if (filter?.onlyDiscount) params.set('onlyDiscount', 'true')
+  if (filter?.onlyInStock) params.set('onlyInStock', 'true')
+  if (filter?.fastDelivery) params.set('fastDelivery', 'true')
+  const minRating = Number(filter?.minRating || 0) || 0
+  if (minRating > 0) params.set('minRating', String(minRating))
+
+  const path = category
+    ? `/search/category-${encodeURIComponent(category)}`
+    : '/search'
+  const qs = params.toString()
+  return qs ? `${path}?${qs}` : path
 }
 
 function firstCategoryId(sections: PublicMegaMenuSection[]): string | null {
@@ -144,7 +175,7 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
     sectionsByMenu.set(section.menuId, list)
   }
 
-  function mapItem(item: MegaMenuItem, pathParts: string[]): PublicMegaMenuItem | null {
+  function mapItem(item: MegaMenuItem): PublicMegaMenuItem | null {
     const base: PublicMegaMenuItem = {
       id: item.id,
       title: item.title,
@@ -153,13 +184,14 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
       sortOrder: Number(item.sortOrder) || 0,
     }
 
-    const itemSlug = slugOrId(item.slug, item.id)
-    const href = joinCategoryPath([...pathParts, itemSlug])
-
     if (item.type === 'category') {
       const cat = item.categoryId ? categoryById.get(item.categoryId) : undefined
       if (!cat) return null
-      return { ...base, href, category: categoryRef(cat)! }
+      return {
+        ...base,
+        href: filterToSearchHref({ category: cat.id }),
+        category: categoryRef(cat)!,
+      }
     }
 
     if (item.type === 'filter') {
@@ -168,7 +200,7 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
       if (filter.category && !categoryById.has(filter.category)) {
         return null
       }
-      return { ...base, href, filter }
+      return { ...base, href: filterToSearchHref(filter), filter }
     }
 
     if (item.type === 'link') {
@@ -182,8 +214,7 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
 
   function buildSectionTree(
     menuId: string,
-    parentId: string | null,
-    pathParts: string[]
+    parentId: string | null
   ): PublicMegaMenuSection[] {
     const siblings = sortByOrder(
       (sectionsByMenu.get(menuId) || []).filter((s) => (s.parentId || null) === parentId)
@@ -191,13 +222,11 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
 
     return siblings
       .map((section) => {
-        const sectionSlug = slugOrId(section.slug, section.id)
-        const nextParts = [...pathParts, sectionSlug]
         const mappedItems = sortByOrder(itemsBySection.get(section.id) || [])
-          .map((item) => mapItem(item, nextParts))
+          .map((item) => mapItem(item))
           .filter(Boolean) as PublicMegaMenuItem[]
 
-        const childSections = buildSectionTree(menuId, section.id, nextParts)
+        const childSections = buildSectionTree(menuId, section.id)
         const cat = section.categoryId ? categoryRef(categoryById.get(section.categoryId)) : undefined
 
         return {
@@ -205,8 +234,7 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
           title: section.title,
           slug: section.slug ?? null,
           sortOrder: Number(section.sortOrder) || 0,
-          href: joinCategoryPath(nextParts),
-          ...(cat ? { category: cat } : {}),
+          ...(cat ? { href: filterToSearchHref({ category: cat.id }), category: cat } : {}),
           items: mappedItems,
           sections: childSections,
         } satisfies PublicMegaMenuSection
@@ -223,12 +251,13 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
 
   const itemsOut: PublicMegaMenu[] = sortByOrder(menus).map((menu) => {
     const menuSlug = slugOrId(menu.slug, menu.id)
-    const sections = buildSectionTree(menu.id, null, [menuSlug])
-    // Prefer first section SEO path (multi-segment → /category/[catId]/[...path]).
-    // Only use single-segment /category/{slug} when slug is a real taxonomy category.
+    const sections = buildSectionTree(menu.id, null)
+    // Prefer taxonomy landing hub; else first section search href.
+    const taxonomyLanding = taxonomyBySlug.has(menuSlug)
+      ? categoryLandingHref(menuSlug)
+      : undefined
     const firstSectionHref = sections[0]?.href
-    const taxonomyLanding = taxonomyBySlug.has(menuSlug) ? joinCategoryPath([menuSlug]) : undefined
-    const href = firstSectionHref || taxonomyLanding
+    const href = taxonomyLanding || firstSectionHref
 
     return {
       id: menu.id,
@@ -260,7 +289,8 @@ function decodePathSegments(path: string): string[] {
 }
 
 /**
- * Resolve `/category/{menu}/{section}/…/{item}` path segments to a catalog filter.
+ * Resolve legacy `/category/{menu}/{section}/…/{item}` path segments to a catalog filter.
+ * Returned `href` is the canonical `/search` URL (for 301 redirects).
  */
 export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolveResult | null> {
   const segments = decodePathSegments(path)
@@ -271,8 +301,6 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
     tree.items.find((m) => m.slug === segments[0] || m.id === segments[0]) || null
   if (!menu) return null
 
-  const href = joinCategoryPath(segments)
-
   if (segments.length === 1) {
     // Never treat menu.slug as a product category unless a section/item actually links one.
     const cat = firstCategoryId(menu.sections)
@@ -282,7 +310,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
       type: 'menu',
       category: cat,
       filter: cat ? { category: cat } : null,
-      href,
+      href: cat ? filterToSearchHref({ category: cat }) : menu.href || '/search',
     }
   }
 
@@ -307,7 +335,9 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
           type: 'section',
           category,
           filter: category ? { category } : null,
-          href,
+          href: category
+            ? filterToSearchHref({ category })
+            : childSection.href || '/search',
         }
       }
       continue
@@ -326,7 +356,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
           type: 'item',
           category: null,
           filter: null,
-          href: item.url || href,
+          href: item.url || '/search',
         }
       }
 
@@ -337,7 +367,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
           type: 'item',
           category: item.category.id,
           filter: { category: item.category.id },
-          href,
+          href: filterToSearchHref({ category: item.category.id }),
         }
       }
 
@@ -348,7 +378,7 @@ export async function resolveMegaMenuPath(path: string): Promise<MegaMenuResolve
           type: 'item',
           category: item.filter.category || null,
           filter: item.filter,
-          href,
+          href: filterToSearchHref(item.filter),
         }
       }
     }

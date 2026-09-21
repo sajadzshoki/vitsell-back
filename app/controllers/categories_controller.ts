@@ -167,7 +167,6 @@ export default class CategoriesController {
   async index({ response }: HttpContext) {
     const categories = await Category.query()
       .where('status', 'active')
-      .whereNull('parent_id')
       .orderBy('sort_order', 'asc')
       .orderBy('name', 'asc')
     return response.ok(categories.map((c) => c.toJSON()))

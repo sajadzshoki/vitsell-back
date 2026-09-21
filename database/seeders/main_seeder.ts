@@ -36,6 +36,9 @@ export default class extends BaseSeeder {
         icon: string
         image?: string | null
         text?: string | null
+        parentId?: string | null
+        sortOrder?: number
+        status?: 'active' | 'inactive'
         subs: { name: string; items: string[] }[]
         pageMeta: unknown
       }[]
@@ -50,6 +53,9 @@ export default class extends BaseSeeder {
           icon: c.icon,
           image: c.image ?? null,
           text: c.text ?? null,
+          parentId: c.parentId ?? null,
+          sortOrder: Number(c.sortOrder) || 0,
+          status: c.status === 'inactive' ? 'inactive' : 'active',
           subs: c.subs ?? [],
           pageMeta: (c.pageMeta as any) ?? null,
           suggested: null,

@@ -140,6 +140,8 @@ export default class Category extends BaseModel {
       icon: publicCategoryIcon(this.icon),
       image: this.image ? toPublicMediaUrl(this.image) : null,
       text: this.text ?? null,
+      parentId: this.parentId ?? null,
+      sortOrder: Number(this.sortOrder) || 0,
       subs: publicSubs(this.subs),
     }
   }

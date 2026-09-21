@@ -115,8 +115,8 @@
     "semantic_hash": ""
   },
   "app/controllers/mega_menu_controller.ts": {
-    "mtime": 1789192057.1472309,
-    "ast_hash": "d5ad16346767617e2aee9ff993574eb3",
+    "mtime": 1789978924.038578,
+    "ast_hash": "b47231a9dd5797090f655f13ca201e74",
     "semantic_hash": ""
   },
   "app/controllers/new_account_controller.ts": {
@@ -695,8 +695,8 @@
     "semantic_hash": ""
   },
   "app/utils/mega_menu_tree.ts": {
-    "mtime": 1789192057.154741,
-    "ast_hash": "273d0e43c7e494c88aa7ed64219e9e54",
+    "mtime": 1789978906.123475,
+    "ast_hash": "7f47af6d5423f27f7393a591b49eb289",
     "semantic_hash": ""
   },
   "app/utils/navigation_settings.ts": {
@@ -1560,7 +1560,7 @@
     "semantic_hash": ""
   },
   "database/schema.ts": {
-    "mtime": 1789907877.038059,
+    "mtime": 1789971416.7055736,
     "ast_hash": "f7c8e70c36ed55efe24aea5fb60c931c",
     "semantic_hash": ""
   },

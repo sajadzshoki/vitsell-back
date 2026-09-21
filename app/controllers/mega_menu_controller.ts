@@ -9,7 +9,7 @@ export default class MegaMenuController {
   }
 
   /**
-   * Resolve SEO path `/category/{menu}/{section}/…/{item}` to catalog filter.
+   * Resolve legacy SEO path `/category/{menu}/{section}/…/{item}` → filter + canonical `/search` href.
    * Query: `?path=mobile/mobile-phone/price-up-to-30ml`
    */
   async resolve({ request, response }: HttpContext) {
