@@ -126,6 +126,8 @@ router
     router.get('blog/:id', [ContentController, 'blogShow'])
     router.get('static-pages/:id', [ContentController, 'staticPage'])
 
+    router.get('orders/:id/tracking', [AccountController, 'postalTracking'])
+
     router.get('payments/zarinpal/callback', [CheckoutController, 'zarinpalCallback'])
     router.get('payments/zarinpal/wallet-callback', [WalletController, 'zarinpalCallback'])
 

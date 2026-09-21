@@ -211,6 +211,38 @@ export default class AccountController {
     )
   }
 
+  async postalTracking({ params, response }: HttpContext) {
+    const id = String(params.id || '').trim()
+    if (!id) {
+      return response.badRequest({
+        errors: [{ field: 'id', message: 'شماره پیگیری سفارش را وارد کنید' }],
+      })
+    }
+
+    const order = await Order.query()
+      .whereRaw('lower(id) = ?', [id.toLowerCase()])
+      .preload('sellerOrders')
+      .first()
+
+    if (!order) {
+      return response.notFound({
+        errors: [{ field: 'id', message: 'سفارشی با این شماره پیدا نشد' }],
+      })
+    }
+
+    const trackingCode = order.sellerOrders
+      .map((row) => String(row.trackingCode || '').trim())
+      .find(Boolean)
+
+    if (!trackingCode) {
+      return response.notFound({
+        errors: [{ field: 'id', message: 'کد رهگیری پستی برای این سفارش هنوز ثبت نشده' }],
+      })
+    }
+
+    return response.ok({ trackingCode })
+  }
+
   async reviews({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()
 

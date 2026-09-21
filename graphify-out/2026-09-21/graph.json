@@ -4168,8 +4168,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "seller_mega_menus_controller.ts"
     },
     {
@@ -4179,8 +4179,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_slugify",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "slugify()"
     },
     {
@@ -4190,8 +4190,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_assertlatinslug",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "assertlatinslug()"
     },
     {
@@ -4201,8 +4201,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_newid",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "newid()"
     },
     {
@@ -4212,8 +4212,8 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_uniquemenuslug",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "uniquemenuslug()"
     },
     {
@@ -4223,8 +4223,8 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_uniquesectionslug",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "uniquesectionslug()"
     },
     {
@@ -4234,8 +4234,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_uniqueitemslug",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "uniqueitemslug()"
     },
     {
@@ -4245,8 +4245,8 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_categoryref",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "categoryref()"
     },
     {
@@ -4256,8 +4256,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_assertcategoryexists",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "assertcategoryexists()"
     },
     {
@@ -4267,8 +4267,8 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_validateitempayload",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": "validateitempayload()"
     },
     {
@@ -4322,8 +4322,8 @@
       "source_location": "L248",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_store",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": ".store()"
     },
     {
@@ -4377,8 +4377,8 @@
       "source_location": "L327",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_storesection",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": ".storesection()"
     },
     {
@@ -4388,8 +4388,8 @@
       "source_location": "L380",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_updatesection",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": ".updatesection()"
     },
     {
@@ -4399,8 +4399,8 @@
       "source_location": "L452",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_setsectionstatus",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": ".setsectionstatus()"
     },
     {
@@ -4421,8 +4421,8 @@
       "source_location": "L469",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_destroysection",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": ".destroysection()"
     },
     {
@@ -4432,8 +4432,8 @@
       "source_location": "L480",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_storeitem",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": ".storeitem()"
     },
     {
@@ -4443,8 +4443,8 @@
       "source_location": "L529",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_updateitem",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 280,
+      "community_name": "seller_mega_menus_controller.ts",
       "norm_label": ".updateitem()"
     },
     {
@@ -4454,8 +4454,8 @@
       "source_location": "L580",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_setitemstatus",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": ".setitemstatus()"
     },
     {
@@ -4476,8 +4476,8 @@
       "source_location": "L597",
       "_origin": "ast",
       "id": "app_controllers_seller_mega_menus_controller_sellermegamenuscontroller_destroyitem",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": ".destroyitem()"
     },
     {
@@ -6841,8 +6841,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_models_audit_log",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "audit_log.ts"
     },
     {
@@ -6852,8 +6852,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "app_models_audit_log_auditaction",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "auditaction"
     },
     {
@@ -6863,8 +6863,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "app_models_audit_log_auditentity",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "auditentity"
     },
     {
@@ -6874,8 +6874,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "app_models_audit_log_auditlog",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "auditlog"
     },
     {
@@ -6885,8 +6885,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_audit_log_ts_column",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "column"
     },
     {
@@ -6896,8 +6896,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_audit_log_ts_datetime",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "datetime"
     },
     {
@@ -6907,8 +6907,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_audit_log_ts_belongsto",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "belongsto"
     },
     {
@@ -6918,8 +6918,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "app_models_audit_log_auditlog_toadminjson",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": ".toadminjson()"
     },
     {
@@ -8040,8 +8040,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_models_mega_menu_item",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "mega_menu_item.ts"
     },
     {
@@ -8051,8 +8051,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "app_models_mega_menu_item_megamenuitemtype",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "megamenuitemtype"
     },
     {
@@ -8062,8 +8062,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "app_models_mega_menu_item_megamenuitemstatus",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "megamenuitemstatus"
     },
     {
@@ -8073,8 +8073,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_models_mega_menu_item_megamenuitem",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "megamenuitem"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_mega_menu_item_ts_column",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "column"
     },
     {
@@ -8095,8 +8095,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_mega_menu_item_ts_datetime",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "datetime"
     },
     {
@@ -8106,8 +8106,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_mega_menu_item_ts_belongsto",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "belongsto"
     },
     {
@@ -8117,8 +8117,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "app_models_mega_menu_item_megamenuitem_toadminjson",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": ".toadminjson()"
     },
     {
@@ -8128,8 +8128,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_models_mega_menu_section",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": "mega_menu_section.ts"
     },
     {
@@ -8139,8 +8139,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_models_mega_menu_section_megamenusectionstatus",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": "megamenusectionstatus"
     },
     {
@@ -8150,8 +8150,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "app_models_mega_menu_section_megamenusection",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": "megamenusection"
     },
     {
@@ -8161,8 +8161,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_mega_menu_section_ts_column",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": "column"
     },
     {
@@ -8172,8 +8172,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_mega_menu_section_ts_datetime",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": "datetime"
     },
     {
@@ -8183,8 +8183,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_mega_menu_section_ts_belongsto",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": "belongsto"
     },
     {
@@ -8194,8 +8194,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "app_models_mega_menu_section_ts_hasmany",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": "hasmany"
     },
     {
@@ -8205,8 +8205,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "app_models_mega_menu_section_megamenusection_toadminjson",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 282,
+      "community_name": "MegaMenuSection",
       "norm_label": ".toadminjson()"
     },
     {
@@ -13067,8 +13067,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_admin_audit",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "admin_audit.ts"
     },
     {
@@ -13078,8 +13078,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "app_utils_admin_audit_recordauditinput",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "recordauditinput"
     },
     {
@@ -13089,8 +13089,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_utils_admin_audit_newauditid",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "newauditid()"
     },
     {
@@ -13100,8 +13100,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "app_utils_admin_audit_resolveactordisplayname",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "resolveactordisplayname()"
     },
     {
@@ -13111,8 +13111,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "app_utils_admin_audit_recordadminaudit",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "recordadminaudit()"
     },
     {
@@ -13540,8 +13540,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_footer",
-      "community": 274,
-      "community_name": "footer.ts",
+      "community": 44,
+      "community_name": "ContentBlock",
       "norm_label": "footer.ts"
     },
     {
@@ -13551,8 +13551,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_utils_footer_footerpayload",
-      "community": 274,
-      "community_name": "footer.ts",
+      "community": 44,
+      "community_name": "ContentBlock",
       "norm_label": "footerpayload"
     },
     {
@@ -13562,8 +13562,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_utils_footer_emptycontact",
-      "community": 274,
-      "community_name": "footer.ts",
+      "community": 44,
+      "community_name": "ContentBlock",
       "norm_label": "emptycontact"
     },
     {
@@ -13573,8 +13573,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "app_utils_footer_block",
-      "community": 274,
-      "community_name": "footer.ts",
+      "community": 44,
+      "community_name": "ContentBlock",
       "norm_label": "block()"
     },
     {
@@ -13584,8 +13584,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "app_utils_footer_loadfooterpayload",
-      "community": 274,
-      "community_name": "footer.ts",
+      "community": 44,
+      "community_name": "ContentBlock",
       "norm_label": "loadfooterpayload()"
     },
     {
@@ -13595,8 +13595,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "app_utils_footer_savefooterpayload",
-      "community": 274,
-      "community_name": "footer.ts",
+      "community": 44,
+      "community_name": "ContentBlock",
       "norm_label": "savefooterpayload()"
     },
     {
@@ -13848,8 +13848,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "mega_menu_tree.ts"
     },
     {
@@ -13859,8 +13859,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_publiccategoryref",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "publiccategoryref"
     },
     {
@@ -13870,8 +13870,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_publicmegamenuitem",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "publicmegamenuitem"
     },
     {
@@ -13881,8 +13881,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_publicmegamenusection",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "publicmegamenusection"
     },
     {
@@ -13892,8 +13892,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_publicmegamenu",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "publicmegamenu"
     },
     {
@@ -13903,8 +13903,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_megamenuresolveresult",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "megamenuresolveresult"
     },
     {
@@ -13914,8 +13914,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_categoryref",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "categoryref()"
     },
     {
@@ -13925,8 +13925,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_sortbyorder",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "sortbyorder()"
     },
     {
@@ -13936,85 +13936,96 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_slugorid",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "slugorid()"
     },
     {
-      "label": "joinCategoryPath()",
+      "label": "categoryLandingHref()",
       "file_type": "code",
       "source_file": "app/utils/mega_menu_tree.ts",
       "source_location": "L80",
       "_origin": "ast",
-      "id": "app_utils_mega_menu_tree_joincategorypath",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
-      "norm_label": "joincategorypath()"
+      "id": "app_utils_mega_menu_tree_categorylandinghref",
+      "community": 274,
+      "community_name": "footer.ts",
+      "norm_label": "categorylandinghref()"
+    },
+    {
+      "label": "filterToSearchHref()",
+      "file_type": "code",
+      "source_file": "app/utils/mega_menu_tree.ts",
+      "source_location": "L85",
+      "_origin": "ast",
+      "id": "app_utils_mega_menu_tree_filtertosearchhref",
+      "community": 274,
+      "community_name": "footer.ts",
+      "norm_label": "filtertosearchhref()"
     },
     {
       "label": "firstCategoryId()",
       "file_type": "code",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L84",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_firstcategoryid",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "firstcategoryid()"
     },
     {
       "label": "loadPublicMegaMenuTree()",
       "file_type": "code",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L97",
+      "source_location": "L128",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_loadpublicmegamenutree",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "loadpublicmegamenutree()"
     },
     {
       "label": "decodePathSegments()",
       "file_type": "code",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L247",
+      "source_location": "L276",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_decodepathsegments",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "decodepathsegments()"
     },
     {
       "label": "resolveMegaMenuPath()",
       "file_type": "code",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L265",
+      "source_location": "L295",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_resolvemegamenupath",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "resolvemegamenupath()"
     },
     {
       "label": "findItemInTree()",
       "file_type": "code",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L362",
+      "source_location": "L392",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_finditemintree",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 274,
+      "community_name": "footer.ts",
       "norm_label": "finditemintree()"
     },
     {
       "label": "loadAdminMegaMenuTree()",
       "file_type": "code",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L375",
+      "source_location": "L405",
       "_origin": "ast",
       "id": "app_utils_mega_menu_tree_loadadminmegamenutree",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 281,
+      "community_name": "MegaMenuItem",
       "norm_label": "loadadminmegamenutree()"
     },
     {
@@ -14871,8 +14882,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_audit_query",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "seller_audit_query.ts"
     },
     {
@@ -14882,8 +14893,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_utils_seller_audit_query_auditq",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "auditq"
     },
     {
@@ -14893,8 +14904,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "app_utils_seller_audit_query_parseauditlistqs",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "parseauditlistqs()"
     },
     {
@@ -14904,8 +14915,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "app_utils_seller_audit_query_applyauditfilters",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "applyauditfilters()"
     },
     {
@@ -14915,8 +14926,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "app_utils_seller_audit_query_actionbuckets",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "actionbuckets()"
     },
     {
@@ -14926,8 +14937,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "app_utils_seller_audit_query_distinctactors",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "distinctactors()"
     },
     {
@@ -14937,8 +14948,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "app_utils_seller_audit_query_queryselleraudit",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "queryselleraudit()"
     },
     {
@@ -16752,8 +16763,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_reports",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "seller_reports.ts"
     },
     {
@@ -16763,8 +16774,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "app_utils_seller_reports_weekday_fa",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "weekday_fa"
     },
     {
@@ -16774,8 +16785,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "app_utils_seller_reports_financeperiodid",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "financeperiodid"
     },
     {
@@ -16785,8 +16796,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "app_utils_seller_reports_financekpibundle",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "financekpibundle"
     },
     {
@@ -16796,8 +16807,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "app_utils_seller_reports_daterange",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "daterange"
     },
     {
@@ -16807,8 +16818,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "app_utils_seller_reports_emptykpis",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "emptykpis()"
     },
     {
@@ -16818,8 +16829,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "app_utils_seller_reports_parsedateinput",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "parsedateinput()"
     },
     {
@@ -16829,8 +16840,8 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "app_utils_seller_reports_resolverange",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "resolverange()"
     },
     {
@@ -16840,8 +16851,8 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "app_utils_seller_reports_parseloosedate",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "parseloosedate()"
     },
     {
@@ -16851,8 +16862,8 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "app_utils_seller_reports_inrange",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "inrange()"
     },
     {
@@ -16862,8 +16873,8 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "app_utils_seller_reports_percentchange",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "percentchange()"
     },
     {
@@ -16873,8 +16884,8 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "app_utils_seller_reports_issuccessfulpayment",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "issuccessfulpayment()"
     },
     {
@@ -16884,8 +16895,8 @@
       "source_location": "L184",
       "_origin": "ast",
       "id": "app_utils_seller_reports_daykey",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "daykey()"
     },
     {
@@ -16895,8 +16906,8 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "app_utils_seller_reports_buildtrend",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "buildtrend()"
     },
     {
@@ -16906,8 +16917,8 @@
       "source_location": "L230",
       "_origin": "ast",
       "id": "app_utils_seller_reports_querysellerfinancereports",
-      "community": 7,
-      "community_name": "SellerPayout",
+      "community": 9,
+      "community_name": "SellerRefund",
       "norm_label": "querysellerfinancereports()"
     },
     {
@@ -17302,8 +17313,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_system_query",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "seller_system_query.ts"
     },
     {
@@ -17313,8 +17324,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_utils_seller_system_query_num",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "num()"
     },
     {
@@ -17324,8 +17335,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "app_utils_seller_system_query_permissioncatalogsize",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "permissioncatalogsize()"
     },
     {
@@ -17335,8 +17346,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "app_utils_seller_system_query_integrationstatus",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "integrationstatus()"
     },
     {
@@ -17346,8 +17357,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "app_utils_seller_system_query_querysystemoverview",
-      "community": 23,
-      "community_name": "StaticPage",
+      "community": 21,
+      "community_name": "Profile",
       "norm_label": "querysystemoverview()"
     },
     {
@@ -17357,8 +17368,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "seller_transactions_query.ts"
     },
     {
@@ -17368,8 +17379,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_sellerfinancetransactiontype",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "sellerfinancetransactiontype"
     },
     {
@@ -17379,8 +17390,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_sellerfinancetransactionstatus",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "sellerfinancetransactionstatus"
     },
     {
@@ -17390,8 +17401,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_sellerfinancetransactionrow",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "sellerfinancetransactionrow"
     },
     {
@@ -17401,8 +17412,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_infergateway",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "infergateway()"
     },
     {
@@ -17412,8 +17423,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_mappaymentstatus",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "mappaymentstatus()"
     },
     {
@@ -17423,8 +17434,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_mapcommercepaymenttotxstatus",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "mapcommercepaymenttotxstatus()"
     },
     {
@@ -17434,8 +17445,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_maprefundstatus",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "maprefundstatus()"
     },
     {
@@ -17445,8 +17456,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_mapsettlementstatus",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "mapsettlementstatus()"
     },
     {
@@ -17456,8 +17467,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_projectpayments",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "projectpayments()"
     },
     {
@@ -17467,8 +17478,8 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_projectrefunds",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "projectrefunds()"
     },
     {
@@ -17478,8 +17489,8 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_projectsettlements",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "projectsettlements()"
     },
     {
@@ -17489,8 +17500,8 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_applyfilters",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "applyfilters()"
     },
     {
@@ -17500,8 +17511,8 @@
       "source_location": "L265",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_countby",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "countby()"
     },
     {
@@ -17511,8 +17522,8 @@
       "source_location": "L274",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_buildsellerfinanceledger",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "buildsellerfinanceledger()"
     },
     {
@@ -17522,8 +17533,8 @@
       "source_location": "L293",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_querysellertransactions",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "querysellertransactions()"
     },
     {
@@ -17533,8 +17544,8 @@
       "source_location": "L319",
       "_origin": "ast",
       "id": "app_utils_seller_transactions_query_findsellertransaction",
-      "community": 9,
-      "community_name": "SellerRefund",
+      "community": 7,
+      "community_name": "SellerPayout",
       "norm_label": "findsellertransaction()"
     },
     {
@@ -17753,8 +17764,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_utils_seo_settings",
-      "community": 44,
-      "community_name": "ContentBlock",
+      "community": 284,
+      "community_name": "utils/seo_settings.ts",
       "norm_label": "utils/seo_settings.ts"
     },
     {
@@ -17764,8 +17775,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_utils_seo_settings_seosettingspayload",
-      "community": 44,
-      "community_name": "ContentBlock",
+      "community": 284,
+      "community_name": "utils/seo_settings.ts",
       "norm_label": "seosettingspayload"
     },
     {
@@ -17775,8 +17786,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "app_utils_seo_settings_defaultseosettings",
-      "community": 44,
-      "community_name": "ContentBlock",
+      "community": 284,
+      "community_name": "utils/seo_settings.ts",
       "norm_label": "defaultseosettings"
     },
     {
@@ -17786,8 +17797,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "app_utils_seo_settings_asstring",
-      "community": 44,
-      "community_name": "ContentBlock",
+      "community": 284,
+      "community_name": "utils/seo_settings.ts",
       "norm_label": "asstring()"
     },
     {
@@ -17797,8 +17808,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "app_utils_seo_settings_normalizeseosettings",
-      "community": 44,
-      "community_name": "ContentBlock",
+      "community": 284,
+      "community_name": "utils/seo_settings.ts",
       "norm_label": "normalizeseosettings()"
     },
     {
@@ -17808,8 +17819,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "app_utils_seo_settings_loadseosettings",
-      "community": 44,
-      "community_name": "ContentBlock",
+      "community": 284,
+      "community_name": "utils/seo_settings.ts",
       "norm_label": "loadseosettings()"
     },
     {
@@ -17819,8 +17830,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "app_utils_seo_settings_saveseosettings",
-      "community": 44,
-      "community_name": "ContentBlock",
+      "community": 284,
+      "community_name": "utils/seo_settings.ts",
       "norm_label": "saveseosettings()"
     },
     {
@@ -24848,8 +24859,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "mega_menu_seeder.ts"
     },
     {
@@ -24859,8 +24870,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_dirname",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "__dirname"
     },
     {
@@ -24870,8 +24881,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_seeddir",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "seeddir"
     },
     {
@@ -24881,8 +24892,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_seeditem",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "seeditem"
     },
     {
@@ -24892,8 +24903,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_seedsection",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "seedsection"
     },
     {
@@ -24903,8 +24914,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_seedmenu",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "seedmenu"
     },
     {
@@ -24914,8 +24925,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_seedfile",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "seedfile"
     },
     {
@@ -24925,8 +24936,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_loadjson",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "loadjson()"
     },
     {
@@ -24936,8 +24947,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_run",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "run()"
     },
     {
@@ -24947,8 +24958,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "database_seeders_mega_menu_seeder_seedsections",
-      "community": 0,
-      "community_name": "SellerMegaMenusController",
+      "community": 283,
+      "community_name": "mega_menu_seeder.ts",
       "norm_label": "seedsections()"
     },
     {
@@ -40746,7 +40757,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L397",
+      "source_location": "L427",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadadminmegamenutree",
@@ -40758,7 +40769,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L129",
+      "source_location": "L160",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadpublicmegamenutree",
@@ -41802,7 +41813,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L376",
+      "source_location": "L406",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadadminmegamenutree",
@@ -41814,7 +41825,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L98",
+      "source_location": "L129",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadpublicmegamenutree",
@@ -41918,7 +41929,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L386",
+      "source_location": "L416",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadadminmegamenutree",
@@ -41930,7 +41941,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L113",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadpublicmegamenutree",
@@ -41954,7 +41965,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L410",
+      "source_location": "L440",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadadminmegamenutree",
@@ -42047,7 +42058,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L379",
+      "source_location": "L409",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadadminmegamenutree",
@@ -42059,7 +42070,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L106",
+      "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadpublicmegamenutree",
@@ -50368,6 +50379,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
+      "source_location": "L80",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_utils_mega_menu_tree",
+      "target": "app_utils_mega_menu_tree_categorylandinghref",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/mega_menu_tree.ts",
       "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
@@ -50379,7 +50401,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L247",
+      "source_location": "L276",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree",
@@ -50390,7 +50412,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L362",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "app_utils_mega_menu_tree",
+      "target": "app_utils_mega_menu_tree_filtertosearchhref",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/utils/mega_menu_tree.ts",
+      "source_location": "L392",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree",
@@ -50401,7 +50434,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L84",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree",
@@ -50412,18 +50445,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L80",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "app_utils_mega_menu_tree",
-      "target": "app_utils_mega_menu_tree_joincategorypath",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L375",
+      "source_location": "L405",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree",
@@ -50434,7 +50456,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L97",
+      "source_location": "L128",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree",
@@ -50500,7 +50522,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L265",
+      "source_location": "L295",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree",
@@ -50534,7 +50556,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L224",
+      "source_location": "L252",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadpublicmegamenutree",
@@ -50546,7 +50568,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L217",
+      "source_location": "L245",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadpublicmegamenutree",
@@ -50558,11 +50580,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L230",
+      "source_location": "L257",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_loadpublicmegamenutree",
-      "target": "app_utils_mega_menu_tree_joincategorypath",
+      "target": "app_utils_mega_menu_tree_categorylandinghref",
       "confidence_score": 1.0
     },
     {
@@ -50570,11 +50592,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L274",
+      "source_location": "L313",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_resolvemegamenupath",
-      "target": "app_utils_mega_menu_tree_joincategorypath",
+      "target": "app_utils_mega_menu_tree_filtertosearchhref",
       "confidence_score": 1.0
     },
     {
@@ -50582,7 +50604,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L278",
+      "source_location": "L306",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_resolvemegamenupath",
@@ -50594,7 +50616,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L269",
+      "source_location": "L299",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_resolvemegamenupath",
@@ -50606,7 +50628,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L266",
+      "source_location": "L296",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_resolvemegamenupath",
@@ -50618,7 +50640,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/utils/mega_menu_tree.ts",
-      "source_location": "L319",
+      "source_location": "L349",
       "weight": 1.0,
       "_origin": "ast",
       "source": "app_utils_mega_menu_tree_resolvemegamenupath",
@@ -66649,5 +66671,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "adb6ed40b1fcf135ab3da9c0fd6d826d1144c589"
+  "built_at_commit": "c8f0d33782d8a59efb2f372002d2dd67bd1f1298"
 }

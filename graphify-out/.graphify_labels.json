@@ -283,5 +283,11 @@
   "281": "MegaMenuItem",
   "282": "MegaMenuSection",
   "283": "mega_menu_seeder.ts",
-  "284": "utils/seo_settings.ts"
+  "284": "utils/seo_settings.ts",
+  "285": "seller_roles_query.ts",
+  "286": "Payment",
+  "287": "footer.ts",
+  "288": "order.ts",
+  "289": "admin_audit.ts",
+  "290": "querySystemOverview"
 }

@@ -278,5 +278,10 @@
   "276": "seller_questions_query.ts",
   "277": ".run",
   "278": "seller_sales.ts",
-  "279": "mega_menu.spec.ts"
+  "279": "mega_menu.spec.ts",
+  "280": "seller_mega_menus_controller.ts",
+  "281": "MegaMenuItem",
+  "282": "MegaMenuSection",
+  "283": "mega_menu_seeder.ts",
+  "284": "utils/seo_settings.ts"
 }

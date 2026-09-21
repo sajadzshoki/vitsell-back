@@ -899,7 +899,7 @@
         },
         {
           "label": "پیگیری سفارش",
-          "to": "/account/orders"
+          "to": "/tracking"
         }
       ]
     }
