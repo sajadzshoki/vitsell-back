@@ -4,6 +4,9 @@ const ARABIC_YEH = /\u064A/g // ي
 const FARSI_YEH = '\u06CC' // ی
 const ARABIC_KEH = /\u0643/g // ك
 const FARSI_KEH = '\u06A9' // ک
+/** آ أ إ ٱ → ا so search typos like ایفون match آیفون */
+const ALEF_VARIANTS = /[\u0622\u0623\u0625\u0671]/g
+const PLAIN_ALEF = '\u0627'
 const ZERO_WIDTH = /[\u200B-\u200D\uFEFF\u00AD]/g
 const MULTI_SPACE = /\s+/g
 
@@ -33,6 +36,7 @@ export function normalizePersianText(input: string | null | undefined): string {
   let s = String(input)
   s = s.replace(ZERO_WIDTH, '')
   s = s.replace(ARABIC_YEH, FARSI_YEH).replace(ARABIC_KEH, FARSI_KEH)
+  s = s.replace(ALEF_VARIANTS, PLAIN_ALEF)
   s = toAsciiDigits(s)
   s = decodeBasicHtmlEntities(s)
   s = s.replace(MULTI_SPACE, ' ').trim()

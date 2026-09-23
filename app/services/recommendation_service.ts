@@ -56,6 +56,17 @@ export async function storeActivities(userId: number, events: IncomingActivity[]
 
   if (!rows.length) return { stored: 0 }
 
+  const productIds = [...new Set(rows.map((r) => r.productId).filter(Boolean))] as string[]
+  if (productIds.length) {
+    const existing = await Product.query().whereIn('id', productIds).select('id')
+    const existingIds = new Set(existing.map((p) => p.id))
+    for (const row of rows) {
+      if (row.productId && !existingIds.has(row.productId)) {
+        row.productId = null
+      }
+    }
+  }
+
   await UserActivity.createMany(rows)
   await pruneUserActivities(userId)
   return { stored: rows.length }

@@ -143,6 +143,7 @@ export default class Category extends BaseModel {
       parentId: this.parentId ?? null,
       sortOrder: Number(this.sortOrder) || 0,
       subs: publicSubs(this.subs),
+      seo: this.seo ? { ...emptySeo(), ...this.seo } : null,
     }
   }
 

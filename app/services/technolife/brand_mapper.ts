@@ -3,7 +3,9 @@ import { normalizeBrandKey, normalizePersianText } from '#services/technolife/pe
 
 export const BRAND_ALIASES: Record<string, string[]> = {
   سامسونگ: ['samsung', 'سامسونگ', 'Samsung'],
-  اپل: ['apple', 'اپل', 'آیفون', 'iphone', 'Apple', 'iPhone'],
+  // Product lines (آیفون/iphone) stay in catalog search synonyms — not brand aliases,
+  // otherwise q=ایفون matches every Apple SKU (MacBook, AirPods, …).
+  اپل: ['apple', 'اپل', 'Apple'],
   شیائومی: ['xiaomi', 'شیائومی', 'شیاومی', 'Xiaomi'],
   پوکو: ['poco', 'پوکو', 'Poco'],
   هوآوی: ['huawei', 'هوآوی', 'هواوی', 'Huawei'],

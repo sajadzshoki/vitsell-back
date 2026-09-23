@@ -23,9 +23,11 @@ export type CatalogFilterInput = {
 
 type ProductQuery = ModelQueryBuilderContract<typeof Product, Product>
 
-/** Coarse product-type synonyms (any hit expands to the whole group). */
+/** Coarse product-type / line synonyms (any hit expands to the whole group). */
 const CATEGORY_SYNONYM_GROUPS: string[][] = [
   ['گوشی', 'موبایل', 'موبايل', 'mobile', 'phone'],
+  // آ vs ا: both spellings kept so ILIKE still hits DB titles that use آیفون
+  ['آیفون', 'ایفون', 'iphone', 'iPhone'],
   ['تبلت', 'tablet', 'ipad'],
   ['لپ تاپ', 'لپ‌تاپ', 'لپتاپ', 'laptop', 'notebook', 'macbook'],
   ['ساعت', 'ساعت هوشمند', 'watch', 'smartwatch'],

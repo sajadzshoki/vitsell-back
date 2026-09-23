@@ -9,6 +9,7 @@ import {
   toAsciiDigits,
   splitTechnolifeBrand,
 } from '#services/technolife/persian'
+import { expandBrandNameAliases } from '#services/technolife/brand_mapper'
 import { rialToToman, normalizeToToman, parsePersianPriceToToman } from '#services/technolife/price'
 import { validateTechnolifeUrl, validateTechnolifeCategoryUrl, validateTechnolifeInputUrl } from '#services/technolife/url'
 import { buildCategoryFilterObj } from '#services/technolife/category_discover'
@@ -23,6 +24,20 @@ test.group('Technolife persian normalize', () => {
     assert.equal(toAsciiDigits('۱۲۳'), '123')
     assert.equal(toAsciiDigits('٤٥'), '45')
     assert.equal(normalizePersianText('ك ag ي'), 'ک ag ی')
+  })
+
+  test('collapses alef variants so ایفون matches آیفون', ({ assert }) => {
+    assert.equal(normalizePersianText('آیفون'), 'ایفون')
+    assert.equal(normalizePersianText('ایفون'), 'ایفون')
+    assert.equal(normalizePersianText('أحمد'), 'احمد')
+  })
+
+  test('iphone product-line is not an Apple brand alias', ({ assert }) => {
+    const iphone = expandBrandNameAliases('ایفون')
+    assert.isFalse(iphone.some((a) => /^apple$/i.test(a) || a === 'اپل'))
+    const apple = expandBrandNameAliases('اپل')
+    assert.isTrue(apple.some((a) => /^apple$/i.test(a)))
+    assert.isFalse(apple.some((a) => /iphone/i.test(a) || a.includes('یفون')))
   })
 
   test('splits technolife brand pipe', ({ assert }) => {

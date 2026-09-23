@@ -180,6 +180,7 @@ export default class BlogPost extends BaseModel {
       popular: this.featured || this.popular,
       engagement: this.engagement ?? 0,
       active: this.isPubliclyVisible(),
+      seo: this.seo ? { ...emptySeo(), ...this.seo } : null,
     }
   }
 
