@@ -246,12 +246,23 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
           }
         : undefined
 
+      const fallbackCategoryId =
+        cat?.id
+        || firstCategoryId(childSections)
+        || mappedItems.find((i) => i.type === 'category' && i.category?.id)?.category?.id
+        || mappedItems.find((i) => i.type === 'filter' && i.filter?.category)?.filter?.category
+        || null
+
       return {
         id: section.id,
         title: section.title,
         slug: section.slug ?? null,
         sortOrder: Number(section.sortOrder) || 0,
-        ...(cat ? { href: filterToSearchHref({ category: cat.id }), category: cat } : {}),
+        ...(cat
+          ? { href: filterToSearchHref({ category: cat.id }), category: cat }
+          : fallbackCategoryId
+            ? { href: filterToSearchHref({ category: fallbackCategoryId }) }
+            : {}),
         items: mappedItems,
         sections: childSections,
       } satisfies PublicMegaMenuSection
