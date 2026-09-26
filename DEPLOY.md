@@ -65,6 +65,8 @@ ADMIN_URL=https://seller.vitsell.ir
 APP_VERSION=beta.0.1
 ```
 
+`FRONTEND_URL` همان آدرسی است که بعد از زرین‌پال کاربر به آن برمی‌گردد (`/cart` یا `/order/...`). **هرگز `localhost` نگذارید** — در غیر این صورت مرورگر خریدار به لوکال سیستم خودش می‌رود. فرانت هنگام پرداخت `returnOrigin` هم می‌فرستد تا اگر `FRONTEND_URL` اشتباه لوپ‌بک باشد، به همان دامنهٔ فروشگاه برگردد.
+
 Health check (بدون DB): `GET /health` → `{ "status": "ok", "version": "<APP_VERSION>" }`  
 در Docker Compose برای سرویس `api` هم همین مسیر به‌عنوان `healthcheck` ست شده است.
 

@@ -53,6 +53,12 @@ export default await Env.create(new URL('../', import.meta.url), {
   ZARINPAL_SANDBOX: Env.schema.boolean.optional(),
   ZARINPAL_CALLBACK_URL: Env.schema.string.optional(),
   ALLOW_PAYMENT_MOCK: Env.schema.boolean.optional(),
+  /**
+   * Extra comma-separated origins allowed for post-payment redirects
+   * (in addition to FRONTEND_URL / ADMIN_URL).
+   * Example: https://shop.example.com,https://www.shop.example.com
+   */
+  PAYMENT_RETURN_ORIGINS: Env.schema.string.optional(),
 
   /** Technolife product importer (optional; defaults applied in config/technolife.ts) */
   TECHNOLIFE_ENABLED: Env.schema.boolean.optional(),

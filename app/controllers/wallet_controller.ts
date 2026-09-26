@@ -1,11 +1,14 @@
 import Wallet from '#models/wallet'
 import WalletTransaction from '#models/wallet_transaction'
 import ZarinpalService from '#services/zarinpal_service'
-import env from '#start/env'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
+import {
+  resolvePaymentReturnBase,
+  zarinpalCallbackUrlWithReturn,
+} from '#utils/payment_return_url'
 
 const MIN_TOPUP = 50_000
 const MAX_TOPUP = 50_000_000
@@ -14,6 +17,7 @@ const MIN_WITHDRAW = 100_000
 const topUpValidator = vine.compile(
   vine.object({
     amount: vine.number().min(MIN_TOPUP).max(MAX_TOPUP),
+    returnOrigin: vine.string().optional(),
   })
 )
 
@@ -98,7 +102,8 @@ export default class WalletController {
 
   async topUp({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { amount } = await request.validateUsing(topUpValidator)
+    const payload = await request.validateUsing(topUpValidator)
+    const { amount } = payload
     const wallet = await ensureWallet(user.id)
     const { date, time } = jalaliishDateTime()
     const txId = `wt${Date.now()}`
@@ -121,11 +126,15 @@ export default class WalletController {
 
     const zarinpal = new ZarinpalService()
     const amountRial = amount * 10
-    const appUrl = env
-      .get('APP_URL')
-      .replace(/\/\/0\.0\.0\.0(?=[:/]|$)/, '//localhost')
-      .replace(/\/\/\[::\](?=[:/]|$)/, '//localhost')
-    const callbackUrl = `${appUrl}/api/v1/payments/zarinpal/wallet-callback`
+    const returnBase = resolvePaymentReturnBase(
+      payload.returnOrigin,
+      request.header('origin'),
+      request.header('referer')
+    )
+    const callbackUrl = zarinpalCallbackUrlWithReturn(
+      '/api/v1/payments/zarinpal/wallet-callback',
+      returnBase
+    )
 
     try {
       const { authority, paymentUrl } = await zarinpal.requestPayment({
@@ -225,7 +234,11 @@ export default class WalletController {
   async zarinpalCallback({ request, response }: HttpContext) {
     const authority = String(request.input('Authority', ''))
     const status = String(request.input('Status', ''))
-    const frontend = env.get('FRONTEND_URL').replace(/\/$/, '')
+    const frontend = resolvePaymentReturnBase(
+      request.input('ro'),
+      request.header('origin'),
+      request.header('referer')
+    ).replace(/\/$/, '')
 
     const redirectWallet = (topup: 'ok' | 'failed' | 'cancelled') => {
       return response

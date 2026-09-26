@@ -12,10 +12,13 @@ import {
   productVariantPrice,
   productVariants,
 } from '#utils/product_variants'
-import env from '#start/env'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import db from '@adonisjs/lucid/services/db'
+import {
+  resolvePaymentReturnBase,
+  zarinpalCallbackUrlWithReturn,
+} from '#utils/payment_return_url'
 
 const placeValidator = vine.compile(
   vine.object({
@@ -23,6 +26,8 @@ const placeValidator = vine.compile(
     shippingMethod: vine.enum(['express', 'post', 'pickup'] as const),
     paymentMethod: vine.enum(['online', 'cod', 'installment'] as const),
     discountCode: vine.string().optional(),
+    /** Storefront origin (e.g. https://vitsell.ir) — used after Zarinpal return. */
+    returnOrigin: vine.string().optional(),
   })
 )
 
@@ -201,10 +206,19 @@ export default class CheckoutController {
 
     const zarinpal = new ZarinpalService()
     const amountRial = total * 10
+    const returnBase = resolvePaymentReturnBase(
+      payload.returnOrigin,
+      request.header('origin'),
+      request.header('referer')
+    )
     const { authority, paymentUrl } = await zarinpal.requestPayment({
       amountRial,
       description: `پرداخت سفارش ${orderId}`,
       mobile: user.phone,
+      callbackUrl: zarinpalCallbackUrlWithReturn(
+        '/api/v1/payments/zarinpal/callback',
+        returnBase
+      ),
     })
 
     await Payment.create({
@@ -225,7 +239,11 @@ export default class CheckoutController {
   async zarinpalCallback({ request, response }: HttpContext) {
     const authority = String(request.input('Authority', ''))
     const status = String(request.input('Status', ''))
-    const frontend = env.get('FRONTEND_URL').replace(/\/$/, '')
+    const frontend = resolvePaymentReturnBase(
+      request.input('ro'),
+      request.header('origin'),
+      request.header('referer')
+    ).replace(/\/$/, '')
     const redirectCart = (payment: string) =>
       response.redirect().withQs(false).toPath(`${frontend}/cart?payment=${payment}`)
     const redirectOrder = (orderId: string) =>
