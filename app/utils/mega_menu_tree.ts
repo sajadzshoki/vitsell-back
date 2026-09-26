@@ -156,8 +156,10 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
     if (item.type === 'filter' && item.filter?.category) categoryIds.add(item.filter.category)
   }
 
+  // Include inactive categories too — storefront still needs the menu link;
+  // only truly missing category rows fall back to id/title.
   const categories = categoryIds.size
-    ? await Category.query().whereIn('id', [...categoryIds]).where('status', 'active')
+    ? await Category.query().whereIn('id', [...categoryIds])
     : []
   const categoryById = new Map(categories.map((c) => [c.id, c]))
 
@@ -169,10 +171,18 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
   }
 
   const sectionsByMenu = new Map<string, MegaMenuSection[]>()
+  const activeSectionIds = new Set(sections.map((s) => s.id))
   for (const section of sections) {
     const list = sectionsByMenu.get(section.menuId) || []
     list.push(section)
     sectionsByMenu.set(section.menuId, list)
+  }
+
+  /** If parent is inactive/missing, hoist the active child to root so it is not orphaned. */
+  function effectiveParentId(section: MegaMenuSection): string | null {
+    const parentId = section.parentId || null
+    if (parentId && !activeSectionIds.has(parentId)) return null
+    return parentId
   }
 
   function mapItem(item: MegaMenuItem): PublicMegaMenuItem | null {
@@ -185,21 +195,22 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
     }
 
     if (item.type === 'category') {
-      const cat = item.categoryId ? categoryById.get(item.categoryId) : undefined
-      if (!cat) return null
+      const categoryId = (item.categoryId || '').trim()
+      if (!categoryId) return null
+      const cat = categoryById.get(categoryId)
       return {
         ...base,
-        href: filterToSearchHref({ category: cat.id }),
-        category: categoryRef(cat)!,
+        href: filterToSearchHref({ category: categoryId }),
+        category: cat
+          ? categoryRef(cat)!
+          : { id: categoryId, name: item.title, icon: '', image: null },
       }
     }
 
     if (item.type === 'filter') {
       const filter = item.filter
       if (!filter) return null
-      if (filter.category && !categoryById.has(filter.category)) {
-        return null
-      }
+      // Keep filter links even when the linked category is missing/inactive.
       return { ...base, href: filterToSearchHref(filter), filter }
     }
 
@@ -217,29 +228,34 @@ export async function loadPublicMegaMenuTree(): Promise<{ items: PublicMegaMenu[
     parentId: string | null
   ): PublicMegaMenuSection[] {
     const siblings = sortByOrder(
-      (sectionsByMenu.get(menuId) || []).filter((s) => (s.parentId || null) === parentId)
+      (sectionsByMenu.get(menuId) || []).filter((s) => effectiveParentId(s) === parentId)
     )
 
-    return siblings
-      .map((section) => {
-        const mappedItems = sortByOrder(itemsBySection.get(section.id) || [])
-          .map((item) => mapItem(item))
-          .filter(Boolean) as PublicMegaMenuItem[]
+    return siblings.map((section) => {
+      const mappedItems = sortByOrder(itemsBySection.get(section.id) || [])
+        .map((item) => mapItem(item))
+        .filter(Boolean) as PublicMegaMenuItem[]
 
-        const childSections = buildSectionTree(menuId, section.id)
-        const cat = section.categoryId ? categoryRef(categoryById.get(section.categoryId)) : undefined
+      const childSections = buildSectionTree(menuId, section.id)
+      const cat = section.categoryId
+        ? categoryRef(categoryById.get(section.categoryId)) || {
+            id: section.categoryId,
+            name: section.title,
+            icon: '',
+            image: null,
+          }
+        : undefined
 
-        return {
-          id: section.id,
-          title: section.title,
-          slug: section.slug ?? null,
-          sortOrder: Number(section.sortOrder) || 0,
-          ...(cat ? { href: filterToSearchHref({ category: cat.id }), category: cat } : {}),
-          items: mappedItems,
-          sections: childSections,
-        } satisfies PublicMegaMenuSection
-      })
-      .filter((s) => s.items.length > 0 || s.sections.length > 0 || Boolean(s.category))
+      return {
+        id: section.id,
+        title: section.title,
+        slug: section.slug ?? null,
+        sortOrder: Number(section.sortOrder) || 0,
+        ...(cat ? { href: filterToSearchHref({ category: cat.id }), category: cat } : {}),
+        items: mappedItems,
+        sections: childSections,
+      } satisfies PublicMegaMenuSection
+    })
   }
 
   const menuSlugs = menus.map((m) => slugOrId(m.slug, m.id))

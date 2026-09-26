@@ -1,7 +1,7 @@
-# Graph Report - digishop-back  (2026-09-23)
+# Graph Report - digishop-back  (2026-09-26)
 
 ## Corpus Check
-- 373 files · ~144,942 words
+- 373 files · ~145,067 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f8787829`
+- Built from commit: `a7f3840d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
