@@ -17,16 +17,23 @@ type ZarinpalVerifyResult = {
 /** Official sandbox accepts any 36-char merchant code. */
 const SANDBOX_MERCHANT_FALLBACK = '00000000-0000-0000-0000-000000000000'
 
+export class PaymentUnavailableError extends Error {
+  constructor(message = 'درگاه پرداخت در دسترس نیست') {
+    super(message)
+    this.name = 'PaymentUnavailableError'
+  }
+}
+
 /**
  * Zarinpal payment gateway v4.
  * Amounts stored/passed here are Rials (frontend toman × 10).
  *
- * When ZARINPAL_SANDBOX=true, requests go to sandbox.zarinpal.com
- * (real sandbox UI). Merchant may be any 36-char id in sandbox.
+ * Live host: payment.zarinpal.com (api.zarinpal.com is deprecated).
+ * Sandbox only when ZARINPAL_SANDBOX=true explicitly.
  */
 export default class ZarinpalService {
   private sandbox() {
-    return env.get('ZARINPAL_SANDBOX') !== false
+    return env.get('ZARINPAL_SANDBOX') === true
   }
 
   private merchantId() {
@@ -39,13 +46,13 @@ export default class ZarinpalService {
   private baseApi() {
     return this.sandbox()
       ? 'https://sandbox.zarinpal.com/pg/v4/payment'
-      : 'https://api.zarinpal.com/pg/v4/payment'
+      : 'https://payment.zarinpal.com/pg/v4/payment'
   }
 
   private startPayBase() {
     return this.sandbox()
       ? 'https://sandbox.zarinpal.com/pg/StartPay'
-      : 'https://www.zarinpal.com/pg/StartPay'
+      : 'https://payment.zarinpal.com/pg/StartPay'
   }
 
   /** Avoid 0.0.0.0 in browser-facing callback URLs. */
@@ -68,23 +75,31 @@ export default class ZarinpalService {
       env.get('ZARINPAL_CALLBACK_URL') ||
       `${this.publicAppUrl()}/api/v1/payments/zarinpal/callback`
 
-    // Local mock only when not in sandbox and merchant is missing.
+    const amountRial = Math.round(Number(input.amountRial) || 0)
+    if (amountRial < 1000) {
+      throw new Error('مبلغ پرداخت کمتر از حداقل زرین‌پال است')
+    }
+
+    // Local mock only when merchant missing and mock explicitly allowed.
     if (!merchantId) {
-      const authority = `MOCK${Date.now()}${Math.floor(Math.random() * 1e6)}`
-      logger.info(
-        { authority, amountRial: input.amountRial },
-        '[Zarinpal] merchant missing (production) — mock authority for local dev'
-      )
-      return {
-        authority,
-        paymentUrl: `${callbackUrl}${callbackUrl.includes('?') ? '&' : '?'}Authority=${authority}&Status=OK&mock=1`,
+      if (env.get('ALLOW_PAYMENT_MOCK') === true && env.get('NODE_ENV') !== 'production') {
+        const authority = `MOCK${Date.now()}${Math.floor(Math.random() * 1e6)}`
+        logger.info(
+          { authority, amountRial },
+          '[Zarinpal] mock authority for local dev'
+        )
+        return {
+          authority,
+          paymentUrl: `${callbackUrl}${callbackUrl.includes('?') ? '&' : '?'}Authority=${authority}&Status=OK&mock=1`,
+        }
       }
+      throw new PaymentUnavailableError('ZARINPAL_MERCHANT_ID تنظیم نشده است')
     }
 
     logger.info(
       {
         sandbox: this.sandbox(),
-        amountRial: input.amountRial,
+        amountRial,
         callbackUrl,
         merchant: `${merchantId.slice(0, 8)}…`,
       },
@@ -99,7 +114,8 @@ export default class ZarinpalService {
       },
       body: JSON.stringify({
         merchant_id: merchantId,
-        amount: input.amountRial,
+        amount: amountRial,
+        currency: 'IRR',
         description: input.description,
         callback_url: callbackUrl,
         metadata: input.mobile ? { mobile: input.mobile } : undefined,
@@ -108,12 +124,13 @@ export default class ZarinpalService {
 
     const payload = (await response.json()) as {
       data?: { code?: number; authority?: string; message?: string }
-      errors?: unknown
+      errors?: { code?: number; message?: string } | Array<{ code?: number; message?: string }>
     }
 
     if (!payload.data?.authority || payload.data.code !== 100) {
-      logger.error({ payload }, '[Zarinpal] request failed')
-      throw new Error(payload.data?.message || 'Zarinpal request failed')
+      logger.error({ payload, status: response.status }, '[Zarinpal] request failed')
+      const errMsg = zarinpalErrorMessage(payload) || payload.data?.message || 'Zarinpal request failed'
+      throw new Error(errMsg)
     }
 
     return {
@@ -127,16 +144,30 @@ export default class ZarinpalService {
     authority: string
   }): Promise<ZarinpalVerifyResult> {
     const merchantId = this.merchantId()
+    const amountRial = Math.round(Number(input.amountRial) || 0)
+    const authority = String(input.authority || '').trim()
 
-    if (!merchantId || input.authority.startsWith('MOCK')) {
-      logger.info({ authority: input.authority }, '[Zarinpal] mock verify OK')
+    if (!merchantId || authority.startsWith('MOCK')) {
+      if (authority.startsWith('MOCK')) {
+        logger.info({ authority }, '[Zarinpal] mock verify OK')
+        return {
+          ok: true,
+          code: 100,
+          refId: `MOCK-${Date.now()}`,
+          cardPan: '502229******0000',
+        }
+      }
       return {
-        ok: true,
-        code: 100,
-        refId: `MOCK-${Date.now()}`,
-        cardPan: '502229******0000',
+        ok: false,
+        code: -1,
+        message: 'ZARINPAL_MERCHANT_ID تنظیم نشده است',
       }
     }
+
+    logger.info(
+      { sandbox: this.sandbox(), amountRial, authority: `${authority.slice(0, 12)}…` },
+      '[Zarinpal] verify request'
+    )
 
     const response = await fetch(`${this.baseApi()}/verify.json`, {
       method: 'POST',
@@ -146,8 +177,8 @@ export default class ZarinpalService {
       },
       body: JSON.stringify({
         merchant_id: merchantId,
-        amount: input.amountRial,
-        authority: input.authority,
+        amount: amountRial,
+        authority,
       }),
     })
 
@@ -158,17 +189,42 @@ export default class ZarinpalService {
         ref_id?: number | string
         card_pan?: string
       }
+      errors?: { code?: number; message?: string } | Array<{ code?: number; message?: string }>
     }
 
-    const code = payload.data?.code ?? 0
+    const code = Number(payload.data?.code ?? zarinpalErrorCode(payload) ?? 0)
     const ok = code === 100 || code === 101
+
+    if (!ok) {
+      logger.error({ payload, status: response.status, amountRial, authority }, '[Zarinpal] verify failed')
+    } else {
+      logger.info({ code, refId: payload.data?.ref_id }, '[Zarinpal] verify OK')
+    }
 
     return {
       ok,
       code,
-      message: payload.data?.message,
+      message: payload.data?.message || zarinpalErrorMessage(payload),
       refId: payload.data?.ref_id != null ? String(payload.data.ref_id) : undefined,
       cardPan: payload.data?.card_pan,
     }
   }
+}
+
+function zarinpalErrorCode(payload: {
+  errors?: { code?: number; message?: string } | Array<{ code?: number; message?: string }>
+}): number | undefined {
+  const errors = payload.errors
+  if (Array.isArray(errors)) return errors[0]?.code
+  if (errors && typeof errors === 'object') return errors.code
+  return undefined
+}
+
+function zarinpalErrorMessage(payload: {
+  errors?: { code?: number; message?: string } | Array<{ code?: number; message?: string }>
+}): string | undefined {
+  const errors = payload.errors
+  if (Array.isArray(errors)) return errors[0]?.message
+  if (errors && typeof errors === 'object') return errors.message
+  return undefined
 }

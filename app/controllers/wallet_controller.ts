@@ -232,8 +232,8 @@ export default class WalletController {
   }
 
   async zarinpalCallback({ request, response }: HttpContext) {
-    const authority = String(request.input('Authority', ''))
-    const status = String(request.input('Status', ''))
+    const authority = String(request.input('Authority') || request.input('authority') || '').trim()
+    const status = String(request.input('Status') || request.input('status') || '').trim().toUpperCase()
     const frontend = resolvePaymentReturnBase(
       request.input('ro'),
       request.header('origin'),
@@ -279,7 +279,7 @@ export default class WalletController {
 
     if (!result.ok) {
       tx.status = 'failed'
-      tx.description = 'تأیید پرداخت ناموفق بود'
+      tx.description = result.message || 'تأیید پرداخت ناموفق بود'
       await tx.save()
       return redirectWallet('failed')
     }

@@ -29,5 +29,5 @@ yarn-error.log
 storage/uploads/*
 !storage/uploads/.gitkeep
 
-graphify-out
+graphify-out/
 

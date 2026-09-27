@@ -284,5 +284,8 @@
   "282": "MegaMenuSection",
   "283": "mega_menu_seeder.ts",
   "284": "OrderItemRow",
-  "285": "catalog_stock.ts"
+  "285": "catalog_stock.ts",
+  "286": "order.ts",
+  "287": "account_controller.ts",
+  "288": "seller_return.ts"
 }

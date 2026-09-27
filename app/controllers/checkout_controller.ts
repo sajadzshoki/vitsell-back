@@ -237,25 +237,33 @@ export default class CheckoutController {
   }
 
   async zarinpalCallback({ request, response }: HttpContext) {
-    const authority = String(request.input('Authority', ''))
-    const status = String(request.input('Status', ''))
+    const authority = String(request.input('Authority') || request.input('authority') || '').trim()
+    const status = String(request.input('Status') || request.input('status') || '').trim().toUpperCase()
     const frontend = resolvePaymentReturnBase(
       request.input('ro'),
       request.header('origin'),
       request.header('referer')
     ).replace(/\/$/, '')
-    const redirectCart = (payment: string) =>
-      response.redirect().withQs(false).toPath(`${frontend}/cart?payment=${payment}`)
+
+    const redirectCart = (payment: string, extra?: Record<string, string>) => {
+      const qs = new URLSearchParams({ payment, ...(extra || {}) })
+      return response.redirect().withQs(false).toPath(`${frontend}/cart?${qs.toString()}`)
+    }
     const redirectOrder = (orderId: string) =>
-      response.redirect().withQs(false).toPath(`${frontend}/order/${orderId}?payment=ok`)
+      response.redirect().withQs(false).toPath(`${frontend}/order/${encodeURIComponent(orderId)}?payment=ok`)
 
     if (!authority) {
-      return redirectCart('failed')
+      return redirectCart('failed', { reason: 'no_authority' })
     }
 
     const payment = await Payment.query().where('authority', authority).preload('order').first()
     if (!payment || !payment.order) {
-      return redirectCart('failed')
+      return redirectCart('failed', { reason: 'payment_not_found' })
+    }
+
+    // Already verified (e.g. double callback / refresh) → order detail
+    if (payment.status === 'paid') {
+      return redirectOrder(payment.order.id)
     }
 
     if (status !== 'OK') {
@@ -277,7 +285,10 @@ export default class CheckoutController {
       await payment.save()
       payment.order.status = 'cancelled'
       await payment.order.save()
-      return redirectCart('failed')
+      return redirectCart('failed', {
+        reason: 'verify',
+        code: String(result.code || 0),
+      })
     }
 
     payment.status = 'paid'

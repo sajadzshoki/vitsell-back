@@ -85,12 +85,29 @@ export function zarinpalCallbackUrlWithReturn(
     .replace(/\/$/, '')
     .replace(/\/\/0\.0\.0\.0(?=[:/]|$)/, '//localhost')
     .replace(/\/\/\[::\](?=[:/]|$)/, '//localhost')
-  const configured = env.get('ZARINPAL_CALLBACK_URL')
-  // Wallet always uses its own path; checkout may override via ZARINPAL_CALLBACK_URL.
-  const base =
-    path.includes('wallet')
-      ? `${appUrl}${path}`
-      : (configured || `${appUrl}${path}`).replace(/\/$/, '')
+
+  const fromApp = `${appUrl}${path}`
+  const configured = env.get('ZARINPAL_CALLBACK_URL')?.trim()
+
+  // Never register a loopback callback_url when APP_URL is public — Zarinpal
+  // redirects the shopper's browser there and verify never hits this API.
+  let base = fromApp
+  if (configured && !path.includes('wallet')) {
+    try {
+      const configuredOrigin = new URL(configured).origin
+      const appOrigin = new URL(appUrl).origin
+      if (isLoopbackOrigin(configuredOrigin) && !isLoopbackOrigin(appOrigin)) {
+        logger.warn(
+          { configured, appUrl },
+          '[payment] ZARINPAL_CALLBACK_URL is loopback; using APP_URL callback instead'
+        )
+      } else {
+        base = configured.replace(/\/$/, '')
+      }
+    } catch {
+      base = configured.replace(/\/$/, '')
+    }
+  }
 
   const url = new URL(base)
   url.searchParams.set('ro', resolvePaymentReturnBase(returnBase))
