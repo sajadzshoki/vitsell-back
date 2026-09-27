@@ -6,6 +6,7 @@ import {
   storeReturnValidator,
   updateReturnStatusValidator,
 } from '#validators/returns'
+import { syncSellerOrderReturnStatus } from '#utils/order_returns'
 import { querySellerReturns } from '#utils/seller_returns_query'
 import { pushTimeline } from '#utils/seller_order_detail'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -69,6 +70,7 @@ export default class SellerReturnsController {
       adminNote: (payload.adminNote ?? '').toString().trim(),
       requestedAt: DateTime.now(),
       items,
+      photos: [],
     })
 
     pushTimeline(order, 'ثبت مرجوعی', 'ادمین', row.id)
@@ -97,20 +99,16 @@ export default class SellerReturnsController {
 
     const order = await SellerOrder.find(row.orderId)
     if (order) {
-      if (['approved', 'received', 'processing', 'completed'].includes(payload.status)) {
-        if (order.status !== 'returned' && order.status !== 'cancelled') {
-          const previous = order.status
-          order.status = 'returned'
-          pushTimeline(order, 'مرجوعی سفارش', 'ادمین', `${previous} → returned (${row.id})`)
-          await order.save()
-        } else {
-          pushTimeline(order, 'به‌روزرسانی مرجوعی', 'ادمین', `${row.id}: ${payload.status}`)
-          await order.save()
-        }
-      } else if (payload.status === 'rejected' || payload.status === 'cancelled') {
-        pushTimeline(order, 'رد/لغو مرجوعی', 'ادمین', `${row.id}: ${payload.status}`)
-        await order.save()
-      }
+      pushTimeline(
+        order,
+        payload.status === 'rejected' || payload.status === 'cancelled'
+          ? 'رد/لغو مرجوعی'
+          : 'به‌روزرسانی مرجوعی',
+        'ادمین',
+        `${row.id}: ${payload.status}`
+      )
+      await order.save()
+      await syncSellerOrderReturnStatus(order)
     }
 
     return response.ok(row.toAdminJSON())

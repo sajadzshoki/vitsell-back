@@ -13,6 +13,7 @@ export type SellerReturnStatus =
 export type SellerReturnItem = {
   productId: string
   productTitle: string
+  variantId?: string | null
   variantLabel: string | null
   sku: string
   qty: number
@@ -64,6 +65,23 @@ export default class SellerReturn extends BaseModel {
   })
   declare items: SellerReturnItem[]
 
+  @column({
+    prepare: (value: string[]) => JSON.stringify(value ?? []),
+    consume: (value: string[] | string | null) => {
+      if (Array.isArray(value)) return value.filter((url) => typeof url === 'string')
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value)
+          return Array.isArray(parsed) ? parsed.filter((url) => typeof url === 'string') : []
+        } catch {
+          return []
+        }
+      }
+      return []
+    },
+  })
+  declare photos: string[]
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -81,6 +99,7 @@ export default class SellerReturn extends BaseModel {
       adminNote: this.adminNote ?? '',
       requestedAt: this.requestedAt?.toISO() ?? this.createdAt?.toISO() ?? null,
       items: Array.isArray(this.items) ? this.items : [],
+      photos: Array.isArray(this.photos) ? this.photos : [],
       createdAt: this.createdAt?.toISO() ?? null,
       updatedAt: this.updatedAt?.toISO() ?? null,
     }

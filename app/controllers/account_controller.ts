@@ -3,6 +3,8 @@ import Address from '#models/address'
 import Order from '#models/order'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
+import { storeCustomerReturnValidator } from '#validators/returns'
+import { createCustomerReturns, listCustomerReturns, ReturnRequestError } from '#utils/order_returns'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 
@@ -243,6 +245,36 @@ export default class AccountController {
     }
 
     return response.ok({ trackingCode })
+  }
+
+  async orderReturns({ auth, params, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    try {
+      return response.ok(await listCustomerReturns(user, String(params.id)))
+    } catch (err) {
+      if (err instanceof ReturnRequestError) {
+        return response.status(err.status).send({
+          errors: [{ field: err.field, message: err.message }],
+        })
+      }
+      throw err
+    }
+  }
+
+  async storeOrderReturn({ auth, params, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const payload = await request.validateUsing(storeCustomerReturnValidator)
+    try {
+      const rows = await createCustomerReturns(user, String(params.id), payload)
+      return response.created(rows)
+    } catch (err) {
+      if (err instanceof ReturnRequestError) {
+        return response.status(err.status).send({
+          errors: [{ field: err.field, message: err.message }],
+        })
+      }
+      throw err
+    }
   }
 
   async reviews({ auth, response }: HttpContext) {

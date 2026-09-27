@@ -162,6 +162,8 @@ router
         router.delete('addresses/:id', [AccountController, 'destroyAddress'])
         router.get('orders', [AccountController, 'orders'])
         router.get('orders/:id', [AccountController, 'showOrder'])
+        router.get('orders/:id/returns', [AccountController, 'orderReturns'])
+        router.post('orders/:id/returns', [AccountController, 'storeOrderReturn'])
         router.get('reviews', [AccountController, 'reviews'])
         router.get('wallet', [WalletController, 'show'])
         router.post('wallet/topup', [WalletController, 'topUp'])

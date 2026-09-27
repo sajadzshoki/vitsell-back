@@ -43,6 +43,22 @@ export const storeReturnValidator = vine.compile(
   })
 )
 
+export const storeCustomerReturnValidator = vine.compile(
+  vine.object({
+    reason: vine.string().trim().minLength(1),
+    photos: vine.array(vine.string().trim().maxLength(500)).maxLength(5).optional(),
+    items: vine
+      .array(
+        vine.object({
+          productId: vine.string().trim(),
+          qty: vine.number().min(1),
+          variantId: vine.string().trim().nullable().optional(),
+        })
+      )
+      .minLength(1),
+  })
+)
+
 export const updateReturnStatusValidator = vine.compile(
   vine.object({
     status: vine.enum([
