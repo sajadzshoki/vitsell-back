@@ -13,6 +13,7 @@ import { upsertCategorySpecKeys } from '#models/category_spec_key'
 import { saveFooterPayload } from '#utils/footer'
 import { computeSellerSalesPoints } from '#utils/seller_sales'
 import { querySellerListings } from '#utils/seller_listings_query'
+import { backfillOrphanSellerOrders } from '#utils/seller_order_backfill'
 import { querySellerOrders } from '#utils/seller_orders_query'
 import {
   buildSellerOrderDetail,
@@ -563,6 +564,8 @@ export default class SellerController {
     if (qs.dateTo === '') delete qs.dateTo
 
     const filters = await ordersQueryValidator.validate(qs)
+    // Repair storefront orders placed before SellerOrder was wired into checkout
+    await backfillOrphanSellerOrders()
     return response.ok(await querySellerOrders(filters))
   }
 

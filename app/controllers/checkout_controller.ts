@@ -1,20 +1,11 @@
-import Address from '#models/address'
 import CartItem from '#models/cart_item'
-import Order from '#models/order'
-import Payment from '#models/payment'
 import Notification from '#models/notification'
+import Payment from '#models/payment'
+import CheckoutService, { CheckoutError } from '#services/checkout_service'
 import ZarinpalService from '#services/zarinpal_service'
-import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
 import { loadPlatformSettings } from '#utils/platform_settings'
-import {
-  findProductVariant,
-  productVariantLabel,
-  productVariantPrice,
-  productVariants,
-} from '#utils/product_variants'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
-import db from '@adonisjs/lucid/services/db'
 import {
   resolvePaymentReturnBase,
   zarinpalCallbackUrlWithReturn,
@@ -30,35 +21,6 @@ const placeValidator = vine.compile(
     returnOrigin: vine.string().optional(),
   })
 )
-
-const FREE_SHIPPING_THRESHOLD = 500_000
-
-function shippingPrice(method: 'express' | 'post' | 'pickup', subtotal: number) {
-  if (method === 'pickup' || subtotal <= 0) return 0
-  const free = subtotal >= FREE_SHIPPING_THRESHOLD
-  if (method === 'express') return free ? 45_000 : 55_000
-  return free ? 0 : 40_000
-}
-
-function shippingLabel(method: string) {
-  if (method === 'express') return 'پیک اکسپرس'
-  if (method === 'post') return 'پست پیشتاز'
-  return 'دریافت حضوری'
-}
-
-function paymentLabel(method: string) {
-  if (method === 'online') return 'پرداخت آنلاین'
-  if (method === 'cod') return 'پرداخت در محل'
-  return 'پرداخت اقساطی'
-}
-
-function jalaliishDate() {
-  return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date())
-}
 
 function isPaymentMethodEnabled(
   method: 'online' | 'cod' | 'installment',
@@ -81,124 +43,30 @@ export default class CheckoutController {
       })
     }
 
-    const address = await Address.query()
-      .where('user_id', user.id)
-      .where('id', payload.addressId)
-      .first()
-    if (!address) {
-      return response.unprocessableEntity({
-        errors: [{ field: 'addressId', message: 'آدرس معتبر نیست' }],
+    const checkout = new CheckoutService()
+    let placed: Awaited<ReturnType<CheckoutService['place']>>
+    try {
+      placed = await checkout.place(user, {
+        addressId: payload.addressId,
+        shippingMethod: payload.shippingMethod,
+        paymentMethod: payload.paymentMethod,
+        discountCode: payload.discountCode,
       })
-    }
-
-    const cartItems = await CartItem.query().where('user_id', user.id).preload('product')
-
-    if (!cartItems.length) {
-      return response.unprocessableEntity({
-        errors: [{ field: 'cart', message: 'سبد خرید خالی است' }],
-      })
-    }
-
-    const lines = cartItems.filter((i) => i.product)
-    for (const line of lines) {
-      const variant = findProductVariant(line.product, line.variantId)
-      if (productVariants(line.product).length && !variant) {
-        return response.conflict({
-          errors: [{ field: 'cart', message: `واریانت «${line.product.title}» معتبر نیست` }],
-        })
-      }
-      if (variant && (variant.status !== 'active' || Number(variant.stock) < line.qty)) {
-        return response.conflict({
-          errors: [{ field: 'stock', message: `موجودی «${line.product.title}» کافی نیست` }],
-        })
-      }
-    }
-    const subtotal = lines.reduce((sum, line) => {
-      const variant = findProductVariant(line.product, line.variantId)
-      return sum + productVariantPrice(line.product, variant) * line.qty
-    }, 0)
-
-    let discountAmount = 0
-    let discountCode: string | null = null
-    if (payload.discountCode) {
-      try {
-        const resolved = await resolveDiscountAmount({
-          code: payload.discountCode,
-          subtotal,
-          userId: user.id,
-        })
-        discountAmount = resolved.amount
-        discountCode = resolved.code
-      } catch (err) {
-        if (err instanceof DiscountResolveError) {
-          return response.unprocessableEntity({
+    } catch (err) {
+      if (err instanceof CheckoutError) {
+        if (err.status === 409) {
+          return response.conflict({
             errors: [{ field: err.field, message: err.message }],
           })
         }
-        throw err
+        return response.unprocessableEntity({
+          errors: [{ field: err.field, message: err.message }],
+        })
       }
+      throw err
     }
 
-    const shipCost = shippingPrice(payload.shippingMethod, subtotal)
-    const total = Math.max(0, subtotal - discountAmount + shipCost)
-    const orderId = `BZ-${Math.floor(100000 + Math.random() * 900000)}`
-
-    const orderItems = lines.map((line) => {
-      const variant = findProductVariant(line.product, line.variantId)
-      return {
-        productId: line.productId,
-        qty: line.qty,
-        price: productVariantPrice(line.product, variant),
-        variantId: line.variantId,
-        variantLabel: productVariantLabel(variant),
-      }
-    })
-
-    const isOnline = payload.paymentMethod === 'online'
-
-    const order = await db.transaction(async (trx) => {
-      const created = await Order.create(
-        {
-          id: orderId,
-          userId: user.id,
-          date: jalaliishDate(),
-          status: isOnline ? 'pending_payment' : 'processing',
-          items: orderItems,
-          total,
-          shippingMethod: shippingLabel(payload.shippingMethod),
-          paymentMethod: paymentLabel(payload.paymentMethod),
-          address: address.toJSON(),
-          discountCode,
-          discountAmount,
-          shippingCost: shipCost,
-        },
-        { client: trx }
-      )
-
-      for (const line of lines) {
-        line.product.soldCount += line.qty
-        await line.product.useTransaction(trx).save()
-      }
-
-      if (!isOnline) {
-        await CartItem.query({ client: trx }).where('user_id', user.id).delete()
-        await Notification.create(
-          {
-            id: `n${Date.now()}`,
-            userId: user.id,
-            title: 'سفارش شما ثبت شد',
-            description: `سفارش ${orderId} با موفقیت ثبت شد.`,
-            time: 'همین الان',
-            icon: 'i-tabler-package',
-            read: false,
-            to: `/order/${orderId}`,
-          },
-          { client: trx }
-        )
-      }
-
-      return created
-    })
+    const { order, total, isOnline } = placed
 
     if (!isOnline) {
       return response.ok({ order: order.toShopOrderJSON() })
@@ -213,7 +81,7 @@ export default class CheckoutController {
     )
     const { authority, paymentUrl } = await zarinpal.requestPayment({
       amountRial,
-      description: `پرداخت سفارش ${orderId}`,
+      description: `پرداخت سفارش ${order.id}`,
       mobile: user.phone,
       callbackUrl: zarinpalCallbackUrlWithReturn(
         '/api/v1/payments/zarinpal/callback',
@@ -238,7 +106,9 @@ export default class CheckoutController {
 
   async zarinpalCallback({ request, response }: HttpContext) {
     const authority = String(request.input('Authority') || request.input('authority') || '').trim()
-    const status = String(request.input('Status') || request.input('status') || '').trim().toUpperCase()
+    const status = String(request.input('Status') || request.input('status') || '')
+      .trim()
+      .toUpperCase()
     const frontend = resolvePaymentReturnBase(
       request.input('ro'),
       request.header('origin'),
@@ -250,7 +120,10 @@ export default class CheckoutController {
       return response.redirect().withQs(false).toPath(`${frontend}/cart?${qs.toString()}`)
     }
     const redirectOrder = (orderId: string) =>
-      response.redirect().withQs(false).toPath(`${frontend}/order/${encodeURIComponent(orderId)}?payment=ok`)
+      response
+        .redirect()
+        .withQs(false)
+        .toPath(`${frontend}/order/${encodeURIComponent(orderId)}?payment=ok`)
 
     if (!authority) {
       return redirectCart('failed', { reason: 'no_authority' })
@@ -266,11 +139,14 @@ export default class CheckoutController {
       return redirectOrder(payment.order.id)
     }
 
+    const checkout = new CheckoutService()
+
     if (status !== 'OK') {
       payment.status = 'cancelled'
       await payment.save()
       payment.order.status = 'cancelled'
       await payment.order.save()
+      await checkout.cancelAfterFailedPayment(payment.order.id)
       return redirectCart('cancelled')
     }
 
@@ -285,6 +161,7 @@ export default class CheckoutController {
       await payment.save()
       payment.order.status = 'cancelled'
       await payment.order.save()
+      await checkout.cancelAfterFailedPayment(payment.order.id)
       return redirectCart('failed', {
         reason: 'verify',
         code: String(result.code || 0),

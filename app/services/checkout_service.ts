@@ -7,9 +7,16 @@ import Product from '#models/product'
 import SellerListing from '#models/seller_listing'
 import SellerOrder from '#models/seller_order'
 import SellerOrderItemRow from '#models/seller_order_item_row'
+import SellerShop from '#models/seller_shop'
 import User from '#models/user'
 import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
 import { loadPlatformSettings } from '#utils/platform_settings'
+import {
+  findProductVariant,
+  productVariantLabel,
+  productVariantPrice,
+  productVariants,
+} from '#utils/product_variants'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import db from '@adonisjs/lucid/services/db'
 
@@ -35,7 +42,7 @@ export class CheckoutError extends Error {
 function shippingPrice(
   method: 'express' | 'post' | 'pickup',
   subtotal: number,
-  freeShippingThreshold: number,
+  freeShippingThreshold: number
 ) {
   if (method === 'pickup' || subtotal <= 0) return 0
   const threshold = freeShippingThreshold > 0 ? freeShippingThreshold : 500_000
@@ -72,11 +79,38 @@ function dateKey() {
   return `${y}${m}${day}`
 }
 
+async function resolveSiteShop() {
+  let siteShop = await SellerShop.query().where('slug', 'vitsell').first()
+  if (!siteShop) {
+    siteShop = await SellerShop.query().orderBy('id', 'asc').first()
+  }
+  if (!siteShop) {
+    const admin = await User.query().where('role', 'admin').first()
+    siteShop = await SellerShop.create({
+      userId: admin?.id ?? 1,
+      name: 'ویتسل',
+      slug: 'vitsell',
+      phone: '',
+      email: '',
+      city: 'تهران',
+      about: '',
+      rating: 0,
+      reviewCount: 0,
+      joinDate: jalaliishDate(),
+    })
+  }
+  return siteShop
+}
+
 type CartLine = {
   productId: string
   qty: number
   product: Product
-  listing: SellerListing
+  listing: SellerListing | null
+  shopId: number
+  variantId: string | null
+  variantLabel: string
+  unitPrice: number
 }
 
 export default class CheckoutService {
@@ -101,36 +135,40 @@ export default class CheckoutService {
 
     const listingByProduct = new Map(listings.map((l) => [l.productId, l]))
     const platform = await loadPlatformSettings()
+    const siteShop = await resolveSiteShop()
 
     const lines: CartLine[] = []
     for (const item of cartItems) {
       if (!item.product) {
         throw new CheckoutError(422, 'cart', 'محصول سبد نامعتبر است')
       }
-      const listing = listingByProduct.get(item.productId)
-      if (!listing) {
-        throw new CheckoutError(
-          422,
-          'cart',
-          `محصول «${item.product.title}» فروشنده فعال ندارد`
-        )
+
+      const variant = findProductVariant(item.product, item.variantId)
+      if (productVariants(item.product).length && !variant) {
+        throw new CheckoutError(409, 'cart', `واریانت «${item.product.title}» معتبر نیست`)
       }
-      if (listing.stock < item.qty && platform.outOfStockBehavior !== 'allow_backorder') {
-        throw new CheckoutError(
-          409,
-          'stock',
-          `موجودی «${item.product.title}» کافی نیست`
-        )
+      if (variant && (variant.status !== 'active' || Number(variant.stock) < item.qty)) {
+        throw new CheckoutError(409, 'stock', `موجودی «${item.product.title}» کافی نیست`)
       }
+
+      const listing = listingByProduct.get(item.productId) ?? null
+      if (listing && listing.stock < item.qty && platform.outOfStockBehavior !== 'allow_backorder') {
+        throw new CheckoutError(409, 'stock', `موجودی «${item.product.title}» کافی نیست`)
+      }
+
       lines.push({
         productId: item.productId,
         qty: item.qty,
         product: item.product,
         listing,
+        shopId: listing?.shopId ?? siteShop.id,
+        variantId: item.variantId,
+        variantLabel: productVariantLabel(variant),
+        unitPrice: productVariantPrice(item.product, variant),
       })
     }
 
-    const subtotal = lines.reduce((sum, i) => sum + Number(i.product.price) * i.qty, 0)
+    const subtotal = lines.reduce((sum, i) => sum + i.unitPrice * i.qty, 0)
 
     if (platform.minOrderAmount > 0 && subtotal < platform.minOrderAmount) {
       throw new CheckoutError(
@@ -175,11 +213,16 @@ export default class CheckoutService {
     const orderItemsJson = lines.map((i) => ({
       productId: i.productId,
       qty: i.qty,
-      price: Number(i.product.price),
+      price: i.unitPrice,
+      variantId: i.variantId,
+      variantLabel: i.variantLabel,
     }))
 
     const order = await db.transaction(async (trx) => {
-      await this.reserveStock(trx, lines, platform.outOfStockBehavior === 'allow_backorder')
+      const reservable = lines.filter((l) => l.listing)
+      if (reservable.length) {
+        await this.reserveStock(trx, reservable, platform.outOfStockBehavior === 'allow_backorder')
+      }
 
       const created = await Order.create(
         {
@@ -205,7 +248,7 @@ export default class CheckoutService {
             orderId: created.id,
             productId: line.productId,
             qty: line.qty,
-            unitPrice: Number(line.product.price),
+            unitPrice: line.unitPrice,
           },
           { client: trx }
         )
@@ -216,9 +259,9 @@ export default class CheckoutService {
 
       const byShop = new Map<number, CartLine[]>()
       for (const line of lines) {
-        const list = byShop.get(line.listing.shopId) ?? []
+        const list = byShop.get(line.shopId) ?? []
         list.push(line)
-        byShop.set(line.listing.shopId, list)
+        byShop.set(line.shopId, list)
       }
 
       let sellerIdx = 0
@@ -227,20 +270,23 @@ export default class CheckoutService {
         const sellerItems = shopLines.map((l) => ({
           productId: l.productId,
           qty: l.qty,
-          price: Number(l.product.price),
+          price: l.unitPrice,
+          variantId: l.variantId,
+          variantLabel: l.variantLabel,
         }))
         const sellerTotal = sellerItems.reduce((s, i) => s + i.price * i.qty, 0)
         const sellerOrderId = `${orderId}-S${sellerIdx}`
+        const stockReserved = shopLines.some((l) => l.listing)
 
         const sellerOrder = await SellerOrder.create(
           {
             id: sellerOrderId,
             shopId,
             buyerOrderId: created.id,
-            stockReserved: true,
+            stockReserved,
             date,
             dateKey: dateKey(),
-            status: isOnline ? 'new' : 'new',
+            status: 'new',
             customerName: addrJson.fullName,
             customerPhone: addrJson.phone,
             city: addrJson.city,
@@ -295,20 +341,34 @@ export default class CheckoutService {
     return { order, total, isOnline }
   }
 
+  /**
+   * Cancel seller-side rows and release reserved listing stock when online payment fails.
+   */
+  async cancelAfterFailedPayment(orderId: string) {
+    await db.transaction(async (trx) => {
+      await this.restoreStockForOrder(orderId, trx)
+      const sellerOrders = await SellerOrder.query({ client: trx }).where('buyer_order_id', orderId)
+      for (const so of sellerOrders) {
+        if (so.status !== 'cancelled') {
+          so.status = 'cancelled'
+          await so.useTransaction(trx).save()
+        }
+      }
+    })
+  }
+
   private async reserveStock(
     trx: TransactionClientContract,
     lines: CartLine[],
-    allowBackorder = false,
+    allowBackorder = false
   ) {
-    const listingIds = [...new Set(lines.map((l) => l.listing.id))]
-    const locked = await SellerListing.query({ client: trx })
-      .whereIn('id', listingIds)
-      .forUpdate()
+    const listingIds = [...new Set(lines.map((l) => l.listing!.id))]
+    const locked = await SellerListing.query({ client: trx }).whereIn('id', listingIds).forUpdate()
 
     const lockedMap = new Map(locked.map((l) => [l.id, l]))
 
     for (const line of lines) {
-      const listing = lockedMap.get(line.listing.id)
+      const listing = lockedMap.get(line.listing!.id)
       if (!listing || listing.status !== 'active') {
         throw new CheckoutError(409, 'stock', `محصول ${line.productId} در دسترس نیست`)
       }
@@ -332,7 +392,9 @@ export default class CheckoutService {
 
     for (const so of sellerOrders) {
       for (const item of so.items) {
-        const listingQ = SellerListing.query().where('shop_id', so.shopId).where('product_id', item.productId)
+        const listingQ = SellerListing.query()
+          .where('shop_id', so.shopId)
+          .where('product_id', item.productId)
         if (trx) listingQ.useTransaction(trx)
         const listing = await listingQ.forUpdate().first()
         if (!listing) continue
