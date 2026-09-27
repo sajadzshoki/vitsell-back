@@ -187,6 +187,7 @@ export default class AccountController {
         return o.toShopOrderJSON({
           trackingCode: seller?.trackingCode,
           carrier: seller?.carrier,
+          sellerStatus: seller?.status,
         })
       }),
     )
@@ -207,6 +208,7 @@ export default class AccountController {
       order.toShopOrderJSON({
         trackingCode: seller?.trackingCode,
         carrier: seller?.carrier,
+        sellerStatus: seller?.status,
       }),
     )
   }

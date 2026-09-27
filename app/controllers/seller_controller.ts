@@ -1,4 +1,5 @@
 import ContentBlock from '#models/content_block'
+import Order, { buyerStatusFromSeller } from '#models/order'
 import Category from '#models/category'
 import Product from '#models/product'
 import ProductQuestion from '#models/product_question'
@@ -615,6 +616,18 @@ export default class SellerController {
       pushTimeline(order, 'تغییر وضعیت', 'ادمین', `${previous} → ${status}`)
     }
     await order.save()
+
+    if (!isSame && order.buyerOrderId) {
+      const buyer = await Order.find(order.buyerOrderId)
+      if (buyer) {
+        const next = buyerStatusFromSeller(status)
+        if (buyer.status !== next) {
+          buyer.status = next
+          await buyer.save()
+        }
+      }
+    }
+
     return response.ok(await buildSellerOrderDetail(order))
   }
 

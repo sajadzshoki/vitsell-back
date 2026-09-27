@@ -4,7 +4,7 @@ import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations
 import User from '#models/user'
 import Payment from '#models/payment'
 import OrderItemRow from '#models/order_item_row'
-import SellerOrder from '#models/seller_order'
+import SellerOrder, { type SellerOrderStatus } from '#models/seller_order'
 
 export type OrderItem = {
   productId: string
@@ -27,6 +27,14 @@ export type OrderAddress = {
 }
 
 export type OrderStatus = 'delivered' | 'shipping' | 'processing' | 'cancelled' | 'pending_payment'
+
+/** Coarse buyer-row status kept in sync when the seller changes fulfillment. */
+export function buyerStatusFromSeller(status: SellerOrderStatus): OrderStatus {
+  if (status === 'shipped') return 'shipping'
+  if (status === 'delivered') return 'delivered'
+  if (status === 'cancelled' || status === 'returned') return 'cancelled'
+  return 'processing'
+}
 
 export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending_payment: ['processing', 'cancelled'],
@@ -101,8 +109,14 @@ export default class Order extends BaseModel {
   @hasMany(() => SellerOrder, { foreignKey: 'buyerOrderId' })
   declare sellerOrders: HasMany<typeof SellerOrder>
 
-  toShopOrderJSON(extras?: { trackingCode?: string | null; carrier?: string | null }) {
-    const status = this.status === 'pending_payment' ? ('processing' as const) : this.status
+  toShopOrderJSON(extras?: {
+    trackingCode?: string | null
+    carrier?: string | null
+    /** Seller fulfillment status — this is what the storefront shows. */
+    sellerStatus?: string | null
+  }) {
+    const sellerStatus = extras?.sellerStatus?.trim()
+    const status = sellerStatus || (this.status === 'pending_payment' ? 'processing' : this.status)
     const trackingCode = extras?.trackingCode?.trim() || undefined
     const carrier = extras?.carrier?.trim() || undefined
     return {
