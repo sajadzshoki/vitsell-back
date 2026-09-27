@@ -36,3 +36,14 @@ export const bulkListingsDeleteValidator = vine.compile(
     ids: vine.array(vine.string().trim().minLength(1)).minLength(1).maxLength(500),
   })
 )
+
+export const bulkListingsPriceValidator = vine.compile(
+  vine.object({
+    direction: vine.enum(['increase', 'decrease'] as const),
+    percent: vine.number().min(0.01).max(1000),
+    ids: vine.array(vine.string().trim().minLength(1)).maxLength(2000).optional(),
+    category: vine.string().trim().optional(),
+    brand: vine.string().trim().optional(),
+    dryRun: vine.boolean().optional(),
+  })
+)

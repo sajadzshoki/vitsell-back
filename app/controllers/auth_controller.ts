@@ -1,20 +1,12 @@
 import User from '#models/user'
-import Profile from '#models/profile'
 import OtpService from '#services/otp_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { assertAdminPanelRequest, assertStorefrontRequest } from '#utils/auth_origins'
-import {
-  ensureSystemAdminRoles,
-  expandRolePermissions,
-  loadUserAdminRoles,
-  syncUserAdminRoles,
-} from '#utils/seller_admins'
-import AdminRole from '#models/admin_role'
-import { mapUserStatusToAdmin, publicRoleId } from '#utils/admin_rbac'
 import { DateTime } from 'luxon'
+import { accountProfilePayload, ensureProfile } from '#utils/account_profile'
 
 const phoneRule = vine.string().regex(/^09\d{9}$/)
 
@@ -46,50 +38,6 @@ const resetPasswordValidator = vine.compile(
     passwordConfirmation: vine.string().minLength(8).maxLength(72).sameAs('password'),
   })
 )
-
-async function ensureProfile(user: User) {
-  await user.load('profile')
-  if (!user.profile) {
-    await Profile.create({
-      userId: user.id,
-      firstName: '',
-      lastName: '',
-      email: null,
-      birth: null,
-      gender: null,
-      avatar: null,
-    })
-    await user.load('profile')
-  }
-  return user.profile!
-}
-
-async function adminProfilePayload(user: User) {
-  const profile = await ensureProfile(user)
-  if (user.role !== 'admin') {
-    return profile.toAccountProfile(user.phone, user.hasPassword, user.role)
-  }
-
-  await ensureSystemAdminRoles()
-  let roles = await loadUserAdminRoles(user)
-  if (!roles.length) {
-    const superRole = await AdminRole.findBy('key', 'SUPER_ADMIN')
-    if (superRole) {
-      await syncUserAdminRoles(user, [superRole])
-      roles = await loadUserAdminRoles(user)
-    }
-  }
-
-  const abilities = await expandRolePermissions(roles)
-  const roleIds = roles.map((r) => publicRoleId(r.key))
-  return profile.toAccountProfile(user.phone, user.hasPassword, user.role, {
-    adminId: String(user.id),
-    adminStatus: mapUserStatusToAdmin(user.status),
-    roleIds,
-    abilities,
-    primaryRoleKey: roles[0]?.key || 'SUPER_ADMIN',
-  })
-}
 
 function rejectAdminOnStore(user: User, response: HttpContext['response']) {
   if (user.role === 'admin') {
@@ -288,7 +236,7 @@ export default class AuthController {
 
     return ctx.response.ok({
       token: token.value!.release(),
-      profile: await adminProfilePayload(user),
+      profile: await accountProfilePayload(user),
     })
   }
 
@@ -299,7 +247,7 @@ export default class AuthController {
         errors: [{ message: 'حساب مدیر غیرفعال یا معلق است' }],
       })
     }
-    return response.ok(await adminProfilePayload(user))
+    return response.ok(await accountProfilePayload(user))
   }
 
   async logout({ auth, response }: HttpContext) {

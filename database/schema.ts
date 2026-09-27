@@ -1134,7 +1134,7 @@ export class SellerRefundSchema extends BaseModel {
 }
 
 export class SellerReturnSchema extends BaseModel {
-  static $columns = ['adminNote', 'createdAt', 'customerId', 'customerName', 'id', 'items', 'orderId', 'reason', 'requestedAt', 'status', 'updatedAt'] as const
+  static $columns = ['adminNote', 'createdAt', 'customerId', 'customerName', 'id', 'items', 'orderId', 'photos', 'reason', 'requestedAt', 'status', 'updatedAt'] as const
   $columns = SellerReturnSchema.$columns
   @column()
   declare adminNote: string
@@ -1150,6 +1150,8 @@ export class SellerReturnSchema extends BaseModel {
   declare items: any
   @column()
   declare orderId: string
+  @column()
+  declare photos: any
   @column()
   declare reason: string
   @column.dateTime()

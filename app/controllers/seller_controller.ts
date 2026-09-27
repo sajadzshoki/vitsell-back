@@ -22,7 +22,8 @@ import {
   type OrderInternalNote,
   type OrderRefundRecord,
 } from '#utils/seller_order_detail'
-import { listingsQueryValidator, bulkListingsDeleteValidator } from '#validators/listings'
+import { listingsQueryValidator, bulkListingsDeleteValidator, bulkListingsPriceValidator } from '#validators/listings'
+import db from '@adonisjs/lucid/services/db'
 import { ordersQueryValidator } from '#validators/orders'
 import {
   orderNoteValidator,
@@ -899,6 +900,69 @@ export default class SellerController {
       deleted: deleted.length,
       failed,
       deletedIds: deleted,
+    })
+  }
+
+  async bulkAdjustListingPrices({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(bulkListingsPriceValidator)
+    const ids = [...new Set((payload.ids || []).map((id) => id.trim()).filter(Boolean))]
+    const category = payload.category?.trim() || ''
+    const brand = payload.brand?.trim() || ''
+
+    if (!ids.length && !category && !brand) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'scope', message: 'دسته، برند یا محصول را مشخص کنید' }],
+      })
+    }
+    if (payload.direction === 'decrease' && payload.percent >= 100) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'percent', message: 'کاهش قیمت باید کمتر از ۱۰۰ درصد باشد' }],
+      })
+    }
+
+    const factor = payload.direction === 'increase'
+      ? 1 + payload.percent / 100
+      : 1 - payload.percent / 100
+
+    const matchedIds = () => {
+      const query = db
+        .from('products')
+        .join('seller_listings', 'seller_listings.product_id', 'products.id')
+        .distinct('products.id')
+      if (ids.length) query.whereIn('products.id', ids)
+      if (category) query.where('products.category', category)
+      if (brand) query.where('products.brand', brand)
+      return query
+    }
+
+    const countRow = await db.from(matchedIds().as('matched')).count('* as total').first()
+    const count = Number(countRow?.total ?? 0)
+
+    if (payload.dryRun || count === 0) {
+      return response.ok({ count, updated: 0 })
+    }
+
+    const updated = await db
+      .from('products')
+      .whereIn('id', matchedIds())
+      .update({
+        price: db.raw('GREATEST(0, ROUND(price * CAST(? AS numeric)))::bigint', [factor]),
+        old_price: db.raw(
+          `CASE
+            WHEN old_price IS NULL THEN NULL
+            ELSE GREATEST(
+              GREATEST(0, ROUND(price * CAST(? AS numeric)))::bigint,
+              GREATEST(0, ROUND(old_price * CAST(? AS numeric)))::bigint
+            )
+          END`,
+          [factor, factor],
+        ),
+        updated_at: new Date(),
+      })
+
+    return response.ok({
+      count,
+      updated: Number(updated) || count,
     })
   }
 

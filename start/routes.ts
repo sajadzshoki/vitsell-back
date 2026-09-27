@@ -191,6 +191,7 @@ router
         router.put('footer', [SellerController, 'updateFooter'])
         router.get('listings', [SellerController, 'listings'])
         router.post('listings/bulk-delete', [SellerController, 'bulkDestroyListings'])
+        router.post('listings/bulk-price', [SellerController, 'bulkAdjustListingPrices'])
         router.get('listings/:productId', [SellerController, 'showListing'])
         router.post('listings', [SellerController, 'storeListing'])
         router.patch('listings/:productId', [SellerController, 'updateListing'])

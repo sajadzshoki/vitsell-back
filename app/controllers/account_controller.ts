@@ -1,5 +1,6 @@
 import Profile from '#models/profile'
 import Address from '#models/address'
+import { accountProfilePayload } from '#utils/account_profile'
 import Order from '#models/order'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
@@ -42,11 +43,7 @@ const addressValidator = vine.compile(
 export default class AccountController {
   async showProfile({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    await (user as any).load('profile')
-    if (!user.profile) {
-      return response.notFound({ errors: [{ field: 'profile', message: 'پروفایل یافت نشد' }] })
-    }
-    return response.ok(user.profile.toAccountProfile(user.phone, user.hasPassword, user.role))
+    return response.ok(await accountProfilePayload(user))
   }
 
   async updateProfile({ auth, request, response }: HttpContext) {
@@ -72,7 +69,8 @@ export default class AccountController {
       })
       await profile.save()
     }
-    return response.ok(profile.toAccountProfile(user.phone, user.hasPassword, user.role))
+    user.$setRelated('profile', profile)
+    return response.ok(await accountProfilePayload(user))
   }
 
   async setPassword({ auth, request, response }: HttpContext) {
