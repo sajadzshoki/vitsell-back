@@ -12,6 +12,9 @@ export default class OtpChallenge extends BaseModel {
   declare code: string
 
   @column()
+  declare purpose: 'login' | 'phone_change'
+
+  @column()
   declare attempts: number
 
   @column.dateTime()

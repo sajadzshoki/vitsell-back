@@ -654,7 +654,7 @@ export class OrderSchema extends BaseModel {
 }
 
 export class OtpChallengeSchema extends BaseModel {
-  static $columns = ['attempts', 'code', 'createdAt', 'expiresAt', 'id', 'phone', 'updatedAt'] as const
+  static $columns = ['attempts', 'code', 'createdAt', 'expiresAt', 'id', 'phone', 'purpose', 'updatedAt'] as const
   $columns = OtpChallengeSchema.$columns
   @column()
   declare attempts: number
@@ -668,6 +668,8 @@ export class OtpChallengeSchema extends BaseModel {
   declare id: number
   @column()
   declare phone: string
+  @column()
+  declare purpose: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }

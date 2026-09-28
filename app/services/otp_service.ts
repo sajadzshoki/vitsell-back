@@ -5,6 +5,8 @@ import KavenegarService from '#services/kavenegar_service'
 const OTP_TTL_MINUTES = 2
 const OTP_LENGTH = 5
 
+export type OtpPurpose = 'login' | 'phone_change'
+
 export default class OtpService {
   constructor(private kavenegar = new KavenegarService()) {}
 
@@ -14,12 +16,13 @@ export default class OtpService {
     return String(n).padStart(OTP_LENGTH, '0')
   }
 
-  async request(phone: string) {
+  async request(phone: string, purpose: OtpPurpose = 'login') {
     const code = this.generateCode()
-    await OtpChallenge.query().where('phone', phone).delete()
+    await OtpChallenge.query().where('phone', phone).where('purpose', purpose).delete()
 
     await OtpChallenge.create({
       phone,
+      purpose,
       code,
       attempts: 0,
       expiresAt: DateTime.now().plus({ minutes: OTP_TTL_MINUTES }),
@@ -33,9 +36,10 @@ export default class OtpService {
     }
   }
 
-  async verify(phone: string, code: string) {
+  async verify(phone: string, code: string, purpose: OtpPurpose = 'login') {
     const challenge = await OtpChallenge.query()
       .where('phone', phone)
+      .where('purpose', purpose)
       .orderBy('id', 'desc')
       .first()
 

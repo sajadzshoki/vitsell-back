@@ -1,7 +1,11 @@
 import Profile from '#models/profile'
 import Address from '#models/address'
+import User from '#models/user'
+import OtpService from '#services/otp_service'
 import { accountProfilePayload } from '#utils/account_profile'
 import Order from '#models/order'
+import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
 import { storeCustomerReturnValidator } from '#validators/returns'
@@ -18,6 +22,28 @@ const profileValidator = vine.compile(
     gender: vine.string().trim().optional(),
   })
 )
+
+const phoneRule = vine.string().regex(/^09\d{9}$/)
+
+const phoneOtpValidator = vine.compile(
+  vine.object({
+    phone: phoneRule.clone(),
+  })
+)
+
+const phoneConfirmValidator = vine.compile(
+  vine.object({
+    phone: phoneRule.clone(),
+    code: vine.string().fixedLength(5).regex(/^\d{5}$/),
+  })
+)
+
+const otpFailureMessages: Record<string, string> = {
+  not_found: 'کد تأیید یافت نشد. دوباره درخواست کنید.',
+  expired: 'کد تأیید منقضی شده است.',
+  too_many: 'تعداد تلاش‌ها بیش از حد مجاز است.',
+  invalid: 'کد تأیید نادرست است.',
+}
 
 const passwordValidator = vine.compile(
   vine.object({
@@ -70,6 +96,72 @@ export default class AccountController {
       await profile.save()
     }
     user.$setRelated('profile', profile)
+    return response.ok(await accountProfilePayload(user))
+  }
+
+  async requestPhoneOtp({ auth, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const { phone } = await request.validateUsing(phoneOtpValidator)
+
+    if (phone === user.phone) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'phone', message: 'این شماره همین حالا روی حساب شماست.' }],
+      })
+    }
+
+    const taken = await User.query().where('phone', phone).whereNot('id', user.id).first()
+    if (taken) {
+      return response.conflict({
+        errors: [{ field: 'phone', message: 'کاربری با این شماره وجود دارد.' }],
+      })
+    }
+
+    const otp = new OtpService()
+    const result = await otp.request(phone, 'phone_change')
+    const exposeDevCode = result.mocked || app.inDev || !env.get('KAVENEGAR_API_KEY')
+
+    return response.ok({
+      message: 'کد تأیید ارسال شد',
+      expiresIn: result.expiresIn,
+      ...(exposeDevCode ? { devCode: result.code } : {}),
+    })
+  }
+
+  async confirmPhone({ auth, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const { phone, code } = await request.validateUsing(phoneConfirmValidator)
+
+    if (phone === user.phone) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'phone', message: 'این شماره همین حالا روی حساب شماست.' }],
+      })
+    }
+
+    const taken = await User.query().where('phone', phone).whereNot('id', user.id).first()
+    if (taken) {
+      return response.conflict({
+        errors: [{ field: 'phone', message: 'کاربری با این شماره وجود دارد.' }],
+      })
+    }
+
+    const otp = new OtpService()
+    const result = await otp.verify(phone, code, 'phone_change')
+    if (!result.ok) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'code', message: otpFailureMessages[result.reason] }],
+      })
+    }
+
+    const takenAfter = await User.query().where('phone', phone).whereNot('id', user.id).first()
+    if (takenAfter) {
+      return response.conflict({
+        errors: [{ field: 'phone', message: 'کاربری با این شماره وجود دارد.' }],
+      })
+    }
+
+    user.phone = phone
+    await user.save()
+
     return response.ok(await accountProfilePayload(user))
   }
 

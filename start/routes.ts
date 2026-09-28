@@ -160,6 +160,8 @@ router
       .group(() => {
         router.get('profile', [AccountController, 'showProfile'])
         router.put('profile', [AccountController, 'updateProfile'])
+        router.post('phone/otp', [AccountController, 'requestPhoneOtp'])
+        router.put('phone', [AccountController, 'confirmPhone'])
         router.put('password', [AccountController, 'setPassword'])
         router.get('addresses', [AccountController, 'addresses'])
         router.post('addresses', [AccountController, 'storeAddress'])
