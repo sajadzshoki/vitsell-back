@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import Product from '#models/product'
+import Product, { normalizeImageAlts } from '#models/product'
 import Category from '#models/category'
 import SellerShop from '#models/seller_shop'
 import SellerListing from '#models/seller_listing'
@@ -20,6 +20,7 @@ export type ListingProductInput = {
   image: string
   imageDark?: string | null
   gallery?: string[] | null
+  imageAlts?: Record<string, string> | null
   colors?: Array<{ name: string; hex: string }> | null
   shortDesc?: string | null
   description?: string | null
@@ -151,6 +152,7 @@ export default class ListingWriteService {
         image: p.image,
         imageDark: p.imageDark ?? null,
         gallery: p.gallery?.length ? p.gallery : null,
+        ...(p.imageAlts !== undefined ? { imageAlts: normalizeImageAlts(p.imageAlts) } : {}),
         badge: p.badge || null,
         colors: p.colors?.length ? p.colors : null,
         inStock: p.inStock ?? input.stock > 0,
@@ -236,6 +238,7 @@ export default class ListingWriteService {
         ...(p.image != null ? { image: p.image } : {}),
         ...(p.imageDark !== undefined ? { imageDark: p.imageDark } : {}),
         ...(p.gallery !== undefined ? { gallery: p.gallery?.length ? p.gallery : null } : {}),
+        ...(p.imageAlts !== undefined ? { imageAlts: normalizeImageAlts(p.imageAlts) } : {}),
         ...(p.colors !== undefined ? { colors: p.colors?.length ? p.colors : null } : {}),
         ...(p.shortDesc !== undefined ? { shortDesc: p.shortDesc } : {}),
         ...(p.shortName !== undefined ? { shortName: p.shortName } : {}),

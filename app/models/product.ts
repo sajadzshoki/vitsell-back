@@ -10,6 +10,31 @@ import { toPublicMediaUrl } from '#utils/media_upload'
 export type ProductColor = { name: string; hex: string }
 export type ProductSpec = { key: string; value: string; group?: string }
 
+export function normalizeImageAlts(value: unknown): Record<string, string> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const out: Record<string, string> = {}
+  for (const [key, alt] of Object.entries(value as Record<string, unknown>)) {
+    const url = key.trim()
+    const text = String(alt ?? '').trim().slice(0, 300)
+    if (!url || !text) continue
+    out[url] = text
+  }
+  return Object.keys(out).length ? out : null
+}
+
+function publicImageAlts(alts: Record<string, string>) {
+  const out: Record<string, string> = {}
+  for (const [url, alt] of Object.entries(alts)) {
+    const stored = url.trim()
+    const text = String(alt || '').trim()
+    if (!stored || !text) continue
+    const publicUrl = toPublicMediaUrl(stored) || stored
+    out[stored] = text
+    out[publicUrl] = text
+  }
+  return out
+}
+
 function emptySeo(): SeoMeta {
   return {
     metaTitle: '',
@@ -70,6 +95,16 @@ export default class Product extends BaseModel {
     },
   })
   declare gallery: string[] | null
+
+  @column({
+    prepare: (value: Record<string, string> | null) => (value ? JSON.stringify(value) : null),
+    consume: (value: Record<string, string> | string | null) => {
+      if (!value) return null
+      const parsed = typeof value === 'string' ? JSON.parse(value) : value
+      return normalizeImageAlts(parsed)
+    },
+  })
+  declare imageAlts: Record<string, string> | null
 
   @column()
   declare badge: string | null
@@ -263,6 +298,7 @@ export default class Product extends BaseModel {
       image: toPublicMediaUrl(this.image),
       ...(this.imageDark ? { imageDark: toPublicMediaUrl(this.imageDark) } : {}),
       ...(gallery.length ? { gallery } : {}),
+      ...(this.imageAlts ? { imageAlts: publicImageAlts(this.imageAlts) } : {}),
       ...(this.badge ? { badge: this.badge } : {}),
       ...(this.colors?.length ? { colors: this.colors } : {}),
       inStock: this.inStock,

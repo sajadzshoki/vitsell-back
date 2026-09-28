@@ -1,7 +1,7 @@
 import ContentBlock from '#models/content_block'
 import Order, { buyerStatusFromSeller } from '#models/order'
 import Category from '#models/category'
-import Product from '#models/product'
+import Product, { normalizeImageAlts } from '#models/product'
 import ProductQuestion from '#models/product_question'
 import SellerListing from '#models/seller_listing'
 import SellerOrder, { SELLER_ORDER_TRANSITIONS } from '#models/seller_order'
@@ -169,6 +169,7 @@ const listingProductFields = {
   image: vine.string().trim(),
   imageDark: vine.string().trim().optional(),
   gallery: vine.array(vine.string()).optional(),
+  imageAlts: vine.any().optional(),
   colors: vine
     .array(
       vine.object({
@@ -389,6 +390,7 @@ export default class SellerController {
         image: p.image,
         imageDark: p.imageDark ?? null,
         gallery: p.gallery?.length ? p.gallery : null,
+        imageAlts: normalizeImageAlts(p.imageAlts),
         badge: p.badge || null,
         colors: p.colors?.length ? p.colors : null,
         inStock: p.inStock ?? payload.stock > 0,
@@ -479,6 +481,8 @@ export default class SellerController {
           image: p.image,
           imageDark: p.imageDark ?? null,
           gallery: p.gallery?.length ? p.gallery : null,
+          imageAlts:
+            p.imageAlts !== undefined ? normalizeImageAlts(p.imageAlts) : product?.imageAlts ?? null,
           badge: p.badge || null,
           colors: p.colors?.length ? p.colors : null,
           inStock: p.inStock ?? (payload.stock ?? listing.stock) > 0,

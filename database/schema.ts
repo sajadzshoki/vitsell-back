@@ -855,7 +855,7 @@ export class ProductReviewSchema extends BaseModel {
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['badge', 'barcode', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'source', 'sourceImportedAt', 'sourceProductId', 'sourceUpdatedAt', 'sourceUrl', 'specs', 'tags', 'title', 'updatedAt', 'variantAxes', 'variants', 'viewCount', 'weight'] as const
+  static $columns = ['badge', 'barcode', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageAlts', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'source', 'sourceImportedAt', 'sourceProductId', 'sourceUpdatedAt', 'sourceUrl', 'specs', 'tags', 'title', 'updatedAt', 'variantAxes', 'variants', 'viewCount', 'weight'] as const
   $columns = ProductSchema.$columns
   @column()
   declare badge: string | null
@@ -889,6 +889,8 @@ export class ProductSchema extends BaseModel {
   declare id: string
   @column()
   declare image: string
+  @column()
+  declare imageAlts: any | null
   @column()
   declare imageDark: string | null
   @column()
