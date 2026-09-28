@@ -47,10 +47,8 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   KAVENEGAR_API_KEY: Env.schema.string.optional(),
   KAVENEGAR_OTP_TEMPLATE: Env.schema.string.optional(),
-  /** Lookup template after the order is confirmed. Default name: vitsell-order-placed */
-  KAVENEGAR_ORDER_PLACED_TEMPLATE: Env.schema.string.optional(),
-  /** Lookup template when the order is ready to ship. Default name: vitsell-order-ready */
-  KAVENEGAR_ORDER_READY_TEMPLATE: Env.schema.string.optional(),
+  /** Sender line for plain order SMS (sms/send). Example: 10004346 */
+  KAVENEGAR_SENDER: Env.schema.string.optional(),
   ALLOW_OTP_MOCK: Env.schema.boolean.optional(),
 
   ZARINPAL_MERCHANT_ID: Env.schema.string.optional(),

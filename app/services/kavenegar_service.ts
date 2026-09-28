@@ -23,10 +23,11 @@ export type KavenegarSendResult = {
 }
 
 /**
- * Kavenegar verify/lookup sender (OTP and order notices).
+ * Kavenegar sender.
+ * OTP uses verify/lookup. Order notices use plain sms/send (no panel template).
  * Mock only when NODE_ENV !== production AND ALLOW_OTP_MOCK === true.
  * OTP uses failClosed so login cannot proceed without a real or mocked send.
- * Order notices leave failClosed off and never throw.
+ * Order notices never throw.
  */
 export default class KavenegarService {
   private allowMock() {
@@ -109,6 +110,55 @@ export default class KavenegarService {
       if (failClosed) throw error
       const message = error instanceof Error ? error.message.replaceAll(apiKey, '***') : 'send failed'
       logger.error({ phone, template: templateName, message }, '[Kavenegar] send failed')
+      return { ok: false, mocked: false, skipped: true }
+    }
+  }
+
+  /** Plain SMS. Requires KAVENEGAR_SENDER (the line number). Does not throw. */
+  async sendPlain(phone: string, message: string): Promise<KavenegarSendResult> {
+    const apiKey = env.get('KAVENEGAR_API_KEY')
+    const sender = (env.get('KAVENEGAR_SENDER') || '').trim()
+
+    if (!sender) {
+      return this.unavailable(phone, 'KAVENEGAR_SENDER تنظیم نشده', false)
+    }
+
+    if (!apiKey) {
+      if (!this.allowMock()) {
+        return this.unavailable(
+          phone,
+          'KAVENEGAR_API_KEY تنظیم نشده و mock OTP غیرفعال است',
+          false
+        )
+      }
+      logger.info({ phone, sender, message }, '[Kavenegar] API key missing — SMS logged (ALLOW_OTP_MOCK)')
+      return { ok: true, mocked: true, skipped: false }
+    }
+
+    const body = new URLSearchParams({ receptor: phone, sender, message })
+    const url = `https://api.kavenegar.com/v1/${apiKey}/sms/send.json`
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        signal: AbortSignal.timeout(8000),
+      })
+
+      const data = (await response.json()) as {
+        return?: { status?: number; message?: string }
+      }
+
+      if (!response.ok || (data.return?.status && data.return.status >= 400)) {
+        logger.error({ phone, data }, '[Kavenegar] plain send failed')
+        return { ok: false, mocked: false, skipped: true }
+      }
+
+      return { ok: true, mocked: false, skipped: false }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message.replaceAll(apiKey, '***') : 'send failed'
+      logger.error({ phone, message: detail }, '[Kavenegar] plain send failed')
       return { ok: false, mocked: false, skipped: true }
     }
   }

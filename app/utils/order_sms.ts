@@ -1,4 +1,3 @@
-import env from '#start/env'
 import logger from '@adonisjs/core/services/logger'
 import Order from '#models/order'
 import SellerOrder from '#models/seller_order'
@@ -7,22 +6,6 @@ import { pushTimeline } from '#utils/seller_order_detail'
 
 const PLACED_EVENT = 'پیامک ثبت سفارش'
 const READY_EVENT = 'پیامک آماده ارسال'
-const MISSING_TRACKING = 'ندارد'
-
-/**
- * Kavenegar lookup tokens allow Persian, English, and digits only.
- * Spaces, hyphens, and underscores are rejected (API status 431).
- */
-export function kavenegarLookupToken(value: string, fallback: string) {
-  let text = String(value ?? '')
-  const persian = '۰۱۲۳۴۵۶۷۸۹'
-  const arabic = '٠١٢٣٤٥٦٧٨٩'
-  for (let i = 0; i < 10; i++) {
-    text = text.replaceAll(persian[i]!, String(i)).replaceAll(arabic[i]!, String(i))
-  }
-  const cleaned = text.replace(/[^0-9A-Za-z\u0600-\u06FF]/g, '')
-  return (cleaned || fallback).slice(0, 100)
-}
 
 export function irMobile(value: string | null | undefined) {
   const digits = String(value ?? '').replace(/\D/g, '')
@@ -32,13 +15,35 @@ export function irMobile(value: string | null | undefined) {
   return ''
 }
 
-function orderTemplate(
-  key: 'KAVENEGAR_ORDER_PLACED_TEMPLATE' | 'KAVENEGAR_ORDER_READY_TEMPLATE',
-  fallback: string
-) {
-  const value = env.get(key)
-  if (value == null) return fallback
-  return value.trim()
+function toman(amount: number) {
+  const rounded = Math.round(Number(amount) || 0)
+  return `${rounded.toLocaleString('fa-IR')} تومان`
+}
+
+/** Full placed-order SMS. Sent as one plain message, not lookup tokens. */
+export function placedOrderMessage(input: { orderId: string; deliveryCode: string; total: number }) {
+  return [
+    'ویتسل',
+    `سفارش ${input.orderId} ثبت شد.`,
+    `کد تحویل: ${input.deliveryCode}`,
+    `مبلغ: ${toman(input.total)}`,
+  ].join('\n')
+}
+
+/** Full ready-to-ship SMS. Tracking line is omitted until a code exists. */
+export function readyToShipMessage(input: {
+  orderId: string
+  deliveryCode: string
+  trackingCode?: string | null
+}) {
+  const tracking = String(input.trackingCode || '').trim()
+  const lines = [
+    'ویتسل',
+    `سفارش ${input.orderId} آماده ارسال است.`,
+    `کد تحویل: ${input.deliveryCode}`,
+  ]
+  if (tracking) lines.push(`کد پیگیری: ${tracking}`)
+  return lines.join('\n')
 }
 
 function alreadySent(order: SellerOrder, event: string, detail?: string) {
@@ -50,7 +55,7 @@ function alreadySent(order: SellerOrder, event: string, detail?: string) {
   })
 }
 
-async function buyerPhone(order: Order | null, seller?: SellerOrder | null) {
+function buyerPhone(order: Order | null, seller?: SellerOrder | null) {
   return (
     irMobile(order?.user?.phone) ||
     irMobile(seller?.customerPhone) ||
@@ -61,7 +66,6 @@ async function buyerPhone(order: Order | null, seller?: SellerOrder | null) {
 
 /**
  * After the order is confirmed: COD/installment at checkout, online after payment.
- * Template tokens: order id, delivery code, amount (toman).
  */
 export async function notifyOrderPlaced(buyerOrderId: string) {
   try {
@@ -71,30 +75,30 @@ export async function notifyOrderPlaced(buyerOrderId: string) {
     const sellerOrders = await SellerOrder.query().where('buyerOrderId', order.id)
     if (!sellerOrders.length) return
 
-    const phone = await buyerPhone(order, sellerOrders[0])
+    const phone = buyerPhone(order, sellerOrders[0])
     if (!phone) {
       logger.warn({ orderId: order.id }, '[order-sms] no mobile for placed notice')
       return
     }
 
-    const template = orderTemplate('KAVENEGAR_ORDER_PLACED_TEMPLATE', 'vitsell-order-placed')
-    const orderToken = kavenegarLookupToken(order.id, '0')
-    const amount = kavenegarLookupToken(String(Math.round(Number(order.total) || 0)), '0')
     const kavenegar = new KavenegarService()
 
     for (const seller of sellerOrders) {
       if (alreadySent(seller, PLACED_EVENT)) continue
-      const delivery = kavenegarLookupToken(seller.deliveryCode || '', '')
+      const delivery = String(seller.deliveryCode || '').trim()
       if (!delivery) {
         logger.warn({ sellerOrderId: seller.id }, '[order-sms] missing delivery code')
         continue
       }
 
-      const result = await kavenegar.sendLookup(phone, template, {
-        token: orderToken,
-        token2: delivery,
-        token3: amount,
-      })
+      const result = await kavenegar.sendPlain(
+        phone,
+        placedOrderMessage({
+          orderId: order.id,
+          deliveryCode: delivery,
+          total: Number(order.total) || 0,
+        })
+      )
       if (!result.ok) continue
 
       pushTimeline(seller, PLACED_EVENT, 'سیستم', delivery)
@@ -106,10 +110,8 @@ export async function notifyOrderPlaced(buyerOrderId: string) {
 }
 
 /**
- * When the seller order is ready to ship (packing) or a tracking code is saved
- * while it is packing/shipped.
- * Template tokens: order id, tracking code, delivery code.
- * A later tracking code sends one more SMS if the previous one had no code.
+ * When the seller order is ready to ship (packing), or when a tracking code
+ * is saved later while it is packing/shipped.
  */
 export async function notifyOrderReadyToShip(sellerOrId: SellerOrder | string) {
   const sellerOrderId = typeof sellerOrId === 'string' ? sellerOrId : sellerOrId.id
@@ -119,37 +121,37 @@ export async function notifyOrderReadyToShip(sellerOrId: SellerOrder | string) {
     if (!seller) return
     if (seller.status !== 'packing' && seller.status !== 'shipped') return
 
-    const trackingToken = seller.trackingCode?.trim()
-      ? kavenegarLookupToken(seller.trackingCode, MISSING_TRACKING)
-      : MISSING_TRACKING
-    if (alreadySent(seller, READY_EVENT, trackingToken)) return
+    const tracking = String(seller.trackingCode || '').trim()
+    if (alreadySent(seller, READY_EVENT, tracking)) return
 
     const buyer = seller.buyerOrderId
       ? await Order.query().where('id', seller.buyerOrderId).preload('user').first()
       : null
     if (buyer && (buyer.status === 'pending_payment' || buyer.status === 'cancelled')) return
 
-    const phone = await buyerPhone(buyer, seller)
+    const phone = buyerPhone(buyer, seller)
     if (!phone) {
       logger.warn({ sellerOrderId }, '[order-sms] no mobile for ready notice')
       return
     }
 
-    const delivery = kavenegarLookupToken(seller.deliveryCode || '', '')
+    const delivery = String(seller.deliveryCode || '').trim()
     if (!delivery) {
       logger.warn({ sellerOrderId }, '[order-sms] missing delivery code')
       return
     }
 
-    const template = orderTemplate('KAVENEGAR_ORDER_READY_TEMPLATE', 'vitsell-order-ready')
-    const result = await new KavenegarService().sendLookup(phone, template, {
-      token: kavenegarLookupToken(buyer?.id || seller.id, '0'),
-      token2: trackingToken,
-      token3: delivery,
-    })
+    const result = await new KavenegarService().sendPlain(
+      phone,
+      readyToShipMessage({
+        orderId: buyer?.id || seller.id,
+        deliveryCode: delivery,
+        trackingCode: tracking,
+      })
+    )
     if (!result.ok) return
 
-    pushTimeline(seller, READY_EVENT, 'سیستم', trackingToken)
+    pushTimeline(seller, READY_EVENT, 'سیستم', tracking)
     await seller.save()
   } catch (error) {
     logger.error({ err: error, sellerOrderId }, '[order-sms] ready notice failed')
