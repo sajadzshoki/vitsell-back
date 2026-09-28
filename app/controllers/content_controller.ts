@@ -12,6 +12,7 @@ import { applyDealToCatalog } from '#utils/deals'
 import { loadAboutPage } from '#utils/about_page'
 import { loadPublicSiteProfile } from '#utils/platform_settings'
 import { loadPublicNavigation } from '#utils/navigation_settings'
+import { loadTopStripSettings } from '#utils/top_strip'
 import { loadFooterWithSiteOverlay } from '#utils/site_settings'
 import { loadSeoSettings } from '#utils/seo_settings'
 import { loadSeoRedirects } from '#utils/seo_redirects'
@@ -237,6 +238,10 @@ export default class ContentController {
 
   async navigation({ response }: HttpContext) {
     return response.ok(await loadPublicNavigation())
+  }
+
+  async topStrip({ response }: HttpContext) {
+    return response.ok(await loadTopStripSettings())
   }
 
   /** Public storefront SEO defaults (no auth). */

@@ -1,4 +1,6 @@
+import Product from '#models/product'
 import SellerReturn from '#models/seller_return'
+import { toPublicMediaUrl } from '#utils/media_upload'
 import type { ReturnsQuery } from '#validators/returns'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 
@@ -62,10 +64,41 @@ export async function querySellerReturns(filters: ReturnsQuery) {
     : await filtered.offset((page - 1) * pageSize).limit(pageSize)
 
   return {
-    items: items.map((row) => row.toAdminJSON()),
+    items: await serializeSellerReturns(items),
     total,
     page: wantAll ? 1 : page,
     pageSize: wantAll ? items.length : pageSize,
     statusCounts: await statusCounts(filters),
   }
+}
+
+export async function serializeSellerReturns(rows: SellerReturn[]) {
+  const ids = [
+    ...new Set(rows.flatMap((row) => (row.items || []).map((item) => item.productId)).filter(Boolean)),
+  ]
+  const products = ids.length
+    ? await Product.query().whereIn('id', ids).select('id', 'title', 'image', 'sku')
+    : []
+  const byId = new Map(products.map((product) => [product.id, product]))
+
+  return rows.map((row) => {
+    const json = row.toAdminJSON()
+    return {
+      ...json,
+      items: json.items.map((item) => {
+        const product = byId.get(item.productId)
+        return {
+          ...item,
+          productTitle: item.productTitle || product?.title || item.productId,
+          sku: item.sku || product?.sku || item.productId,
+          image: product?.image ? toPublicMediaUrl(product.image) : '',
+        }
+      }),
+    }
+  })
+}
+
+export async function serializeSellerReturn(row: SellerReturn) {
+  const [json] = await serializeSellerReturns([row])
+  return json!
 }

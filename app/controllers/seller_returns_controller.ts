@@ -7,7 +7,7 @@ import {
   updateReturnStatusValidator,
 } from '#validators/returns'
 import { syncSellerOrderReturnStatus } from '#utils/order_returns'
-import { querySellerReturns } from '#utils/seller_returns_query'
+import { querySellerReturns, serializeSellerReturn } from '#utils/seller_returns_query'
 import { pushTimeline } from '#utils/seller_order_detail'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
@@ -37,7 +37,7 @@ export default class SellerReturnsController {
     if (!row) {
       return response.notFound({ errors: [{ field: 'id', message: 'مرجوعی یافت نشد' }] })
     }
-    return response.ok(row.toAdminJSON())
+    return response.ok(await serializeSellerReturn(row))
   }
 
   async store({ request, response }: HttpContext) {
@@ -76,7 +76,7 @@ export default class SellerReturnsController {
     pushTimeline(order, 'ثبت مرجوعی', 'ادمین', row.id)
     await order.save()
 
-    return response.created(row.toAdminJSON())
+    return response.created(await serializeSellerReturn(row))
   }
 
   async setStatus({ params, request, response }: HttpContext) {
@@ -111,6 +111,6 @@ export default class SellerReturnsController {
       await syncSellerOrderReturnStatus(order)
     }
 
-    return response.ok(row.toAdminJSON())
+    return response.ok(await serializeSellerReturn(row))
   }
 }

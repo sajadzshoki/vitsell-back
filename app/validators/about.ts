@@ -57,6 +57,8 @@ export const aboutValidator = vine.compile(
       })
       .optional(),
     seo: seoSchema.clone().optional(),
+    mapLat: vine.number().min(-90).max(90).nullable().optional(),
+    mapLng: vine.number().min(-180).max(180).nullable().optional(),
     sectionVisibility: vine
       .object({
         hero: vine.boolean().optional(),
@@ -65,6 +67,7 @@ export const aboutValidator = vine.compile(
         values: vine.boolean().optional(),
         milestones: vine.boolean().optional(),
         team: vine.boolean().optional(),
+        map: vine.boolean().optional(),
         cta: vine.boolean().optional(),
       })
       .optional(),
