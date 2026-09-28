@@ -20,6 +20,7 @@ const verifyOtpValidator = vine.compile(
   vine.object({
     phone: phoneRule.clone(),
     code: vine.string().fixedLength(5).regex(/^\d{5}$/),
+    panel: vine.enum(['courier'] as const).optional(),
   })
 )
 
@@ -88,7 +89,7 @@ export default class AuthController {
 
   async verifyOtp(ctx: HttpContext) {
     if (!assertStorefrontRequest(ctx)) return
-    const { phone, code } = await ctx.request.validateUsing(verifyOtpValidator)
+    const { phone, code, panel } = await ctx.request.validateUsing(verifyOtpValidator)
     const otp = new OtpService()
     const result = await otp.verify(phone, code)
 
@@ -101,6 +102,21 @@ export default class AuthController {
       }
       return ctx.response.unprocessableEntity({
         errors: [{ field: 'code', message: messages[result.reason] }],
+      })
+    }
+
+    if (panel === 'courier') {
+      const courier = await User.query().where('phone', phone).first()
+      if (!courier || courier.role !== 'courier' || courier.status !== 'active') {
+        return ctx.response.forbidden({
+          errors: [{ message: 'ورود به پنل پیک مجاز نیست.' }],
+        })
+      }
+      const profile = await ensureProfile(courier)
+      const token = await User.accessTokens.create(courier)
+      return ctx.response.ok({
+        token: token.value!.release(),
+        profile: profile.toAccountProfile(courier.phone, courier.hasPassword, courier.role),
       })
     }
 

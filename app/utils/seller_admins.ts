@@ -48,6 +48,13 @@ export async function resolveRolesByPublicIds(roleIds: string[]) {
   return AdminRole.query().whereIn('key', keys)
 }
 
+export async function adminHasPermission(user: User, permission: string) {
+  await ensureSystemAdminRoles()
+  const roles = await loadUserAdminRoles(user)
+  const abilities = await expandRolePermissions(roles)
+  return abilities.includes('*') || abilities.includes(permission)
+}
+
 export async function expandRolePermissions(roles: AdminRole[]) {
   const set = new Set<string>()
   for (const role of roles) {

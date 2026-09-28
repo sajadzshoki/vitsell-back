@@ -58,6 +58,7 @@ cd ../vitsell-back
 |----------|---------|
 | `DB_*` | Postgres |
 | `KAVENEGAR_API_KEY` / `KAVENEGAR_OTP_TEMPLATE` | OTP SMS (empty → code logged to console) |
+| `KAVENEGAR_ORDER_PLACED_TEMPLATE` / `KAVENEGAR_ORDER_READY_TEMPLATE` | Order SMS: placed, and ready to ship |
 | `ZARINPAL_MERCHANT_ID` / `ZARINPAL_SANDBOX` / `ZARINPAL_CALLBACK_URL` | Payment (empty merchant → mock redirect) |
 | `FRONTEND_URL` | Redirect after Zarinpal callback |
 

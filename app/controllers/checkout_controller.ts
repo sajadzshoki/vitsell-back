@@ -10,6 +10,7 @@ import {
   resolvePaymentReturnBase,
   zarinpalCallbackUrlWithReturn,
 } from '#utils/payment_return_url'
+import { notifyOrderPlaced } from '#utils/order_sms'
 
 const placeValidator = vine.compile(
   vine.object({
@@ -188,6 +189,8 @@ export default class CheckoutController {
       read: false,
       to: `/order/${payment.order.id}`,
     })
+
+    await notifyOrderPlaced(payment.order.id)
 
     return redirectOrder(payment.order.id)
   }

@@ -1,5 +1,4 @@
 import ContentBlock from '#models/content_block'
-import Order, { buyerStatusFromSeller } from '#models/order'
 import Category from '#models/category'
 import Product, { normalizeImageAlts } from '#models/product'
 import ProductQuestion from '#models/product_question'
@@ -19,9 +18,13 @@ import { querySellerOrders } from '#utils/seller_orders_query'
 import {
   buildSellerOrderDetail,
   pushTimeline,
+  syncBuyerOrderStatus,
   type OrderInternalNote,
   type OrderRefundRecord,
 } from '#utils/seller_order_detail'
+import { adminHasPermission } from '#utils/seller_admins'
+import { notifyOrderReadyToShip } from '#utils/order_sms'
+import { assignCourierValidator } from '#validators/couriers'
 import { listingsQueryValidator, bulkListingsDeleteValidator, bulkListingsPriceValidator } from '#validators/listings'
 import db from '@adonisjs/lucid/services/db'
 import { ordersQueryValidator } from '#validators/orders'
@@ -622,17 +625,59 @@ export default class SellerController {
     }
     await order.save()
 
-    if (!isSame && order.buyerOrderId) {
-      const buyer = await Order.find(order.buyerOrderId)
-      if (buyer) {
-        const next = buyerStatusFromSeller(status)
-        if (buyer.status !== next) {
-          buyer.status = next
-          await buyer.save()
-        }
-      }
+    if (!isSame) {
+      await syncBuyerOrderStatus(order)
     }
 
+    if (!isSame && status === 'packing') {
+      await notifyOrderReadyToShip(order)
+    }
+
+    return response.ok(await buildSellerOrderDetail(order))
+  }
+
+  async assignCourier({ auth, params, request, response }: HttpContext) {
+    const actor = auth.getUserOrFail()
+    if (!(await adminHasPermission(actor, 'orders.update'))) {
+      return response.forbidden({
+        errors: [{ message: 'دسترسی به‌روزرسانی سفارش لازم است' }],
+      })
+    }
+
+    const { courierId } = await request.validateUsing(assignCourierValidator)
+    const order = await SellerOrder.find(params.id)
+    if (!order) {
+      return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
+    }
+    if (order.status === 'delivered') {
+      return response.unprocessableEntity({
+        errors: [{ message: 'پس از تحویل نمی‌توان پیک را تغییر داد' }],
+      })
+    }
+
+    if (courierId == null) {
+      order.courierId = null
+      await order.save()
+      return response.ok(await buildSellerOrderDetail(order))
+    }
+
+    if (Number(courierId) === Number(order.courierId)) {
+      return response.ok(await buildSellerOrderDetail(order))
+    }
+
+    const courier = await User.query()
+      .where('id', courierId)
+      .where('role', 'courier')
+      .where('status', 'active')
+      .first()
+    if (!courier) {
+      return response.unprocessableEntity({
+        errors: [{ field: 'courierId', message: 'پیک فعال یافت نشد' }],
+      })
+    }
+
+    order.courierId = courier.id
+    await order.save()
     return response.ok(await buildSellerOrderDetail(order))
   }
 
@@ -654,6 +699,9 @@ export default class SellerController {
       order.trackingCode || undefined,
     )
     await order.save()
+    if (order.status === 'packing' || order.status === 'shipped') {
+      await notifyOrderReadyToShip(order)
+    }
     return response.ok(await buildSellerOrderDetail(order))
   }
 

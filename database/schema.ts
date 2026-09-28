@@ -1019,7 +1019,7 @@ export class SellerOrderItemSchema extends BaseModel {
 }
 
 export class SellerOrderSchema extends BaseModel {
-  static $columns = ['address', 'buyerOrderId', 'carrier', 'city', 'createdAt', 'customerName', 'customerPhone', 'date', 'dateKey', 'estimatedDelivery', 'id', 'internalNotes', 'items', 'note', 'paymentMethod', 'refundedAmount', 'refunds', 'shippingMethod', 'shopId', 'status', 'stockReserved', 'timeline', 'total', 'trackingCode', 'updatedAt'] as const
+  static $columns = ['address', 'buyerOrderId', 'carrier', 'city', 'courierId', 'createdAt', 'customerName', 'customerPhone', 'date', 'dateKey', 'deliveryAttemptCount', 'deliveryAttemptResetAt', 'deliveryCode', 'estimatedDelivery', 'id', 'internalNotes', 'items', 'note', 'paymentMethod', 'refundedAmount', 'refunds', 'shippingMethod', 'shopId', 'status', 'stockReserved', 'timeline', 'total', 'trackingCode', 'updatedAt'] as const
   $columns = SellerOrderSchema.$columns
   @column()
   declare address: any
@@ -1029,6 +1029,8 @@ export class SellerOrderSchema extends BaseModel {
   declare carrier: string
   @column()
   declare city: string
+  @column()
+  declare courierId: number | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
@@ -1039,6 +1041,12 @@ export class SellerOrderSchema extends BaseModel {
   declare date: string
   @column()
   declare dateKey: string
+  @column()
+  declare deliveryAttemptCount: number
+  @column.dateTime()
+  declare deliveryAttemptResetAt: DateTime | null
+  @column()
+  declare deliveryCode: string
   @column()
   declare estimatedDelivery: string
   @column({ isPrimary: true })

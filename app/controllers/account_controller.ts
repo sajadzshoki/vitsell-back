@@ -204,11 +204,15 @@ export default class AccountController {
       return response.notFound({ errors: [{ field: 'id', message: 'سفارش یافت نشد' }] })
     }
     const seller = order.sellerOrders[0]
+    const deliveryCodes = order.sellerOrders
+      .filter((row) => String(row.deliveryCode || '').trim())
+      .map((row) => ({ id: row.id, code: row.deliveryCode }))
     return response.ok(
       order.toShopOrderJSON({
         trackingCode: seller?.trackingCode,
         carrier: seller?.carrier,
         sellerStatus: seller?.status,
+        deliveryCodes,
       }),
     )
   }

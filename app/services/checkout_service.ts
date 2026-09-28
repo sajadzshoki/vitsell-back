@@ -10,6 +10,8 @@ import SellerOrderItemRow from '#models/seller_order_item_row'
 import SellerShop from '#models/seller_shop'
 import User from '#models/user'
 import { DiscountResolveError, resolveDiscountAmount } from '#utils/discount_codes'
+import { generateDeliveryCode } from '#utils/delivery_code'
+import { notifyOrderPlaced } from '#utils/order_sms'
 import { loadPlatformSettings } from '#utils/platform_settings'
 import {
   findProductVariant,
@@ -301,6 +303,7 @@ export default class CheckoutService {
             shippingMethod: shipLabel,
             paymentMethod: payLabel,
             note: null,
+            deliveryCode: generateDeliveryCode(),
           },
           { client: trx }
         )
@@ -337,6 +340,10 @@ export default class CheckoutService {
 
       return created
     })
+
+    if (!isOnline) {
+      await notifyOrderPlaced(order.id)
+    }
 
     return { order, total, isOnline }
   }

@@ -114,6 +114,8 @@ export default class Order extends BaseModel {
     carrier?: string | null
     /** Seller fulfillment status — this is what the storefront shows. */
     sellerStatus?: string | null
+    /** Detail-only. Never attach this on list endpoints. */
+    deliveryCodes?: { id: string, code: string }[]
   }) {
     const sellerStatus = extras?.sellerStatus?.trim()
     const status = sellerStatus || (this.status === 'pending_payment' ? 'processing' : this.status)
@@ -130,6 +132,7 @@ export default class Order extends BaseModel {
       address: this.address,
       ...(trackingCode ? { trackingCode } : {}),
       ...(carrier ? { carrier } : {}),
+      ...(extras?.deliveryCodes?.length ? { deliveryCodes: extras.deliveryCodes } : {}),
     }
   }
 }

@@ -16,6 +16,7 @@ import { loadTopStripSettings } from '#utils/top_strip'
 import { loadFooterWithSiteOverlay } from '#utils/site_settings'
 import { loadSeoSettings } from '#utils/seo_settings'
 import { loadSeoRedirects } from '#utils/seo_redirects'
+import { loadHomeSeoBlocks } from '#utils/home_seo'
 import { productsToCatalogWithStock, stockByProductIds } from '#utils/catalog_stock'
 import { resolveCategoryTreeIds } from '#utils/catalog_filters'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -201,6 +202,7 @@ export default class ContentController {
       dealsOfTheDay,
       bestSellers,
       newArrivals,
+      seoBlocks: await loadHomeSeoBlocks(),
     })
   }
 

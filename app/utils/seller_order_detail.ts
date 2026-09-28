@@ -1,7 +1,8 @@
-import Order from '#models/order'
+import Order, { buyerStatusFromSeller } from '#models/order'
 import Payment from '#models/payment'
 import SellerOrder, { type SellerOrderStatus } from '#models/seller_order'
 import Profile from '#models/profile'
+import User from '#models/user'
 import { DateTime } from 'luxon'
 
 export type OrderTimelineEvent = {
@@ -94,6 +95,35 @@ function ensureTimeline(order: SellerOrder): OrderTimelineEvent[] {
       detail: order.customerName,
     },
   ]
+}
+
+/** Keep the buyer order status in sync with seller fulfillment. */
+export async function syncBuyerOrderStatus(sellerOrder: SellerOrder) {
+  if (!sellerOrder.buyerOrderId) return
+  const buyerQuery = sellerOrder.$trx
+    ? Order.query({ client: sellerOrder.$trx })
+    : Order.query()
+  const buyer = await buyerQuery.where('id', sellerOrder.buyerOrderId).first()
+  if (!buyer) return
+  const next = buyerStatusFromSeller(sellerOrder.status)
+  if (buyer.status === next) return
+  if (sellerOrder.$trx) buyer.useTransaction(sellerOrder.$trx)
+  buyer.status = next
+  await buyer.save()
+}
+
+export function courierSummary(user: User | null | undefined) {
+  if (!user) return null
+  const name = [user.profile?.firstName, user.profile?.lastName]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+    .join(' ')
+  return {
+    id: user.id,
+    name: name || user.phone,
+    phone: user.phone,
+    status: user.status,
+  }
 }
 
 export function pushTimeline(
@@ -201,6 +231,10 @@ export async function attachOrderListCommerce(orders: SellerOrder[]) {
 }
 
 export async function buildSellerOrderDetail(order: SellerOrder) {
+  if (order.courierId) {
+    await order.load('courier', (query) => query.preload('profile'))
+  }
+
   let buyerOrder: Order | null = null
   let payment: Payment | null = null
   let customerEmail = ''
@@ -234,6 +268,8 @@ export async function buildSellerOrderDetail(order: SellerOrder) {
 
   return {
     ...order.toJSON(),
+    deliveryCode: order.deliveryCode || '',
+    courier: courierSummary(order.courier),
     buyerOrderId: order.buyerOrderId,
     commerce,
     payment: paymentPayload(payment),

@@ -4,6 +4,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import SellerShop from '#models/seller_shop'
 import Order from '#models/order'
 import SellerOrderItemRow from '#models/seller_order_item_row'
+import User from '#models/user'
 
 export type SellerOrderItem = {
   productId: string
@@ -143,6 +144,18 @@ export default class SellerOrder extends BaseModel {
   @column()
   declare refundedAmount: number
 
+  @column()
+  declare courierId: number | null
+
+  @column()
+  declare deliveryCode: string
+
+  @column()
+  declare deliveryAttemptCount: number
+
+  @column.dateTime()
+  declare deliveryAttemptResetAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -154,6 +167,9 @@ export default class SellerOrder extends BaseModel {
 
   @belongsTo(() => Order, { foreignKey: 'buyerOrderId' })
   declare buyerOrder: BelongsTo<typeof Order>
+
+  @belongsTo(() => User, { foreignKey: 'courierId' })
+  declare courier: BelongsTo<typeof User>
 
   @hasMany(() => SellerOrderItemRow, { foreignKey: 'sellerOrderId' })
   declare itemRows: HasMany<typeof SellerOrderItemRow>
@@ -181,6 +197,18 @@ export default class SellerOrder extends BaseModel {
       internalNotes: Array.isArray(this.internalNotes) ? this.internalNotes : [],
       refunds: Array.isArray(this.refunds) ? this.refunds : [],
       refundedAmount: Number(this.refundedAmount) || 0,
+      courierId: this.courierId ?? null,
+      courierName: courierDisplayName(this),
     }
   }
+}
+
+function courierDisplayName(order: SellerOrder) {
+  const courier = order.$preloaded.courier as User | undefined
+  if (!courier) return null
+  const name = [courier.profile?.firstName, courier.profile?.lastName]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+    .join(' ')
+  return name || courier.phone
 }

@@ -21,7 +21,7 @@ export default class User extends BaseModel {
   declare password: string | null
 
   @column()
-  declare role: 'customer' | 'seller' | 'admin'
+  declare role: 'customer' | 'seller' | 'admin' | 'courier'
 
   @column()
   declare status: 'active' | 'inactive' | 'blocked'

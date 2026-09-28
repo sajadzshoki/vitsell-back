@@ -41,7 +41,7 @@ export default class Profile extends BaseModel {
   toAccountProfile(
     phone: string,
     hasPassword = false,
-    role: 'customer' | 'seller' | 'admin' = 'customer',
+    role: 'customer' | 'seller' | 'admin' | 'courier' = 'customer',
     extras?: {
       adminId?: string
       adminStatus?: string

@@ -6,6 +6,7 @@ import SellerOrderItemRow from '#models/seller_order_item_row'
 import SellerShop from '#models/seller_shop'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
+import { generateDeliveryCode } from '#utils/delivery_code'
 
 function dateKeyFromOrder(order: Order) {
   const d = order.createdAt?.toJSDate?.() ?? new Date()
@@ -128,6 +129,7 @@ export async function backfillOrphanSellerOrders() {
             shippingMethod: order.shippingMethod,
             paymentMethod: order.paymentMethod,
             note: null,
+            deliveryCode: generateDeliveryCode(),
           },
           { client: trx }
         )

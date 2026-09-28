@@ -22,6 +22,7 @@ const ContentPromosController = () => import('#controllers/content_promos_contro
 const SellerBlogController = () => import('#controllers/seller_blog_controller')
 const SellerPagesController = () => import('#controllers/seller_pages_controller')
 const SellerAboutController = () => import('#controllers/seller_about_controller')
+const SellerHomeSeoController = () => import('#controllers/seller_home_seo_controller')
 const SellerBannersController = () => import('#controllers/seller_banners_controller')
 const SellerMarketingController = () => import('#controllers/seller_marketing_controller')
 const SellerDiscountsController = () => import('#controllers/seller_discounts_controller')
@@ -56,6 +57,8 @@ const SellerTopStripController = () => import('#controllers/seller_top_strip_con
 const MegaMenuController = () => import('#controllers/mega_menu_controller')
 const SellerMegaMenusController = () => import('#controllers/seller_mega_menus_controller')
 const SellerAuditController = () => import('#controllers/seller_audit_controller')
+const SellerCouriersController = () => import('#controllers/seller_couriers_controller')
+const CourierOrdersController = () => import('#controllers/courier_orders_controller')
 
 router.get('/', () => {
   return { name: 'digishop-api', version: env.get('APP_VERSION') }
@@ -187,6 +190,16 @@ router
 
     router
       .group(() => {
+        router.get('orders', [CourierOrdersController, 'index'])
+        router.get('orders/:id', [CourierOrdersController, 'show'])
+        router.post('orders/:id/deliver', [CourierOrdersController, 'deliver'])
+      })
+      .prefix('courier')
+      .use(middleware.auth())
+      .use(middleware.courier())
+
+    router
+      .group(() => {
         router.get('shop', [SellerController, 'shop'])
         router.put('shop', [SellerController, 'updateShop'])
         router.get('footer', [SellerController, 'footer'])
@@ -200,6 +213,7 @@ router
         router.delete('listings/:productId', [SellerController, 'destroyListing'])
         router.get('orders', [SellerController, 'orders'])
         router.get('orders/:id', [SellerController, 'showOrder'])
+        router.patch('orders/:id/courier', [SellerController, 'assignCourier'])
         router.patch('orders/:id/status', [SellerController, 'updateOrderStatus'])
         router.patch('orders/:id/tracking', [SellerController, 'updateOrderTracking'])
         router.post('orders/:id/notes', [SellerController, 'addOrderNote'])
@@ -288,6 +302,8 @@ router
 
         router.get('about', [SellerAboutController, 'show'])
         router.put('about', [SellerAboutController, 'update'])
+        router.get('home-seo', [SellerHomeSeoController, 'show'])
+        router.put('home-seo', [SellerHomeSeoController, 'update'])
 
         router.get('media', [SellerMediaController, 'index'])
         router.post('media', [SellerMediaController, 'store'])
@@ -421,6 +437,12 @@ router
         router.get('shipping/:id', [SellerShippingController, 'show'])
         router.patch('shipping/:id', [SellerShippingController, 'update'])
         router.delete('shipping/:id', [SellerShippingController, 'destroy'])
+
+        router.get('couriers', [SellerCouriersController, 'index'])
+        router.post('couriers', [SellerCouriersController, 'store'])
+        router.get('couriers/:id', [SellerCouriersController, 'show'])
+        router.put('couriers/:id', [SellerCouriersController, 'update'])
+        router.patch('couriers/:id/status', [SellerCouriersController, 'setStatus'])
 
         router.get('customers', [SellerCustomersController, 'index'])
         router.post('customers/bulk-status', [SellerCustomersController, 'bulkStatus'])

@@ -163,7 +163,9 @@ export async function querySellerOrders(filters: OrdersQuery) {
     .first()
   const total = Number((countRow as any)?.$extras?.total ?? (countRow as any)?.total ?? 0)
 
-  let listQuery = applySort(filtered, filters.sort)
+  let listQuery = applySort(filtered, filters.sort).preload('courier', (query) => {
+    query.preload('profile')
+  })
   const orders = wantAll
     ? await listQuery.limit(pageSize)
     : await listQuery.offset((page - 1) * pageSize).limit(pageSize)
