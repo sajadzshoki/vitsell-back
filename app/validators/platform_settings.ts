@@ -38,5 +38,6 @@ export const platformSettingsValidator = vine.compile(
     onlinePaymentEnabled: vine.boolean().optional(),
     codPaymentEnabled: vine.boolean().optional(),
     installmentPaymentEnabled: vine.boolean().optional(),
+    productCardStyle: vine.enum(['classic', 'showcase'] as const).optional(),
   })
 )

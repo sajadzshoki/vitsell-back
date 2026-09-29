@@ -154,7 +154,17 @@ export default class ProductsController {
         )
         break
       default:
-        query = query.orderBy('rating', 'desc')
+        // Default relevance only: products with listing stock first.
+        // User-selected sorts (viewed, price, newest, …) stay unchanged.
+        query = query
+          .orderByRaw(
+            `CASE WHEN COALESCE((
+              SELECT SUM(seller_listings.stock)
+              FROM seller_listings
+              WHERE seller_listings.product_id = products.id
+            ), 0) > 0 THEN 1 ELSE 0 END DESC`
+          )
+          .orderBy('rating', 'desc')
     }
 
     const totalQuery = query.clone().clearOrder().clearSelect().count('* as total')

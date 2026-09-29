@@ -278,6 +278,9 @@ export default class extends BaseSeeder {
           relatedCategories: post.relatedCategories ?? [],
           content: post.content ?? [],
           highlights: post.highlights ?? null,
+          active: true,
+          status: 'published',
+          publishedAt: DateTime.utc(),
         }
       )
     }

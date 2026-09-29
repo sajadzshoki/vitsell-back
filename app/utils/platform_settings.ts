@@ -42,6 +42,8 @@ export type PlatformSettingsPayload = {
   onlinePaymentEnabled: boolean
   codPaymentEnabled: boolean
   installmentPaymentEnabled: boolean
+  /** Storefront product card: classic grid card or image showcase card */
+  productCardStyle: 'classic' | 'showcase'
 }
 
 export const defaultPlatformSettings: PlatformSettingsPayload = {
@@ -81,6 +83,7 @@ export const defaultPlatformSettings: PlatformSettingsPayload = {
   onlinePaymentEnabled: true,
   codPaymentEnabled: true,
   installmentPaymentEnabled: true,
+  productCardStyle: 'classic',
 }
 
 function asString(value: unknown, fallback: string) {
@@ -186,6 +189,7 @@ export function normalizePlatformSettings(raw: unknown): PlatformSettingsPayload
     onlinePaymentEnabled: asBool(src.onlinePaymentEnabled, true),
     codPaymentEnabled: asBool(src.codPaymentEnabled, true),
     installmentPaymentEnabled: asBool(src.installmentPaymentEnabled, true),
+    productCardStyle: src.productCardStyle === 'showcase' ? 'showcase' : 'classic',
   }
 }
 
@@ -288,5 +292,6 @@ export async function loadPublicSiteProfile() {
     onlinePaymentEnabled: platform.onlinePaymentEnabled,
     codPaymentEnabled: platform.codPaymentEnabled,
     installmentPaymentEnabled: platform.installmentPaymentEnabled,
+    productCardStyle: platform.productCardStyle,
   }
 }
