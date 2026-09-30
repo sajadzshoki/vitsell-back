@@ -7,6 +7,7 @@ import {
 } from '#validators/inventory'
 import { querySellerInventory } from '#utils/seller_inventory_query'
 import { resolveDefaultWarehouseId } from '#utils/seller_warehouses_query'
+import { activeVariantStockTotal } from '#utils/product_variants'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class SellerInventoryController {
@@ -55,7 +56,9 @@ export default class SellerInventoryController {
 
     const product = await Product.find(listing.productId)
     if (product) {
-      product.inStock = after > 0
+      const variantStock = activeVariantStockTotal(product)
+      product.inStock =
+        listing.status !== 'out_of_stock' && Math.max(after, variantStock) > 0
       await product.save()
     }
 

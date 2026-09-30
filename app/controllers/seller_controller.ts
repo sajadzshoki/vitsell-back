@@ -28,6 +28,7 @@ import { assignCourierValidator } from '#validators/couriers'
 import { listingsQueryValidator, bulkListingsDeleteValidator, bulkListingsPriceValidator } from '#validators/listings'
 import db from '@adonisjs/lucid/services/db'
 import { ordersQueryValidator } from '#validators/orders'
+import { activeVariantStockTotal } from '#utils/product_variants'
 import {
   orderNoteValidator,
   orderRefundValidator,
@@ -542,10 +543,12 @@ export default class SellerController {
 
     if (product) {
       const status = listing.status
-      if (status === 'out_of_stock') product.inStock = false
-      else if (status === 'active') product.inStock = listing.stock > 0
-      else if (status === 'pending') product.inStock = listing.stock > 0
-      else product.inStock = listing.stock > 0
+      if (status === 'out_of_stock') {
+        product.inStock = false
+      } else {
+        const variantStock = activeVariantStockTotal(product)
+        product.inStock = Math.max(Number(listing.stock) || 0, variantStock) > 0
+      }
       await product.save()
     }
 

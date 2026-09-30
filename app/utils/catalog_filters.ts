@@ -2,7 +2,7 @@ import Category from '#models/category'
 import Product from '#models/product'
 import ProductAttribute from '#models/product_attribute'
 import { expandBrandNameAliases } from '#services/technolife/brand_mapper'
-import { normalizePersianText } from '#services/technolife/persian'
+import { normalizePersianText, toAsciiDigits } from '#services/technolife/persian'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 
 export type CatalogFilterInput = {
@@ -17,8 +17,22 @@ export type CatalogFilterInput = {
   onlyInStock?: boolean
   fastDelivery?: boolean
   minRating?: number
-  /** slug → selected attribute values */
+  /** Raw slug → values (e.g. mega-menu). Prefer `resolvedAttrs` for product queries. */
   attrs?: Record<string, string[]>
+  /**
+   * Pre-resolved attribute filters (sync-safe). Prefer this over raw `attrs` —
+   * Knex/Lucid `where` callbacks cannot await async lookups.
+   */
+  resolvedAttrs?: ResolvedAttrFilter[]
+}
+
+export type ResolvedAttrFilter = {
+  slug: string
+  id?: string
+  name?: string
+  type?: string
+  /** Distinct ILIKE / equality needles for this attribute selection */
+  needles: string[]
 }
 
 type ProductQuery = ModelQueryBuilderContract<typeof Product, Product>
@@ -72,6 +86,104 @@ export function parseAttrFilters(raw: unknown): Record<string, string[]> {
     if (values.length) out[slug] = values
   }
   return out
+}
+
+function escapeLike(value: string) {
+  return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+}
+
+/** Expand a filter token into ASCII/Persian capacity + label variants for ILIKE. */
+function expandNeedleVariants(raw: string): string[] {
+  const trimmed = String(raw || '').trim()
+  if (!trimmed) return []
+  const out = new Set<string>([trimmed])
+  const normalized = normalizePersianText(trimmed)
+  if (normalized) out.add(normalized)
+
+  const ascii = toAsciiDigits(trimmed).trim()
+  if (ascii) out.add(ascii)
+
+  const capacity = normalized.match(
+    /(\d+(?:\.\d+)?)\s*(gb|tb|mb|گیگابایت|گیگ|ترابایت|مگابایت)?/i
+  )
+  if (capacity?.[1]) {
+    const num = capacity[1]
+    const unitRaw = (capacity[2] || '').toLowerCase()
+    const isTb = /tb|ترابایت/.test(unitRaw)
+    const isMb = /mb|مگابایت/.test(unitRaw)
+    if (isTb) {
+      out.add(`${num}TB`)
+      out.add(`${num} TB`)
+      out.add(`${num}ترابایت`)
+      out.add(`${num} ترابایت`)
+    } else if (isMb) {
+      out.add(`${num}MB`)
+      out.add(`${num} MB`)
+    } else {
+      // default / explicit GB — covers ram + storage filter values like 8gb
+      out.add(`${num}GB`)
+      out.add(`${num} GB`)
+      out.add(`${num}گیگابایت`)
+      out.add(`${num} گیگابایت`)
+      out.add(`${num}گیگ`)
+      out.add(`${num} گیگ`)
+    }
+  }
+
+  return [...out].map((s) => s.trim()).filter(Boolean)
+}
+
+/**
+ * Resolve raw slug→values filters into sync-safe needles.
+ * Must run **before** building the product query (async attribute lookup).
+ */
+export async function resolveAttributeFilters(
+  attrs: Record<string, string[]>
+): Promise<ResolvedAttrFilter[]> {
+  const entries = Object.entries(attrs).filter(([, values]) => values.length)
+  if (!entries.length) return []
+
+  const slugs = entries.map(([slug]) => slug)
+  const attributes = await ProductAttribute.query()
+    .whereIn('slug', slugs)
+    .where('status', 'active')
+  const bySlug = new Map(attributes.map((a) => [a.slug, a]))
+
+  const resolved: ResolvedAttrFilter[] = []
+  for (const [slug, selected] of entries) {
+    const attr = bySlug.get(slug)
+    const valueSet = new Set(
+      selected.flatMap((v) => expandNeedleVariants(v).map((x) => x.toLowerCase()))
+    )
+
+    const fromCatalog = (attr?.values || [])
+      .filter((v) => {
+        const candidates = [v.value, v.label, v.id, v.meta]
+          .filter(Boolean)
+          .flatMap((x) => expandNeedleVariants(String(x)))
+        return candidates.some((c) => valueSet.has(c.toLowerCase()))
+      })
+      .flatMap((v) => [v.label, v.value, v.id, v.meta].filter(Boolean).map(String))
+
+    const needles = Array.from(
+      new Set(
+        [...selected, ...fromCatalog]
+          .flatMap((s) => expandNeedleVariants(s))
+          .map((s) => s.trim())
+          .filter(Boolean)
+      )
+    )
+    if (!needles.length) continue
+
+    resolved.push({
+      slug,
+      id: attr?.id,
+      name: attr?.name,
+      type: attr?.type,
+      needles,
+    })
+  }
+  return resolved
 }
 
 /** Self + all descendant category ids (BFS on parent_id). */
@@ -188,9 +300,25 @@ export function applyCatalogFilters(
     if (maxPrice > 0) query = query.where('price', '<=', maxPrice)
   }
   if (input.onlyDiscount) query = query.whereNotNull('old_price')
-  if (input.onlyInStock) query = query.where('in_stock', true)
+  if (input.onlyInStock) {
+    // Include products whose sellable stock lives on active variants even when
+    // products.in_stock / listing rows are stale (common after variant edits).
+    query = query.where((group) => {
+      group
+        .where('in_stock', true)
+        .orWhereRaw(
+          `EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements(COALESCE(variants, '[]'::jsonb)) AS v
+            WHERE COALESCE(v->>'status', 'active') = 'active'
+              AND COALESCE((v->>'stock')::int, 0) > 0
+          )`
+        )
+    })
+  }
   if (input.fastDelivery) query = query.where('fast_delivery', true)
-  if ((input.minRating || 0) > 0) query = query.where('rating', '>=', input.minRating)
+  const minRating = Number(input.minRating || 0) || 0
+  if (minRating > 0) query = query.where('rating', '>=', minRating)
 
   if (q) {
     const tokens = tokenizeSearchQuery(q)
@@ -207,64 +335,89 @@ export function applyCatalogFilters(
     }
   }
 
-  if (!opts?.skipAttrs && input.attrs) {
-    query = applyAttributeFilters(query, input.attrs)
+  if (!opts?.skipAttrs && input.resolvedAttrs?.length) {
+    query = applyResolvedAttributeFilters(query, input.resolvedAttrs)
   }
 
   return query
 }
 
-function applyAttributeFilters(query: ProductQuery, attrs: Record<string, string[]>) {
-  const entries = Object.entries(attrs).filter(([, values]) => values.length)
-  if (!entries.length) return query
+function applyResolvedAttributeFilters(query: ProductQuery, attrs: ResolvedAttrFilter[]) {
+  if (!attrs.length) return query
 
-  return query.where(async (builder) => {
-    // Resolve attribute metadata once per request scope
-    const slugs = entries.map(([slug]) => slug)
-    const attributes = await ProductAttribute.query()
-      .whereIn('slug', slugs)
-      .where('status', 'active')
-
-    const bySlug = new Map(attributes.map((a) => [a.slug, a]))
-
-    for (const [slug, selected] of entries) {
-      const attr = bySlug.get(slug)
-      const valueSet = selected.map((v) => v.toLowerCase())
-      const labels = (attr?.values || [])
-        .filter((v) => valueSet.includes(String(v.value || '').toLowerCase())
-          || valueSet.includes(String(v.label || '').toLowerCase())
-          || valueSet.includes(String(v.id || '').toLowerCase()))
-        .flatMap((v) => [v.label, v.value, v.id, v.meta].filter(Boolean).map(String))
-
-      const needles = Array.from(new Set([...selected, ...labels].map((s) => s.trim()).filter(Boolean)))
+  return query.where((builder) => {
+    for (const attr of attrs) {
+      const needles = attr.needles.filter(Boolean)
       if (!needles.length) continue
+
+      const isColor = attr.type === 'color' || attr.slug === 'color'
+      const attrName = String(attr.name || '').trim()
+      const attrId = String(attr.id || '').trim()
 
       builder.where((group) => {
         for (const needle of needles) {
-          const like = `%${needle}%`
-          if (attr?.type === 'color' || slug === 'color') {
+          const like = `%${escapeLike(needle)}%`
+
+          if (isColor) {
             group.orWhereRaw(
               `EXISTS (
                 SELECT 1
                 FROM jsonb_array_elements(COALESCE(colors, '[]'::jsonb)) AS c
-                WHERE (c->>'name') ILIKE ?
-                   OR (c->>'hex') ILIKE ?
+                WHERE (c->>'name') ILIKE ? ESCAPE '\\'
+                   OR (c->>'hex') ILIKE ? ESCAPE '\\'
               )`,
               [like, like]
             )
           }
+
+          // Specs: key matches attribute name (when known), value matches needle
           group.orWhereRaw(
             `EXISTS (
               SELECT 1
               FROM jsonb_array_elements(COALESCE(specs, '[]'::jsonb)) AS s
               WHERE (
-                (? = '' OR (s->>'key') ILIKE ?)
-                AND (s->>'value') ILIKE ?
+                (? = '' OR (s->>'key') ILIKE ? ESCAPE '\\')
+                AND (s->>'value') ILIKE ? ESCAPE '\\'
               )
             )`,
-            [attr?.name || '', attr?.name ? `%${attr.name}%` : '%', like]
+            [
+              attrName,
+              attrName ? `%${escapeLike(attrName)}%` : '%',
+              like,
+            ]
           )
-          // Also match title for storage sizes etc.
+
+          // Variant options (color / storage / ram axes on imported products)
+          group.orWhereRaw(
+            `EXISTS (
+              SELECT 1
+              FROM jsonb_array_elements(COALESCE(variants, '[]'::jsonb)) AS v
+              CROSS JOIN LATERAL jsonb_array_elements(
+                CASE
+                  WHEN jsonb_typeof(v->'options') = 'array' THEN v->'options'
+                  ELSE '[]'::jsonb
+                END
+              ) AS o
+              WHERE (
+                (? = '' OR (o->>'attributeId') = ? OR (o->>'attributeName') ILIKE ? ESCAPE '\\')
+                AND (
+                  (o->>'label') ILIKE ? ESCAPE '\\'
+                  OR (o->>'valueId') ILIKE ? ESCAPE '\\'
+                  OR COALESCE(o->>'meta', '') ILIKE ? ESCAPE '\\'
+                )
+              )
+            )`,
+            [
+              attrId || attrName,
+              attrId,
+              attrName ? `%${escapeLike(attrName)}%` : '%',
+              like,
+              like,
+              like,
+            ]
+          )
+
+          // Title fallback (storage / ram often appear in titles)
           group.orWhereILike('title', like)
         }
       })

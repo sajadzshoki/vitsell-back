@@ -7,6 +7,7 @@ import User from '#models/user'
 import { upsertCategorySpecKeys } from '#models/category_spec_key'
 import { defaultSiteSettings } from '#utils/site_settings'
 import type { SeoMeta } from '#models/blog_post'
+import { activeVariantStockTotal } from '#utils/product_variants'
 
 export type ListingProductInput = {
   id?: string
@@ -186,7 +187,13 @@ export default class ListingWriteService {
 
     await upsertCategorySpecKeys(product.category, product.specs)
 
-    const status = input.status ?? (input.stock > 0 ? 'pending' : 'out_of_stock')
+    const variantStock = activeVariantStockTotal(product)
+    const combinedStock = Math.max(Number(input.stock) || 0, variantStock)
+    const status =
+      input.status ?? (combinedStock > 0 ? 'pending' : 'out_of_stock')
+    product.inStock = combinedStock > 0 && status !== 'out_of_stock'
+    await product.save()
+
     const siteShop = await resolveSiteShop()
     const existing = await SellerListing.query().where('product_id', product.id).first()
     let listing: SellerListing
@@ -266,7 +273,9 @@ export default class ListingWriteService {
     if (input.stock != null) listing.stock = input.stock
     if (input.status != null) listing.status = input.status
     if (input.status === 'out_of_stock') listing.stock = 0
-    product.inStock = listing.stock > 0 && listing.status !== 'out_of_stock'
+    const variantStock = activeVariantStockTotal(product)
+    const combinedStock = Math.max(Number(listing.stock) || 0, variantStock)
+    product.inStock = combinedStock > 0 && listing.status !== 'out_of_stock'
     await product.save()
     await listing.save()
 

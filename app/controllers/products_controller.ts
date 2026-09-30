@@ -10,6 +10,7 @@ import {
   applyCatalogFilters,
   loadFilterableAttributes,
   parseAttrFilters,
+  resolveAttributeFilters,
   resolveCategoryTreeIds,
 } from '#utils/catalog_filters'
 import { loadPlatformSettings } from '#utils/platform_settings'
@@ -111,6 +112,7 @@ export default class ProductsController {
     const forceInStock = platform.outOfStockBehavior === 'hide' || onlyInStock
 
     const categoryIds = category ? await resolveCategoryTreeIds(category) : undefined
+    const resolvedAttrs = await resolveAttributeFilters(attrs)
 
     let query = applyCatalogFilters(Product.query(), {
       q,
@@ -123,7 +125,7 @@ export default class ProductsController {
       onlyInStock: forceInStock,
       fastDelivery,
       minRating,
-      attrs,
+      resolvedAttrs,
     })
 
     switch (sort) {
@@ -154,15 +156,22 @@ export default class ProductsController {
         )
         break
       default:
-        // Default relevance only: products with listing stock first.
-        // User-selected sorts (viewed, price, newest, …) stay unchanged.
+        // Default relevance: sellable inventory first (listing rows OR active variants).
         query = query
           .orderByRaw(
-            `CASE WHEN COALESCE((
-              SELECT SUM(seller_listings.stock)
-              FROM seller_listings
-              WHERE seller_listings.product_id = products.id
-            ), 0) > 0 THEN 1 ELSE 0 END DESC`
+            `CASE WHEN (
+              COALESCE((
+                SELECT SUM(seller_listings.stock)
+                FROM seller_listings
+                WHERE seller_listings.product_id = products.id
+              ), 0) > 0
+              OR EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(COALESCE(products.variants, '[]'::jsonb)) AS v
+                WHERE COALESCE(v->>'status', 'active') = 'active'
+                  AND COALESCE((v->>'stock')::int, 0) > 0
+              )
+            ) THEN 1 ELSE 0 END DESC`
           )
           .orderBy('rating', 'desc')
     }

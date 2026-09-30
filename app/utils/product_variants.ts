@@ -25,8 +25,28 @@ type ProductVariantAxis = {
   priceAdjustments?: Record<string, number>
 }
 
-export function productVariants(product: Product): ProductVariant[] {
+export function productVariants(product: Product | { variants?: unknown[] | null }): ProductVariant[] {
   return Array.isArray(product.variants) ? (product.variants as ProductVariant[]) : []
+}
+
+/** Sum stock across active variants (sellable inventory on the PDP). */
+export function activeVariantStockTotal(
+  product: Product | { variants?: unknown[] | null; hasVariants?: boolean }
+): number {
+  const rows = productVariants(product)
+  if (!rows.length) return 0
+  let total = 0
+  for (const variant of rows) {
+    if (String(variant.status || 'active') !== 'active') continue
+    total += Math.max(0, Number(variant.stock) || 0)
+  }
+  return total
+}
+
+export function hasSellableVariant(
+  product: Product | { variants?: unknown[] | null; hasVariants?: boolean }
+): boolean {
+  return activeVariantStockTotal(product) > 0
 }
 
 export function findProductVariant(product: Product, variantId?: string | null) {
