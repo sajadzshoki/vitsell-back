@@ -40,41 +40,22 @@ const resetPasswordValidator = vine.compile(
   })
 )
 
-function rejectAdminOnStore(user: User, response: HttpContext['response']) {
-  if (user.role === 'admin') {
-    response.forbidden({
-      errors: [{ message: 'حساب مدیر از این مسیر قابل ورود نیست. از پنل ادمین استفاده کنید.' }],
-    })
-    return true
-  }
-  return false
-}
-
 export default class AuthController {
-  /** ——— Storefront (customers) ——— */
+  /** ——— Storefront (customers + admins shopping as customers) ——— */
 
   async checkPhone(ctx: HttpContext) {
     if (!assertStorefrontRequest(ctx)) return
     const { phone } = await ctx.request.validateUsing(requestOtpValidator)
     const user = await User.query().where('phone', phone).first()
-    if (user?.role === 'admin') {
-      return ctx.response.ok({ hasPassword: false, isAdmin: true })
-    }
     return ctx.response.ok({
       hasPassword: Boolean(user?.password),
-      isAdmin: false,
+      isAdmin: user?.role === 'admin',
     })
   }
 
   async requestOtp(ctx: HttpContext) {
     if (!assertStorefrontRequest(ctx)) return
     const { phone } = await ctx.request.validateUsing(requestOtpValidator)
-    const existing = await User.query().where('phone', phone).first()
-    if (existing?.role === 'admin') {
-      return ctx.response.forbidden({
-        errors: [{ message: 'حساب مدیر از فروشگاه قابل ورود نیست.' }],
-      })
-    }
 
     const otp = new OtpService()
     const result = await otp.request(phone)
@@ -121,7 +102,6 @@ export default class AuthController {
     }
 
     let user = await User.query().where('phone', phone).first()
-    if (user && rejectAdminOnStore(user, ctx.response)) return
 
     if (!user) {
       user = await User.create({ phone, role: 'customer', password: null })
@@ -151,8 +131,6 @@ export default class AuthController {
         ],
       })
     }
-
-    if (rejectAdminOnStore(user, ctx.response)) return
 
     const valid = await user.verifyPassword(password)
     if (!valid) {
@@ -194,7 +172,6 @@ export default class AuthController {
         errors: [{ field: 'phone', message: 'حساب کاربری یافت نشد.' }],
       })
     }
-    if (rejectAdminOnStore(user, ctx.response)) return
 
     user.password = password
     await user.save()
