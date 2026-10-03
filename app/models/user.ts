@@ -26,6 +26,15 @@ export default class User extends BaseModel {
   @column()
   declare status: 'active' | 'inactive' | 'blocked'
 
+  @column()
+  declare isCourier: boolean
+
+  @column()
+  declare courierActive: boolean
+
+  @column()
+  declare courierName: string | null
+
   @column.dateTime()
   declare lastLoginAt: DateTime | null
 

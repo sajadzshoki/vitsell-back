@@ -1,6 +1,7 @@
 import SellerRefund from '#models/seller_refund'
 import type { RefundsQuery } from '#validators/refunds'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 type RefundQuery = ModelQueryBuilderContract<typeof SellerRefund, SellerRefund>
 
@@ -62,8 +63,9 @@ export async function querySellerRefunds(filters: RefundsQuery) {
   }
 }
 
-export async function sumActiveRefundsForOrder(orderId: string) {
-  const rows = await SellerRefund.query()
+export async function sumActiveRefundsForOrder(orderId: string, trx?: TransactionClientContract) {
+  const query = trx ? SellerRefund.query({ client: trx }) : SellerRefund.query()
+  const rows = await query
     .where('order_id', orderId)
     .whereIn('status', ['pending', 'processing', 'completed'])
   let completed = 0

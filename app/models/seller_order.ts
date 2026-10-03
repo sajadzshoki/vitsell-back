@@ -5,6 +5,7 @@ import SellerShop from '#models/seller_shop'
 import Order from '#models/order'
 import SellerOrderItemRow from '#models/seller_order_item_row'
 import User from '#models/user'
+import { courierDisplayName as userCourierName } from '#utils/courier'
 
 export type SellerOrderItem = {
   productId: string
@@ -206,9 +207,5 @@ export default class SellerOrder extends BaseModel {
 function courierDisplayName(order: SellerOrder) {
   const courier = order.$preloaded.courier as User | undefined
   if (!courier) return null
-  const name = [courier.profile?.firstName, courier.profile?.lastName]
-    .map((part) => String(part || '').trim())
-    .filter(Boolean)
-    .join(' ')
-  return name || courier.phone
+  return userCourierName(courier)
 }

@@ -25,6 +25,7 @@ import {
 import { adminHasPermission } from '#utils/seller_admins'
 import { notifyOrderReadyToShip } from '#utils/order_sms'
 import { assignCourierValidator } from '#validators/couriers'
+import { applyActiveCourier } from '#utils/courier'
 import { listingsQueryValidator, bulkListingsDeleteValidator, bulkListingsPriceValidator } from '#validators/listings'
 import db from '@adonisjs/lucid/services/db'
 import { ordersQueryValidator } from '#validators/orders'
@@ -34,6 +35,10 @@ import {
   orderRefundValidator,
   orderTrackingValidator,
 } from '#validators/order_detail'
+import {
+  creditWalletForCompletedRefund,
+  WalletCreditError,
+} from '#utils/wallet_credit'
 import {
   defaultSiteSettings,
   loadFooterWithSiteOverlay,
@@ -668,11 +673,7 @@ export default class SellerController {
       return response.ok(await buildSellerOrderDetail(order))
     }
 
-    const courier = await User.query()
-      .where('id', courierId)
-      .where('role', 'courier')
-      .where('status', 'active')
-      .first()
+    const courier = await applyActiveCourier(User.query().where('id', courierId)).first()
     if (!courier) {
       return response.unprocessableEntity({
         errors: [{ field: 'courierId', message: 'پیک فعال یافت نشد' }],
@@ -753,29 +754,64 @@ export default class SellerController {
       createdAt: new Date().toISOString(),
       actorName: 'ادمین',
     }
-    const refunds = Array.isArray(order.refunds) ? [...order.refunds] : []
-    order.refunds = [refund, ...refunds]
-    if (status === 'completed') {
-      order.refundedAmount = completed + amount
+
+    try {
+      await db.transaction(async (trx) => {
+        const { default: SellerRefundModel } = await import('#models/seller_refund')
+        order.useTransaction(trx)
+        const refunds = Array.isArray(order.refunds) ? [...order.refunds] : []
+        order.refunds = [refund, ...refunds]
+        if (status === 'completed') {
+          order.refundedAmount = completed + amount
+        }
+        pushTimeline(order, 'ثبت بازپرداخت', 'ادمین', `${amount.toLocaleString('fa-IR')} تومان`)
+        await order.save()
+
+        const created = await SellerRefundModel.create(
+          {
+            id: refundId,
+            orderId: order.id,
+            returnId: null,
+            customerName: order.customerName,
+            status: status as any,
+            amount,
+            orderTotal: Number(order.total) || 0,
+            alreadyRefunded: completed,
+            reason: refund.reason,
+            transactionId: refund.transactionId,
+            items: [],
+          },
+          { client: trx }
+        )
+
+        if (status === 'completed') {
+          const walletTx = await creditWalletForCompletedRefund({
+            sellerOrder: order,
+            refundId,
+            amount,
+            reason: refund.reason,
+            trx,
+          })
+          if (!created.transactionId) {
+            created.useTransaction(trx)
+            created.transactionId = walletTx.id
+            await created.save()
+            refund.transactionId = walletTx.id
+            order.refunds = [refund, ...refunds]
+            await order.save()
+          }
+        }
+      })
+    } catch (error) {
+      if (error instanceof WalletCreditError) {
+        return response.unprocessableEntity({
+          errors: [{ field: 'amount', message: error.message }],
+        })
+      }
+      throw error
     }
-    pushTimeline(order, 'ثبت بازپرداخت', 'ادمین', `${amount.toLocaleString('fa-IR')} تومان`)
-    await order.save()
 
-    const { default: SellerRefundModel } = await import('#models/seller_refund')
-    await SellerRefundModel.create({
-      id: refundId,
-      orderId: order.id,
-      returnId: null,
-      customerName: order.customerName,
-      status: status as any,
-      amount,
-      orderTotal: Number(order.total) || 0,
-      alreadyRefunded: completed,
-      reason: refund.reason,
-      transactionId: refund.transactionId,
-      items: [],
-    })
-
+    await order.refresh()
     return response.created(await buildSellerOrderDetail(order))
   }
 

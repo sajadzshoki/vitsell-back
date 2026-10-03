@@ -3,6 +3,7 @@ import Payment from '#models/payment'
 import SellerOrder, { type SellerOrderStatus } from '#models/seller_order'
 import Profile from '#models/profile'
 import User from '#models/user'
+import { courierDisplayName } from '#utils/courier'
 import { DateTime } from 'luxon'
 
 export type OrderTimelineEvent = {
@@ -114,15 +115,11 @@ export async function syncBuyerOrderStatus(sellerOrder: SellerOrder) {
 
 export function courierSummary(user: User | null | undefined) {
   if (!user) return null
-  const name = [user.profile?.firstName, user.profile?.lastName]
-    .map((part) => String(part || '').trim())
-    .filter(Boolean)
-    .join(' ')
   return {
     id: user.id,
-    name: name || user.phone,
+    name: courierDisplayName(user),
     phone: user.phone,
-    status: user.status,
+    status: user.isCourier ? (user.courierActive ? 'active' : 'inactive') : user.status,
   }
 }
 

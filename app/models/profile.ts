@@ -48,6 +48,7 @@ export default class Profile extends BaseModel {
       roleIds?: string[]
       abilities?: string[]
       primaryRoleKey?: string | null
+      isCourier?: boolean
     },
   ) {
     return {
@@ -60,6 +61,7 @@ export default class Profile extends BaseModel {
       avatar: this.avatar ?? '',
       hasPassword,
       role,
+      isCourier: Boolean(extras?.isCourier),
       ...(extras?.adminId != null ? { adminId: extras.adminId } : {}),
       ...(extras?.adminStatus != null ? { adminStatus: extras.adminStatus } : {}),
       ...(extras?.roleIds != null ? { roleIds: extras.roleIds } : {}),

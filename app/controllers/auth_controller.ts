@@ -7,6 +7,7 @@ import app from '@adonisjs/core/services/app'
 import { assertAdminPanelRequest, assertStorefrontRequest } from '#utils/auth_origins'
 import { DateTime } from 'luxon'
 import { accountProfilePayload, ensureProfile } from '#utils/account_profile'
+import { isActiveCourier } from '#utils/courier'
 
 const phoneRule = vine.string().regex(/^09\d{9}$/)
 
@@ -88,16 +89,15 @@ export default class AuthController {
 
     if (panel === 'courier') {
       const courier = await User.query().where('phone', phone).first()
-      if (!courier || courier.role !== 'courier' || courier.status !== 'active') {
+      if (!courier || !isActiveCourier(courier)) {
         return ctx.response.forbidden({
           errors: [{ message: 'ورود به پنل پیک مجاز نیست.' }],
         })
       }
-      const profile = await ensureProfile(courier)
       const token = await User.accessTokens.create(courier)
       return ctx.response.ok({
         token: token.value!.release(),
-        profile: profile.toAccountProfile(courier.phone, courier.hasPassword, courier.role),
+        profile: await accountProfilePayload(courier),
       })
     }
 
@@ -107,12 +107,11 @@ export default class AuthController {
       user = await User.create({ phone, role: 'customer', password: null })
     }
 
-    const profile = await ensureProfile(user)
     const token = await User.accessTokens.create(user)
 
     return ctx.response.ok({
       token: token.value!.release(),
-      profile: profile.toAccountProfile(user.phone, user.hasPassword, user.role),
+      profile: await accountProfilePayload(user),
     })
   }
 
@@ -139,12 +138,11 @@ export default class AuthController {
       })
     }
 
-    const profile = await ensureProfile(user)
     const token = await User.accessTokens.create(user)
 
     return ctx.response.ok({
       token: token.value!.release(),
-      profile: profile.toAccountProfile(user.phone, user.hasPassword, user.role),
+      profile: await accountProfilePayload(user),
     })
   }
 

@@ -1421,12 +1421,18 @@ export class UserActivitySchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'lastLoginAt', 'password', 'phone', 'role', 'status', 'updatedAt'] as const
+  static $columns = ['courierActive', 'courierName', 'createdAt', 'id', 'isCourier', 'lastLoginAt', 'password', 'phone', 'role', 'status', 'updatedAt'] as const
   $columns = UserSchema.$columns
+  @column()
+  declare courierActive: boolean
+  @column()
+  declare courierName: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: number
+  @column()
+  declare isCourier: boolean
   @column.dateTime()
   declare lastLoginAt: DateTime | null
   @column({ serializeAs: null })

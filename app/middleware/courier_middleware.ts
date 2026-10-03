@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
+import { isActiveCourier } from '#utils/courier'
 
 /**
  * Requires an active courier. Must run after auth middleware.
@@ -8,7 +9,7 @@ import type { NextFn } from '@adonisjs/core/types/http'
 export default class CourierMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
     const user = ctx.auth.getUserOrFail()
-    if (user.role !== 'courier' || user.status !== 'active') {
+    if (!isActiveCourier(user)) {
       return ctx.response.forbidden({
         errors: [{ message: 'دسترسی فقط برای پیک فعال مجاز است' }],
       })

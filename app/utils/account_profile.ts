@@ -8,6 +8,7 @@ import {
   loadUserAdminRoles,
   syncUserAdminRoles,
 } from '#utils/seller_admins'
+import { isActiveCourier } from '#utils/courier'
 
 export async function ensureProfile(user: User) {
   const existing = await Profile.findBy('user_id', user.id)
@@ -33,7 +34,9 @@ export async function ensureProfile(user: User) {
 export async function accountProfilePayload(user: User) {
   const profile = await ensureProfile(user)
   if (user.role !== 'admin') {
-    return profile.toAccountProfile(user.phone, user.hasPassword, user.role)
+    return profile.toAccountProfile(user.phone, user.hasPassword, user.role, {
+      isCourier: isActiveCourier(user),
+    })
   }
 
   await ensureSystemAdminRoles()
@@ -54,5 +57,6 @@ export async function accountProfilePayload(user: User) {
     roleIds,
     abilities,
     primaryRoleKey: roles[0]?.key || 'SUPER_ADMIN',
+    isCourier: isActiveCourier(user),
   })
 }
