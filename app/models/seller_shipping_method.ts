@@ -47,4 +47,14 @@ export default class SellerShippingMethod extends BaseModel {
       updatedAt: this.updatedAt?.toISO() ?? null,
     }
   }
+
+  toStorefrontJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      carrier: this.carrier ?? '',
+      estimatedDays: this.estimatedDays ?? '',
+      baseCost: Number(this.baseCost) || 0,
+    }
+  }
 }

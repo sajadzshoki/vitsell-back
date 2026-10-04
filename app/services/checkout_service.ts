@@ -14,6 +14,11 @@ import { generateDeliveryCode } from '#utils/delivery_code'
 import { notifyOrderPlaced } from '#utils/order_sms'
 import { loadPlatformSettings } from '#utils/platform_settings'
 import {
+  resolveCheckoutShippingMethod,
+  shippingCostForMethod,
+  shippingMethodLabel,
+} from '#utils/checkout_shipping'
+import {
   findProductVariant,
   productVariantLabel,
   productVariantPrice,
@@ -26,7 +31,7 @@ const FALLBACK_FREE_SHIPPING_THRESHOLD = 500_000
 
 export type PlaceCheckoutInput = {
   addressId: string
-  shippingMethod: 'express' | 'post' | 'pickup'
+  shippingMethod: string
   paymentMethod: 'online' | 'cod' | 'installment'
   discountCode?: string
 }
@@ -39,24 +44,6 @@ export class CheckoutError extends Error {
   ) {
     super(message)
   }
-}
-
-function shippingPrice(
-  method: 'express' | 'post' | 'pickup',
-  subtotal: number,
-  freeShippingThreshold: number
-) {
-  if (method === 'pickup' || subtotal <= 0) return 0
-  const threshold = freeShippingThreshold > 0 ? freeShippingThreshold : 500_000
-  const free = subtotal >= threshold
-  if (method === 'express') return free ? 45_000 : 55_000
-  return free ? 0 : 40_000
-}
-
-function shippingLabel(method: string) {
-  if (method === 'express') return 'پیک اکسپرس'
-  if (method === 'post') return 'پست پیشتاز'
-  return 'دریافت حضوری'
 }
 
 function paymentLabel(method: string) {
@@ -199,15 +186,20 @@ export default class CheckoutService {
       }
     }
 
+    const shipMethod = await resolveCheckoutShippingMethod(input.shippingMethod)
+    if (!shipMethod) {
+      throw new CheckoutError(422, 'shippingMethod', 'روش ارسال معتبر نیست')
+    }
+
     const freeThreshold =
       platform.freeShippingThreshold > 0
         ? platform.freeShippingThreshold
         : FALLBACK_FREE_SHIPPING_THRESHOLD
-    const shipCost = shippingPrice(input.shippingMethod, subtotal, freeThreshold)
+    const shipCost = shippingCostForMethod(shipMethod, subtotal, freeThreshold)
     const total = Math.max(0, subtotal - discountAmount + shipCost)
     const orderId = `BZ-${Math.floor(100000 + Math.random() * 900000)}`
     const isOnline = input.paymentMethod === 'online'
-    const shipLabel = shippingLabel(input.shippingMethod)
+    const shipLabel = shippingMethodLabel(shipMethod)
     const payLabel = paymentLabel(input.paymentMethod)
     const date = jalaliishDate()
     const addrJson = address.toJSON()

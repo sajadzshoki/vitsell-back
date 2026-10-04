@@ -15,7 +15,7 @@ import { notifyOrderPlaced } from '#utils/order_sms'
 const placeValidator = vine.compile(
   vine.object({
     addressId: vine.string(),
-    shippingMethod: vine.enum(['express', 'post', 'pickup'] as const),
+    shippingMethod: vine.string().trim().minLength(1),
     paymentMethod: vine.enum(['online', 'cod', 'installment'] as const),
     discountCode: vine.string().optional(),
     /** Storefront origin (e.g. https://vitsell.ir) — used after Zarinpal return. */

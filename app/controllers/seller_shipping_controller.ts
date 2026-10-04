@@ -47,6 +47,16 @@ export default class SellerShippingController {
     })
   }
 
+  async publicIndex({ response }: HttpContext) {
+    const rows = await SellerShippingMethod.query()
+      .where('status', 'active')
+      .orderBy('sort_order', 'asc')
+      .orderBy('id', 'asc')
+    return response.ok({
+      items: rows.map((row) => row.toStorefrontJSON()),
+    })
+  }
+
   async show({ params, response }: HttpContext) {
     const row = await SellerShippingMethod.find(params.id)
     if (!row) {

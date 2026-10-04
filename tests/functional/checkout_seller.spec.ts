@@ -7,6 +7,7 @@ import SellerShop from '#models/seller_shop'
 import SellerListing from '#models/seller_listing'
 import SellerOrder from '#models/seller_order'
 import CheckoutService from '#services/checkout_service'
+import SellerShippingMethod from '#models/seller_shipping_method'
 import env from '#start/env'
 import KavenegarService, { OtpUnavailableError } from '#services/kavenegar_service'
 import ZarinpalService, { PaymentUnavailableError } from '#services/zarinpal_service'
@@ -136,6 +137,63 @@ test.group('Checkout marketplace', (group) => {
       .firstOrFail()
     assert.equal(listing1.stock, 4)
     assert.equal(listing1.sold, 1)
+  })
+
+  test('stores configured shipping cost on the buyer order', async ({ assert }) => {
+    const buyer = await User.updateOrCreate(
+      { phone: '09190000061' },
+      { phone: '09190000061', role: 'customer' }
+    )
+    const { shop } = await makeSeller('09190000062', `ship-${Date.now()}`)
+    const product = await makeProduct(`ship-p-${Date.now()}`, 50_000)
+
+    await SellerListing.create({
+      shopId: shop.id,
+      productId: product.id,
+      stock: 5,
+      sold: 0,
+      views: 0,
+      status: 'active',
+    })
+
+    await CartItem.query().where('user_id', buyer.id).delete()
+    await CartItem.create({ userId: buyer.id, productId: product.id, qty: 1 })
+
+    const address = await Address.create({
+      id: `addr-ship-${Date.now()}`,
+      userId: buyer.id,
+      title: 'خانه',
+      fullName: 'تست',
+      phone: buyer.phone,
+      province: 'تهران',
+      city: 'تهران',
+      address: 'خیابان تست',
+      postalCode: '1234567890',
+      isDefault: true,
+    })
+
+    const method = await SellerShippingMethod.create({
+      id: `ship-test-${Date.now()}`,
+      name: 'پیک تست',
+      carrier: 'تست',
+      estimatedDays: '۱ روز',
+      baseCost: 77_000,
+      status: 'active',
+      sortOrder: 99,
+    })
+
+    const checkout = new CheckoutService()
+    const { order, total } = await checkout.place(buyer, {
+      addressId: address.id,
+      shippingMethod: method.id,
+      paymentMethod: 'cod',
+    })
+
+    assert.equal(Number(order.shippingCost), 77_000)
+    assert.equal(Number(order.total), 50_000 + 77_000)
+    assert.equal(total, Number(order.total))
+    const json = order.toShopOrderJSON()
+    assert.equal(json.shippingCost, 77_000)
   })
 
   test('rejects second buy when stock is 1', async ({ assert }) => {

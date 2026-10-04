@@ -66,7 +66,9 @@ export default class Order extends BaseModel {
   })
   declare items: OrderItem[]
 
-  @column()
+  @column({
+    consume: (value: unknown) => Number(value) || 0,
+  })
   declare total: number
 
   @column()
@@ -85,10 +87,14 @@ export default class Order extends BaseModel {
   @column()
   declare discountCode: string | null
 
-  @column()
+  @column({
+    consume: (value: unknown) => Number(value) || 0,
+  })
   declare discountAmount: number
 
-  @column()
+  @column({
+    consume: (value: unknown) => Number(value) || 0,
+  })
   declare shippingCost: number
 
   @column.dateTime({ autoCreate: true })
@@ -129,6 +135,9 @@ export default class Order extends BaseModel {
       total: Number(this.total),
       shippingMethod: this.shippingMethod,
       paymentMethod: this.paymentMethod,
+      shippingCost: Number(this.shippingCost) || 0,
+      discountAmount: Number(this.discountAmount) || 0,
+      discountCode: this.discountCode,
       address: this.address,
       ...(trackingCode ? { trackingCode } : {}),
       ...(carrier ? { carrier } : {}),

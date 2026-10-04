@@ -120,6 +120,7 @@ router
     router.get('locations', [ContentController, 'locations'])
     router.get('compare/templates/:category', [ContentController, 'compareTemplates'])
     router.get('footer', [ContentController, 'footer'])
+    router.get('shipping-methods', [SellerShippingController, 'publicIndex'])
     router.get('navigation', [ContentController, 'navigation'])
     router.get('top-strip', [ContentController, 'topStrip'])
     router.get('seo', [ContentController, 'seo'])

@@ -5,6 +5,7 @@ import Profile from '#models/profile'
 import User from '#models/user'
 import { courierDisplayName } from '#utils/courier'
 import { DateTime } from 'luxon'
+import { moneyAmount } from '#utils/money'
 
 export type OrderTimelineEvent = {
   id: string
@@ -29,6 +30,32 @@ export type OrderRefundRecord = {
   transactionId: string
   createdAt: string
   actorName: string
+}
+
+function orderLineSubtotal(order: SellerOrder) {
+  const items = Array.isArray(order.items) ? order.items : []
+  return items.reduce(
+    (sum, item) => sum + moneyAmount(item.price) * moneyAmount(item.qty),
+    0,
+  )
+}
+
+function buyerShippingBreakdown(
+  order: SellerOrder,
+  buyer?: {
+    shippingCost?: unknown
+    discountAmount?: unknown
+    total?: unknown
+  } | null,
+) {
+  const subtotal = orderLineSubtotal(order)
+  const discountAmount = moneyAmount(buyer?.discountAmount)
+  const storedShipping = moneyAmount(buyer?.shippingCost)
+  const buyerTotal = moneyAmount(buyer?.total)
+  const inferredShipping = Math.max(0, buyerTotal - subtotal + discountAmount)
+  const shippingCost = storedShipping > 0 ? storedShipping : inferredShipping
+  const payableTotal = Math.max(0, subtotal - discountAmount + shippingCost)
+  return { subtotal, discountAmount, shippingCost, payableTotal }
 }
 
 function asArray<T>(value: unknown): T[] {
@@ -144,14 +171,14 @@ export function pushTimeline(
 function buildCommerceSnapshot(
   order: SellerOrder,
   payment: Payment | null,
-  extras?: {
+    extras?: {
     customerEmail?: string
     customerId?: string | null
     discountAmount?: number
     shippingCost?: number
   },
 ) {
-  const refundedAmount = Number((order as any).refundedAmount) || 0
+  const refundedAmount = moneyAmount((order as any).refundedAmount)
   const refunds = asArray<OrderRefundRecord>((order as any).refunds)
   const timeline = ensureTimeline(order)
   const internalNotes = asArray<OrderInternalNote>((order as any).internalNotes)
@@ -171,8 +198,8 @@ function buildCommerceSnapshot(
     paymentRefId: payment?.refId ? String(payment.refId) : null,
     paymentCardPan: payment?.cardPan ? String(payment.cardPan) : null,
     paymentDate: payment?.createdAt?.toISO() || order.date,
-    discountAmount: Number(extras?.discountAmount) || 0,
-    shippingCost: Number(extras?.shippingCost) || 0,
+    discountAmount: moneyAmount(extras?.discountAmount),
+    shippingCost: moneyAmount(extras?.shippingCost),
     taxAmount: 0,
     customerEmail: extras?.customerEmail || '',
     customerId: extras?.customerId ?? null,
@@ -207,10 +234,15 @@ export async function attachOrderListCommerce(orders: SellerOrder[]) {
   ]
 
   const paymentByBuyerOrderId = new Map<string, Payment>()
+  const buyerById = new Map<string, Order>()
   if (buyerIds.length) {
     const payments = await Payment.query().whereIn('order_id', buyerIds)
     for (const p of payments) {
       paymentByBuyerOrderId.set(String(p.orderId), p)
+    }
+    const buyers = await Order.query().whereIn('id', buyerIds)
+    for (const buyer of buyers) {
+      buyerById.set(String(buyer.id), buyer)
     }
   }
 
@@ -218,7 +250,12 @@ export async function attachOrderListCommerce(orders: SellerOrder[]) {
     const payment = order.buyerOrderId
       ? paymentByBuyerOrderId.get(String(order.buyerOrderId)) || null
       : null
-    const commerce = buildCommerceSnapshot(order, payment)
+    const buyer = order.buyerOrderId ? buyerById.get(String(order.buyerOrderId)) || null : null
+    const { discountAmount, shippingCost } = buyerShippingBreakdown(order, buyer)
+    const commerce = buildCommerceSnapshot(order, payment, {
+      discountAmount,
+      shippingCost,
+    })
     return {
       ...order.toJSON(),
       commerce,
@@ -247,12 +284,9 @@ export async function buildSellerOrderDetail(order: SellerOrder) {
     }
   }
 
-  const discountAmount = Number(buyerOrder?.discountAmount) || 0
-  const shippingCost = Number(buyerOrder?.shippingCost) || 0
-  const items = Array.isArray(order.items) ? order.items : []
-  const subtotal = items.reduce(
-    (sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0),
-    0,
+  const { subtotal, discountAmount, shippingCost, payableTotal } = buyerShippingBreakdown(
+    order,
+    buyerOrder,
   )
 
   const commerce = buildCommerceSnapshot(order, payment, {
@@ -277,7 +311,7 @@ export async function buildSellerOrderDetail(order: SellerOrder) {
           discountCode: buyerOrder.discountCode,
           discountAmount,
           shippingCost,
-          total: Number(buyerOrder.total) || 0,
+          total: moneyAmount(buyerOrder.total) || payableTotal,
         }
       : null,
     invoice: {
@@ -291,17 +325,17 @@ export async function buildSellerOrderDetail(order: SellerOrder) {
       paymentMethod: order.paymentMethod,
       shippingMethod: order.shippingMethod,
       trackingCode: commerce.trackingCode,
-      items: items.map((item) => ({
+      items: (Array.isArray(order.items) ? order.items : []).map((item) => ({
         productId: item.productId,
         qty: item.qty,
         price: item.price,
-        lineTotal: Number(item.price || 0) * Number(item.qty || 0),
+        lineTotal: moneyAmount(item.price) * moneyAmount(item.qty),
       })),
       subtotal,
       discountAmount,
       shippingCost,
       taxAmount: 0,
-      total: Number(order.total) || 0,
+      total: payableTotal,
       refundedAmount,
     },
   }
