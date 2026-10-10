@@ -8,6 +8,7 @@ import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
+import SellerReview from '#models/seller_review'
 import { storeCustomerReturnValidator } from '#validators/returns'
 import { createCustomerReturns, listCustomerReturns, ReturnRequestError } from '#utils/order_returns'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -385,8 +386,18 @@ export default class AccountController {
         .orderBy('created_at', 'desc'),
     ])
 
+    const sellerRows = reviews.length
+      ? await SellerReview.query().whereIn(
+          'id',
+          reviews.map((r) => r.id)
+        )
+      : []
+    const replyById = new Map(
+      sellerRows.map((row) => [row.id, row.reply?.trim() || null] as const)
+    )
+
     return response.ok({
-      reviews: reviews.map((r) => r.toAccountJSON(r.product)),
+      reviews: reviews.map((r) => r.toAccountJSON(r.product, replyById.get(r.id))),
       questions: questions.map((q) => q.toAccountJSON(q.product)),
     })
   }

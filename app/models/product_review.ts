@@ -97,8 +97,12 @@ export default class ProductReview extends BaseModel {
     }
   }
 
-  toAccountJSON(product?: Product | null) {
+  toAccountJSON(
+    product?: Product | null,
+    sellerReply?: string | null
+  ) {
     const p = product ?? this.product
+    const reply = sellerReply?.trim()
     return {
       id: this.id,
       productId: this.productId,
@@ -111,13 +115,23 @@ export default class ProductReview extends BaseModel {
       ...(this.pros?.length ? { pros: this.pros } : {}),
       ...(this.cons?.length ? { cons: this.cons } : {}),
       helpfulCount: this.helpfulCount,
-      replies: [] as {
-        id: string
-        author: string
-        date: string
-        text: string
-        role: 'seller' | 'support'
-      }[],
+      replies: reply
+        ? [
+            {
+              id: `${this.id}-seller-reply`,
+              author: 'فروشگاه',
+              date: this.date,
+              text: reply,
+              role: 'seller' as const,
+            },
+          ]
+        : ([] as {
+            id: string
+            author: string
+            date: string
+            text: string
+            role: 'seller' | 'support'
+          }[]),
     }
   }
 }

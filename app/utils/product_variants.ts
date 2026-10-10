@@ -29,6 +29,55 @@ export function productVariants(product: Product | { variants?: unknown[] | null
   return Array.isArray(product.variants) ? (product.variants as ProductVariant[]) : []
 }
 
+type AxisWithMeta = ProductVariantAxis & {
+  valueIds?: string[]
+  valueMeta?: Record<string, { label: string; attributeName: string; meta?: string | null }>
+}
+
+/** Ensure axis valueMeta exists for every valueId (incl. 0-adjustment options). */
+export function enrichVariantAxes(
+  product: Product | { variantAxes?: unknown[] | null; variants?: unknown[] | null }
+) {
+  const axes = Array.isArray(product.variantAxes)
+    ? (product.variantAxes as AxisWithMeta[])
+    : []
+  if (!axes.length) return axes
+
+  const variants = productVariants(product)
+  return axes.map((axis) => {
+    const valueIds = (axis.valueIds ?? []).map(String)
+    const valueMeta = { ...(axis.valueMeta ?? {}) }
+    const priceAdjustments = { ...(axis.priceAdjustments ?? {}) }
+
+    for (const variant of variants) {
+      for (const option of variant.options) {
+        if (option.attributeId !== axis.attributeId) continue
+        const valueId = String(option.valueId)
+        if (!valueIds.includes(valueId)) continue
+        if (!valueMeta[valueId]?.label) {
+          valueMeta[valueId] = {
+            label: option.label,
+            attributeName: option.attributeName,
+            ...(option.meta ? { meta: option.meta } : {}),
+          }
+        }
+        if (priceAdjustments[valueId] == null) priceAdjustments[valueId] = 0
+      }
+    }
+
+    for (const valueId of valueIds) {
+      if (priceAdjustments[valueId] == null) priceAdjustments[valueId] = 0
+    }
+
+    return {
+      ...axis,
+      valueIds,
+      valueMeta,
+      priceAdjustments,
+    }
+  })
+}
+
 /** Sum stock across active variants (sellable inventory on the PDP). */
 export function activeVariantStockTotal(
   product: Product | { variants?: unknown[] | null; hasVariants?: boolean }
@@ -89,4 +138,26 @@ export function catalogForVariant(product: Product, variant: ProductVariant | nu
     barcode: variant.barcode || catalog.barcode,
     weight: variant.weight || catalog.weight,
   }
+}
+
+/** Apply stock delta to a specific variant on the product JSON (mutates product.variants). */
+export function applyVariantStockDelta(
+  product: Product,
+  variantId: string | null | undefined,
+  delta: number
+) {
+  if (!variantId || !delta) return null
+  const rows = productVariants(product)
+  if (!rows.length) return null
+  let matched: ProductVariant | null = null
+  const next = rows.map((variant) => {
+    if (variant.id !== variantId) return variant
+    const stock = Math.max(0, (Number(variant.stock) || 0) + delta)
+    matched = { ...variant, stock }
+    return matched
+  })
+  if (!matched) return null
+  product.variants = next
+  product.hasVariants = true
+  return matched
 }

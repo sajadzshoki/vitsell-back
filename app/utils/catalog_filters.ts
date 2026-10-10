@@ -301,20 +301,23 @@ export function applyCatalogFilters(
   }
   if (input.onlyDiscount) query = query.whereNotNull('old_price')
   if (input.onlyInStock) {
-    // Include products whose sellable stock lives on active variants even when
-    // products.in_stock / listing rows are stale (common after variant edits).
-    query = query.where((group) => {
-      group
-        .where('in_stock', true)
-        .orWhereRaw(
-          `EXISTS (
-            SELECT 1
-            FROM jsonb_array_elements(COALESCE(variants, '[]'::jsonb)) AS v
-            WHERE COALESCE(v->>'status', 'active') = 'active'
-              AND COALESCE((v->>'stock')::int, 0) > 0
-          )`
+    // Prefer live listing/variant stock — products.in_stock is often stale after sales.
+    query = query.whereRaw(
+      `(
+        COALESCE((
+          SELECT SUM(seller_listings.stock)
+          FROM seller_listings
+          WHERE seller_listings.product_id = products.id
+            AND seller_listings.status IN ('active', 'out_of_stock')
+        ), 0) > 0
+        OR EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(COALESCE(products.variants, '[]'::jsonb)) AS v
+          WHERE COALESCE(v->>'status', 'active') = 'active'
+            AND COALESCE((v->>'stock')::int, 0) > 0
         )
-    })
+      )`
+    )
   }
   if (input.fastDelivery) query = query.where('fast_delivery', true)
   const minRating = Number(input.minRating || 0) || 0

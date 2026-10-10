@@ -6,6 +6,7 @@ import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
 import type { SeoMeta } from '#models/blog_post'
 import { toPublicMediaUrl } from '#utils/media_upload'
+import { enrichVariantAxes } from '#utils/product_variants'
 
 export type ProductColor = { name: string; hex: string }
 export type ProductSpec = { key: string; value: string; group?: string }
@@ -310,7 +311,7 @@ export default class Product extends BaseModel {
       barcode: this.barcode || '',
       weight: this.weight || '',
       lowStockThreshold: Number(this.lowStockThreshold) || 5,
-      variantAxes: Array.isArray(this.variantAxes) ? this.variantAxes : [],
+      variantAxes: enrichVariantAxes(this),
       variants,
       ...(this.shortDesc ? { shortDesc: this.shortDesc } : {}),
       ...(this.shortName ? { shortName: this.shortName } : {}),

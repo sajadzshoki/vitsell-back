@@ -1,6 +1,7 @@
 import Product from '#models/product'
 import ProductReview from '#models/product_review'
 import ProductQuestion from '#models/product_question'
+import SellerListing from '#models/seller_listing'
 import SellerReview from '#models/seller_review'
 import SellerShop from '#models/seller_shop'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -114,19 +115,32 @@ export default class ProductsController {
     const categoryIds = category ? await resolveCategoryTreeIds(category) : undefined
     const resolvedAttrs = await resolveAttributeFilters(attrs)
 
-    let query = applyCatalogFilters(Product.query(), {
-      q,
-      category,
-      categoryIds,
-      brands,
-      minPrice,
-      maxPrice,
-      onlyDiscount,
-      onlyInStock: forceInStock,
-      fastDelivery,
-      minRating,
-      resolvedAttrs,
-    })
+    let query = applyCatalogFilters(
+      Product.query()
+        .where((group) => {
+          group.where('published', true).orWhereNull('published')
+        })
+        .whereRaw(
+          `EXISTS (
+            SELECT 1 FROM seller_listings sl
+            WHERE sl.product_id = products.id
+              AND sl.status IN ('active', 'out_of_stock')
+          )`
+        ),
+      {
+        q,
+        category,
+        categoryIds,
+        brands,
+        minPrice,
+        maxPrice,
+        onlyDiscount,
+        onlyInStock: forceInStock,
+        fastDelivery,
+        minRating,
+        resolvedAttrs,
+      }
+    )
 
     switch (sort) {
       case 'viewed':
@@ -142,10 +156,10 @@ export default class ProductsController {
         query = query.orderBy('fast_delivery', 'desc').orderBy('rating', 'desc')
         break
       case 'expensive':
-        query = query.orderBy('price', 'desc')
+        query = query.orderByRaw('price DESC NULLS LAST').orderBy('id', 'asc')
         break
       case 'cheapest':
-        query = query.orderBy('price', 'asc')
+        query = query.orderByRaw('price ASC NULLS LAST').orderBy('id', 'asc')
         break
       case 'bestrated':
         query = query.orderBy('rating', 'desc')
@@ -208,7 +222,17 @@ export default class ProductsController {
     // Price/brand facets ignore price + brand + attr selections so ranges stay stable.
     const categoryIds = category ? await resolveCategoryTreeIds(category) : undefined
     const base = applyCatalogFilters(
-      Product.query(),
+      Product.query()
+        .where((group) => {
+          group.where('published', true).orWhereNull('published')
+        })
+        .whereRaw(
+          `EXISTS (
+            SELECT 1 FROM seller_listings sl
+            WHERE sl.product_id = products.id
+              AND sl.status IN ('active', 'out_of_stock')
+          )`
+        ),
       { q, category, categoryIds, onlyDiscount, onlyInStock: forceInStock, fastDelivery, minRating },
       { skipPrice: true, skipBrands: true, skipAttrs: true }
     )
@@ -254,6 +278,16 @@ export default class ProductsController {
     if (!product) {
       return response.notFound({ errors: [{ field: 'id', message: 'محصول یافت نشد' }] })
     }
+    if (product.published === false) {
+      return response.notFound({ errors: [{ field: 'id', message: 'محصول یافت نشد' }] })
+    }
+    const listing = await SellerListing.query()
+      .where('product_id', product.id)
+      .whereIn('status', ['active', 'out_of_stock'])
+      .first()
+    if (!listing) {
+      return response.notFound({ errors: [{ field: 'id', message: 'محصول یافت نشد' }] })
+    }
     product.viewCount += 1
     await product.save()
     return response.ok(await productToCatalogWithStock(product))
@@ -283,7 +317,40 @@ export default class ProductsController {
     }
 
     const reviews = await query
-    return response.ok(reviews.map((r) => r.toJSON()))
+    const sellerRows = reviews.length
+      ? await SellerReview.query().whereIn(
+          'id',
+          reviews.map((r) => r.id)
+        )
+      : []
+    const replyById = new Map(
+      sellerRows
+        .filter((row) => Boolean(row.reply?.trim()))
+        .map((row) => [row.id, String(row.reply).trim()] as const)
+    )
+
+    return response.ok(
+      reviews.map((r) => {
+        const reply = replyById.get(r.id)
+        return {
+          ...r.toJSON(),
+          ...(reply
+            ? {
+                reply,
+                replies: [
+                  {
+                    id: `${r.id}-seller-reply`,
+                    author: 'فروشگاه',
+                    date: r.date,
+                    text: reply,
+                    role: 'seller' as const,
+                  },
+                ],
+              }
+            : {}),
+        }
+      })
+    )
   }
 
   async storeReview({ auth, params, request, response }: HttpContext) {

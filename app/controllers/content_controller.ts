@@ -260,10 +260,13 @@ export default class ContentController {
   async discountCodes({ response }: HttpContext) {
     const now = DateTime.utc()
     const rows = await DiscountCode.query().where('active', true)
-    const map: Record<string, number> = {}
+    const map: Record<string, { percent: number; minAmount: number }> = {}
     for (const row of rows) {
       if (!row.isLive(now)) continue
-      map[row.code] = Number(row.percent)
+      map[row.code] = {
+        percent: Number(row.percent),
+        minAmount: Math.max(0, Number(row.minAmount) || 0),
+      }
     }
     return response.ok(map)
   }

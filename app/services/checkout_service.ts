@@ -19,6 +19,8 @@ import {
   shippingMethodLabel,
 } from '#utils/checkout_shipping'
 import {
+  activeVariantStockTotal,
+  applyVariantStockDelta,
   findProductVariant,
   productVariantLabel,
   productVariantPrice,
@@ -132,8 +134,13 @@ export default class CheckoutService {
         throw new CheckoutError(422, 'cart', 'محصول سبد نامعتبر است')
       }
 
+      if (item.product.published === false) {
+        throw new CheckoutError(409, 'cart', `محصول «${item.product.title}» غیرفعال است`)
+      }
+
       const variant = findProductVariant(item.product, item.variantId)
-      if (productVariants(item.product).length && !variant) {
+      const hasVariants = productVariants(item.product).length > 0
+      if (hasVariants && !variant) {
         throw new CheckoutError(409, 'cart', `واریانت «${item.product.title}» معتبر نیست`)
       }
       if (variant && (variant.status !== 'active' || Number(variant.stock) < item.qty)) {
@@ -141,7 +148,15 @@ export default class CheckoutService {
       }
 
       const listing = listingByProduct.get(item.productId) ?? null
-      if (listing && listing.stock < item.qty && platform.outOfStockBehavior !== 'allow_backorder') {
+      if (!listing) {
+        throw new CheckoutError(409, 'cart', `محصول «${item.product.title}» در دسترس نیست`)
+      }
+      // Variant stock is authoritative when variants exist; listing stock for simple products.
+      if (
+        !hasVariants
+        && listing.stock < item.qty
+        && platform.outOfStockBehavior !== 'allow_backorder'
+      ) {
         throw new CheckoutError(409, 'stock', `موجودی «${item.product.title}» کافی نیست`)
       }
 
@@ -371,6 +386,36 @@ export default class CheckoutService {
       if (!listing || listing.status !== 'active') {
         throw new CheckoutError(409, 'stock', `محصول ${line.productId} در دسترس نیست`)
       }
+
+      const product = await Product.query({ client: trx }).where('id', line.productId).forUpdate().first()
+      if (!product || product.published === false) {
+        throw new CheckoutError(409, 'stock', `محصول ${line.productId} در دسترس نیست`)
+      }
+
+      const hasVariants = productVariants(product).length > 0
+      if (hasVariants) {
+        const variant = findProductVariant(product, line.variantId)
+        if (!variant || variant.status !== 'active') {
+          throw new CheckoutError(409, 'stock', `موجودی «${line.product.title}» کافی نیست`)
+        }
+        if (Number(variant.stock) < line.qty && !allowBackorder) {
+          throw new CheckoutError(409, 'stock', `موجودی «${line.product.title}» کافی نیست`)
+        }
+        applyVariantStockDelta(product, line.variantId, -line.qty)
+        const variantStock = activeVariantStockTotal(product)
+        listing.stock = variantStock
+        listing.sold += line.qty
+        if (variantStock <= 0) {
+          listing.stock = 0
+          listing.status = 'out_of_stock'
+        }
+        product.inStock = variantStock > 0
+        await product.useTransaction(trx).save()
+        await listing.useTransaction(trx).save()
+        line.product = product
+        continue
+      }
+
       if (listing.stock < line.qty && !allowBackorder) {
         throw new CheckoutError(409, 'stock', `موجودی «${line.product.title}» کافی نیست`)
       }
@@ -380,7 +425,10 @@ export default class CheckoutService {
         listing.stock = 0
         listing.status = 'out_of_stock'
       }
+      product.inStock = listing.stock > 0
+      await product.useTransaction(trx).save()
       await listing.useTransaction(trx).save()
+      line.product = product
     }
   }
 
@@ -397,20 +445,29 @@ export default class CheckoutService {
         if (trx) listingQ.useTransaction(trx)
         const listing = await listingQ.forUpdate().first()
         if (!listing) continue
-        listing.stock += item.qty
+
+        const productQ = Product.query().where('id', item.productId)
+        if (trx) productQ.useTransaction(trx)
+        const product = await productQ.forUpdate().first()
+        if (product) {
+          if (item.variantId && productVariants(product).length) {
+            applyVariantStockDelta(product, item.variantId, item.qty)
+            listing.stock = activeVariantStockTotal(product)
+          } else {
+            listing.stock += item.qty
+          }
+          product.soldCount = Math.max(0, product.soldCount - item.qty)
+          product.inStock = Math.max(Number(listing.stock) || 0, activeVariantStockTotal(product)) > 0
+          await product.save()
+        } else {
+          listing.stock += item.qty
+        }
+
         listing.sold = Math.max(0, listing.sold - item.qty)
         if (listing.status === 'out_of_stock' && listing.stock > 0) {
           listing.status = 'active'
         }
         await listing.save()
-
-        const productQ = Product.query().where('id', item.productId)
-        if (trx) productQ.useTransaction(trx)
-        const product = await productQ.first()
-        if (product) {
-          product.soldCount = Math.max(0, product.soldCount - item.qty)
-          await product.save()
-        }
       }
       so.stockReserved = false
       if (trx) so.useTransaction(trx)

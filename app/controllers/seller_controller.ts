@@ -548,8 +548,17 @@ export default class SellerController {
 
     if (product) {
       const status = listing.status
-      if (status === 'out_of_stock') {
+      if (status === 'inactive') {
         product.inStock = false
+        product.published = false
+      } else if (status === 'out_of_stock') {
+        product.inStock = false
+      } else if (status === 'active') {
+        const variantStock = activeVariantStockTotal(product)
+        product.inStock = Math.max(Number(listing.stock) || 0, variantStock) > 0
+        if (payload.status === 'active' && product.published === false) {
+          product.published = true
+        }
       } else {
         const variantStock = activeVariantStockTotal(product)
         product.inStock = Math.max(Number(listing.stock) || 0, variantStock) > 0
