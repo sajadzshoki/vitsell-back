@@ -19,6 +19,17 @@ import {
   shippingMethodLabel,
 } from '#utils/checkout_shipping'
 import {
+  cartAllProductsFastDelivery,
+  confirmSlotReservation,
+  holdSlotReservation,
+  releaseSlotReservation,
+  resolveMethodPrice,
+  validateSlotSelection,
+} from '#utils/shipping_slots'
+import SellerShippingMethod from '#models/seller_shipping_method'
+import { moneyAmount } from '#utils/money'
+import { DateTime } from 'luxon'
+import {
   activeVariantStockTotal,
   applyVariantStockDelta,
   findProductVariant,
@@ -36,6 +47,10 @@ export type PlaceCheckoutInput = {
   shippingMethod: string
   paymentMethod: 'online' | 'cod' | 'installment'
   discountCode?: string
+  shippingSlotDate?: string
+  shippingSlotStart?: string
+  shippingSlotEnd?: string
+  shippingIsExpress?: boolean
 }
 
 export class CheckoutError extends Error {
@@ -206,18 +221,69 @@ export default class CheckoutService {
       throw new CheckoutError(422, 'shippingMethod', 'روش ارسال معتبر نیست')
     }
 
+    const addrJson = address.toJSON()
+    const methodModel =
+      shipMethod instanceof SellerShippingMethod
+        ? shipMethod
+        : await SellerShippingMethod.find(shipMethod.id)
+
+    let resolvedBasePrice = moneyAmount(shipMethod.baseCost)
+    if (methodModel) {
+      const priced = await resolveMethodPrice(methodModel, addrJson.province, addrJson.city)
+      if (!priced.ok) {
+        throw new CheckoutError(422, 'shippingMethod', priced.reason)
+      }
+      resolvedBasePrice = priced.price
+    }
+
+    const allFast = await cartAllProductsFastDelivery(productIds)
+    const wantsExpress = Boolean(input.shippingIsExpress)
+    const slotsEnabled = Boolean(
+      methodModel?.slotsEnabled ?? (shipMethod as { slotsEnabled?: boolean }).slotsEnabled
+    )
+
+    let slotPrice = resolvedBasePrice
+    let slotDate: string | null = null
+    let slotStart: string | null = null
+    let slotEnd: string | null = null
+    let isExpress = false
+
+    if (slotsEnabled && methodModel) {
+      if (!input.shippingSlotDate || !input.shippingSlotStart || !input.shippingSlotEnd) {
+        throw new CheckoutError(422, 'shippingSlot', 'انتخاب روز و بازه زمانی ارسال الزامی است')
+      }
+      const validated = await validateSlotSelection({
+        method: methodModel,
+        date: input.shippingSlotDate,
+        startTime: input.shippingSlotStart,
+        endTime: input.shippingSlotEnd,
+        isExpress: wantsExpress,
+        basePrice: resolvedBasePrice,
+        cartAllFastDelivery: allFast,
+      })
+      if (!validated.ok) {
+        throw new CheckoutError(422, 'shippingSlot', validated.reason)
+      }
+      slotPrice = validated.price
+      slotDate = input.shippingSlotDate
+      slotStart = validated.slot.startTime || input.shippingSlotStart
+      slotEnd = validated.slot.endTime || input.shippingSlotEnd
+      isExpress = wantsExpress && allFast
+    } else if (wantsExpress) {
+      throw new CheckoutError(422, 'shippingIsExpress', 'ارسال سریع برای این روش فعال نیست')
+    }
+
     const freeThreshold =
       platform.freeShippingThreshold > 0
         ? platform.freeShippingThreshold
         : FALLBACK_FREE_SHIPPING_THRESHOLD
-    const shipCost = shippingCostForMethod(shipMethod, subtotal, freeThreshold)
+    const shipCost = shippingCostForMethod(shipMethod, subtotal, freeThreshold, slotPrice)
     const total = Math.max(0, subtotal - discountAmount + shipCost)
     const orderId = `BZ-${Math.floor(100000 + Math.random() * 900000)}`
     const isOnline = input.paymentMethod === 'online'
     const shipLabel = shippingMethodLabel(shipMethod)
     const payLabel = paymentLabel(input.paymentMethod)
     const date = jalaliishDate()
-    const addrJson = address.toJSON()
 
     const orderItemsJson = lines.map((i) => ({
       productId: i.productId,
@@ -247,9 +313,27 @@ export default class CheckoutService {
           discountCode,
           discountAmount,
           shippingCost: shipCost,
+          shippingMethodId: shipMethod.id,
+          shippingSlotDate: slotDate ? DateTime.fromISO(slotDate) : null,
+          shippingSlotStart: slotStart,
+          shippingSlotEnd: slotEnd,
+          shippingIsExpress: isExpress,
         },
         { client: trx }
       )
+
+      if (slotsEnabled && slotDate && slotStart && slotEnd) {
+        await holdSlotReservation({
+          methodId: shipMethod.id,
+          orderId,
+          date: slotDate,
+          startTime: slotStart,
+          endTime: slotEnd,
+          isExpress,
+          status: isOnline ? 'held' : 'confirmed',
+          trx,
+        })
+      }
 
       for (const line of lines) {
         await OrderItemRow.create(
@@ -369,6 +453,11 @@ export default class CheckoutService {
         }
       }
     })
+    await releaseSlotReservation(orderId)
+  }
+
+  async confirmShippingSlot(orderId: string) {
+    await confirmSlotReservation(orderId)
   }
 
   private async reserveStock(

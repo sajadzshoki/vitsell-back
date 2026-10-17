@@ -41,11 +41,25 @@ export type ListingProductInput = {
   variants?: unknown[] | null
   seo?: Partial<SeoMeta> | null
   tags?: string[]
+  relatedProductIds?: string[]
   source?: string | null
   sourceUrl?: string | null
   sourceProductId?: string | null
   sourceImportedAt?: DateTime | null
   sourceUpdatedAt?: DateTime | null
+}
+
+function normalizeRelatedProductIds(value: unknown, selfId?: string): string[] {
+  if (!Array.isArray(value)) return []
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const item of value) {
+    const id = String(item || '').trim()
+    if (!id || (selfId && id === selfId) || seen.has(id)) continue
+    seen.add(id)
+    out.push(id)
+  }
+  return out
 }
 
 export type ListingWriteResult = {
@@ -174,6 +188,10 @@ export default class ListingWriteService {
         variants: Array.isArray(p.variants) && p.variants.length ? p.variants : null,
         seo: normalizeProductSeo(p.seo),
         tags: p.tags?.length ? p.tags.map((t) => t.trim()).filter(Boolean) : [],
+        relatedProductIds:
+          p.relatedProductIds !== undefined
+            ? normalizeRelatedProductIds(p.relatedProductIds, id)
+            : existingProduct?.relatedProductIds ?? [],
         scores: existingProduct?.scores ?? null,
         soldCount: existingProduct?.soldCount ?? 0,
         viewCount: existingProduct?.viewCount ?? 0,
@@ -261,6 +279,9 @@ export default class ListingWriteService {
           ? { variants: Array.isArray(p.variants) && p.variants.length ? p.variants : null }
           : {}),
         ...(p.tags !== undefined ? { tags: p.tags } : {}),
+        ...(p.relatedProductIds !== undefined
+          ? { relatedProductIds: normalizeRelatedProductIds(p.relatedProductIds, productId) }
+          : {}),
         ...(p.source != null ? { source: p.source } : {}),
         ...(p.sourceUrl != null ? { sourceUrl: p.sourceUrl } : {}),
         ...(p.sourceProductId != null ? { sourceProductId: p.sourceProductId } : {}),

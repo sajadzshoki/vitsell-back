@@ -78,4 +78,6 @@ export default await Env.create(new URL('../', import.meta.url), {
   TECHNOLIFE_UPDATE_DESCRIPTION: Env.schema.boolean.optional(),
   TECHNOLIFE_UPDATE_IMAGES: Env.schema.boolean.optional(),
   TECHNOLIFE_UPDATE_SPECS: Env.schema.boolean.optional(),
+  TECHNOLIFE_STRIP_LOGO: Env.schema.boolean.optional(),
+  TECHNOLIFE_STRIP_LOGO_FORCE: Env.schema.boolean.optional(),
 })

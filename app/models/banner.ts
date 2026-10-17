@@ -38,6 +38,14 @@ export default class Banner extends BaseModel {
   @column()
   declare imageMobile: string | null
 
+  /** CSS aspect-ratio like "16/9" or "4/1" */
+  @column()
+  declare aspectDesktop: string
+
+  /** CSS aspect-ratio like "3/1" or "16/9" */
+  @column()
+  declare aspectMobile: string
+
   @column()
   declare link: string
 
@@ -121,6 +129,8 @@ export default class Banner extends BaseModel {
       alt: this.alt,
       image: this.image,
       imageMobile: this.imageMobile,
+      aspectDesktop: this.aspectDesktop || '4/1',
+      aspectMobile: this.aspectMobile || '3/1',
       link: this.link,
       linkType: this.linkType,
       productId: this.productId,
@@ -152,6 +162,9 @@ export default class Banner extends BaseModel {
       cta: to ? button || 'مشاهده' : '',
       to,
       image: this.image,
+      imageMobile: this.imageMobile || undefined,
+      aspectDesktop: this.aspectDesktop || '4/1',
+      aspectMobile: this.aspectMobile || '3/1',
       icon: 'photo',
       tone: 'primary' as const,
     }

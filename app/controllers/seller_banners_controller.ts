@@ -8,6 +8,7 @@ import {
 import { bannersQueryValidator } from '#validators/banners_query'
 import { querySellerBanners } from '#utils/seller_banners_query'
 import { parseListQs } from '#utils/seller_schedule_filters'
+import { normalizeAspectRatio } from '#utils/banner_aspect'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 
@@ -80,6 +81,8 @@ export default class SellerBannersController {
       alt: payload.alt?.trim() || payload.title?.trim() || '',
       image: payload.image,
       imageMobile: payload.imageMobile?.trim() || null,
+      aspectDesktop: normalizeAspectRatio(payload.aspectDesktop, '4/1'),
+      aspectMobile: normalizeAspectRatio(payload.aspectMobile, '3/1'),
       link: linkType === 'none' ? '' : payload.link?.trim() || '',
       linkType,
       productId: linkType === 'product' ? (payload.productId ?? null) : null,
@@ -128,6 +131,14 @@ export default class SellerBannersController {
         payload.imageMobile !== undefined
           ? payload.imageMobile?.trim() || null
           : banner.imageMobile,
+      aspectDesktop:
+        payload.aspectDesktop !== undefined
+          ? normalizeAspectRatio(payload.aspectDesktop, banner.aspectDesktop || '4/1')
+          : banner.aspectDesktop || '4/1',
+      aspectMobile:
+        payload.aspectMobile !== undefined
+          ? normalizeAspectRatio(payload.aspectMobile, banner.aspectMobile || '3/1')
+          : banner.aspectMobile || '3/1',
       link:
         linkType === 'none'
           ? ''

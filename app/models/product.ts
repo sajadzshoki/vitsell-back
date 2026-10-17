@@ -241,6 +241,25 @@ export default class Product extends BaseModel {
   })
   declare tags: string[]
 
+  @column({
+    prepare: (value: string[] | null) => (value ? JSON.stringify(value) : '[]'),
+    consume: (value: string[] | string | null) => {
+      if (!value) return []
+      const parsed = typeof value === 'string' ? JSON.parse(value) : value
+      if (!Array.isArray(parsed)) return []
+      const seen = new Set<string>()
+      const out: string[] = []
+      for (const item of parsed) {
+        const id = String(item || '').trim()
+        if (!id || seen.has(id)) continue
+        seen.add(id)
+        out.push(id)
+      }
+      return out
+    },
+  })
+  declare relatedProductIds: string[]
+
   @column()
   declare source: string | null
 
@@ -329,6 +348,7 @@ export default class Product extends BaseModel {
           }
         : null,
       tags: Array.isArray(this.tags) ? this.tags : [],
+      relatedProductIds: Array.isArray(this.relatedProductIds) ? this.relatedProductIds : [],
     }
   }
 }

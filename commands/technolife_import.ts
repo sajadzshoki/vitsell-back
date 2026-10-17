@@ -5,6 +5,7 @@ import technolifeConfig from '#config/technolife'
 import TechnolifeImportService from '#services/technolife/import_service'
 import TechnolifeCategoryDiscoverer from '#services/technolife/category_discover'
 import { validateTechnolifeInputUrl } from '#services/technolife/url'
+import { setTechnolifeLogoStripOverride } from '#services/technolife/logo_strip_runtime'
 
 export default class TechnolifeImport extends BaseCommand {
   static commandName = 'technolife:import'
@@ -40,6 +41,16 @@ export default class TechnolifeImport extends BaseCommand {
   declare skipImages: boolean
 
   @flags.boolean({
+    description: 'Keep Techno Life corner watermark (disable logo strip on download)',
+  })
+  declare keepLogo: boolean
+
+  @flags.boolean({
+    description: 'Always whiten logo corner even when detection is weak (may clip phone corners)',
+  })
+  declare forceStripLogo: boolean
+
+  @flags.boolean({
     description: 'In upsert mode update price, inventory, description, images, and specs',
     alias: 'A',
   })
@@ -53,6 +64,16 @@ export default class TechnolifeImport extends BaseCommand {
       )
       this.exitCode = 1
       return
+    }
+
+    if (this.keepLogo) {
+      setTechnolifeLogoStripOverride({ stripLogo: false })
+      this.logger.info('Logo strip disabled for this run (--keep-logo)')
+    } else if (this.forceStripLogo) {
+      setTechnolifeLogoStripOverride({ stripLogo: true, stripLogoForce: true })
+      this.logger.info('Logo strip enabled (force corner whitening)')
+    } else if (!this.skipImages && !this.dryRun) {
+      this.logger.info('Logo strip enabled on image download')
     }
 
     const service = new TechnolifeImportService()

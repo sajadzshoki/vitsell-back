@@ -80,10 +80,19 @@ node ace technolife:import 20
 # Explicit category + limit
 node ace technolife:import --category="https://www.technolife.com/category/mobile/mobile-phone?manufacturer_id=26&af=195" --limit=20
 node ace technolife:import "https://www.technolife.com/category/mobile/mobile-phone" --limit=10
+
+# Logo strip runs during image download (default on). Keep watermark or force corner whitening:
+node ace technolife:import --category="https://www.technolife.com/category/mobile/mobile-phone" --limit=1000
+node ace technolife:import --category="..." --limit=1000 --force-strip-logo
+node ace technolife:import --category="..." --limit=20 --keep-logo
 ```
 
 Hard cap: `TECHNOLIFE_MAX_CATEGORY_IMPORT` (default **2000**, max 5000).
 The CLI numeric arg / `--limit` is honored up to that ceiling.
+
+Product gallery images are downloaded once; when `TECHNOLIFE_STRIP_LOGO=true` (default), the Techno Life
+corner watermark is whitened before upload to Drive/MinIO. No separate post-pass is required for new imports.
+Env: `TECHNOLIFE_STRIP_LOGO`, `TECHNOLIFE_STRIP_LOGO_FORCE`.
 
 ## Duplicate strategy
 
@@ -104,6 +113,8 @@ node ace technolife:import --file=urls.txt
 node ace technolife:import --dry-run <url>
 node ace technolife:import --mode=upsert <url>
 node ace technolife:import --mode=upsert --update-all 20
+node ace technolife:import --force-strip-logo --category=<url> --limit=20
+node ace technolife:import --keep-logo --category=<url> --limit=20
 node ace products:clear --force
 node ace products:clear --technolife-only --force
 ```

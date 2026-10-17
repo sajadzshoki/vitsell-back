@@ -22,6 +22,8 @@ const bannerFields = {
   alt: vine.string().trim().optional(),
   image: vine.string().trim().minLength(1),
   imageMobile: vine.string().trim().nullable().optional(),
+  aspectDesktop: vine.string().trim().maxLength(16).optional(),
+  aspectMobile: vine.string().trim().maxLength(16).optional(),
   link: vine.string().trim().optional(),
   linkType: vine
     .enum(['none', 'url', 'product', 'category', 'brand', 'campaign'] as const)

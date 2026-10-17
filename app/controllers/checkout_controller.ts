@@ -18,6 +18,10 @@ const placeValidator = vine.compile(
     shippingMethod: vine.string().trim().minLength(1),
     paymentMethod: vine.enum(['online', 'cod', 'installment'] as const),
     discountCode: vine.string().optional(),
+    shippingSlotDate: vine.string().optional(),
+    shippingSlotStart: vine.string().optional(),
+    shippingSlotEnd: vine.string().optional(),
+    shippingIsExpress: vine.boolean().optional(),
     /** Storefront origin (e.g. https://vitsell.ir) — used after Zarinpal return. */
     returnOrigin: vine.string().optional(),
   })
@@ -52,6 +56,10 @@ export default class CheckoutController {
         shippingMethod: payload.shippingMethod,
         paymentMethod: payload.paymentMethod,
         discountCode: payload.discountCode,
+        shippingSlotDate: payload.shippingSlotDate,
+        shippingSlotStart: payload.shippingSlotStart,
+        shippingSlotEnd: payload.shippingSlotEnd,
+        shippingIsExpress: payload.shippingIsExpress,
       })
     } catch (err) {
       if (err instanceof CheckoutError) {
@@ -176,6 +184,7 @@ export default class CheckoutController {
 
     payment.order.status = 'processing'
     await payment.order.save()
+    await checkout.confirmShippingSlot(payment.order.id)
 
     await CartItem.query().where('user_id', payment.order.userId).delete()
 

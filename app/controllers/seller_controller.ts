@@ -24,6 +24,7 @@ import {
 } from '#utils/seller_order_detail'
 import { adminHasPermission } from '#utils/seller_admins'
 import { notifyOrderReadyToShip } from '#utils/order_sms'
+import { releaseSlotReservation } from '#utils/shipping_slots'
 import { assignCourierValidator } from '#validators/couriers'
 import { applyActiveCourier } from '#utils/courier'
 import { listingsQueryValidator, bulkListingsDeleteValidator, bulkListingsPriceValidator } from '#validators/listings'
@@ -212,6 +213,20 @@ const listingProductFields = {
   variants: vine.array(vine.any()).optional(),
   seo: listingSeoSchema.clone().optional(),
   tags: vine.array(vine.string().trim()).optional(),
+  relatedProductIds: vine.array(vine.string().trim()).optional(),
+}
+
+function normalizeRelatedProductIds(value: unknown, selfId?: string): string[] {
+  if (!Array.isArray(value)) return []
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const item of value) {
+    const id = String(item || '').trim()
+    if (!id || (selfId && id === selfId) || seen.has(id)) continue
+    seen.add(id)
+    out.push(id)
+  }
+  return out
 }
 
 const storeListingValidator = vine.compile(
@@ -420,6 +435,7 @@ export default class SellerController {
         variants: Array.isArray(p.variants) && p.variants.length ? p.variants : null,
         seo: normalizeProductSeo(p.seo),
         tags: p.tags?.length ? p.tags.map((t) => t.trim()).filter(Boolean) : [],
+        relatedProductIds: normalizeRelatedProductIds(p.relatedProductIds, id),
         scores: null,
         soldCount: 0,
         viewCount: 0,
@@ -521,6 +537,10 @@ export default class SellerController {
             p.tags !== undefined
               ? p.tags.map((t) => t.trim()).filter(Boolean)
               : product?.tags ?? [],
+          relatedProductIds:
+            p.relatedProductIds !== undefined
+              ? normalizeRelatedProductIds(p.relatedProductIds, listing.productId)
+              : product?.relatedProductIds ?? [],
           scores: product?.scores ?? null,
           soldCount: product?.soldCount ?? 0,
           viewCount: product?.viewCount ?? 0,
@@ -644,6 +664,10 @@ export default class SellerController {
 
     if (!isSame) {
       await syncBuyerOrderStatus(order)
+    }
+
+    if (!isSame && status === 'cancelled' && order.buyerOrderId) {
+      await releaseSlotReservation(order.buyerOrderId)
     }
 
     if (!isSame && status === 'packing') {

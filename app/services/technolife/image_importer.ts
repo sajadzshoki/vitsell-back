@@ -6,6 +6,8 @@ import MediaAsset from '#models/media_asset'
 import { kindFromExt, mimeFromExt, MEDIA_IMAGE_EXT } from '#utils/media_upload'
 import { validateTechnolifeUrl, normalizeImageUrl } from '#services/technolife/url'
 import technolifeConfig from '#config/technolife'
+import { stripTechnolifeLogo } from '#services/technolife/logo_strip'
+import { resolveTechnolifeLogoStripOptions } from '#services/technolife/logo_strip_runtime'
 
 const IMAGE_MIME_EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -113,10 +115,27 @@ export async function importRemoteImages(
         continue
       }
 
-      const buf = Buffer.from(await res.arrayBuffer())
+      let buf = Buffer.from(await res.arrayBuffer())
       if (buf.length < 100 || buf.length > 12 * 1024 * 1024) {
         warnings.push('حجم تصویر نامعتبر است')
         continue
+      }
+
+      let logoStripped = false
+      const logoOpts = resolveTechnolifeLogoStripOptions()
+      if (logoOpts.stripLogo) {
+        try {
+          const stripped = await stripTechnolifeLogo(buf, {
+            mimeHint: contentType,
+            force: logoOpts.stripLogoForce,
+          })
+          buf = stripped.buffer
+          logoStripped = stripped.stripped
+        } catch (err) {
+          warnings.push(
+            `حذف لوگوی تصویر ناموفق: ${err instanceof Error ? err.message : String(err)}`
+          )
+        }
       }
 
       const storedName = `${Date.now()}-${randomBytes(6).toString('hex')}.${ext}`
@@ -140,12 +159,15 @@ export async function importRemoteImages(
         width: null,
         height: null,
         sizeBytes: buf.length,
-        usageHints: ['technolife'],
+        usageHints: logoStripped ? ['technolife', 'logo-stripped'] : ['technolife'],
       })
 
       imported.push(url)
       items.push({ sourceUrl: abs, storedUrl: url })
-      logger.info({ url, source: abs }, '[TechnolifeImporter] Downloading images')
+      logger.info(
+        { url, source: abs, logoStripped },
+        '[TechnolifeImporter] Downloading images'
+      )
     } catch (err) {
       warnings.push(`خطای تصویر: ${err instanceof Error ? err.message : String(err)}`)
     }

@@ -91,6 +91,13 @@ export default class ProductsController {
   async index({ request, response }: HttpContext) {
     const q = String(request.input('q', '')).trim()
     const category = String(request.input('category', '')).trim()
+    const idsRaw = request.input('ids', [])
+    const ids = Array.isArray(idsRaw)
+      ? idsRaw.map(String).map((id) => id.trim()).filter(Boolean)
+      : String(idsRaw || '')
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean)
     const brandsRaw = request.input('brands', [])
     const brands = Array.isArray(brandsRaw)
       ? brandsRaw.map(String)
@@ -107,7 +114,8 @@ export default class ProductsController {
     const attrs = parseAttrFilters(request.input('attrs'))
     const sort = String(request.input('sort', 'relevant')) as (typeof SORTS)[number]
     const page = Math.max(1, Number(request.input('page', 1)) || 1)
-    const pageSize = Math.min(48, Math.max(1, Number(request.input('pageSize', 12)) || 12))
+    const pageSizeCap = ids.length ? 100 : 48
+    const pageSize = Math.min(pageSizeCap, Math.max(1, Number(request.input('pageSize', ids.length || 12)) || 12))
 
     const platform = await loadPlatformSettings()
     const forceInStock = platform.outOfStockBehavior === 'hide' || onlyInStock
@@ -131,6 +139,7 @@ export default class ProductsController {
         q,
         category,
         categoryIds,
+        ids,
         brands,
         minPrice,
         maxPrice,
@@ -195,9 +204,15 @@ export default class ProductsController {
     const total = Number((totalRow as any)?.$extras?.total ?? (totalRow as any)?.total ?? 0)
 
     const items = await query.offset((page - 1) * pageSize).limit(pageSize)
+    let catalogItems = await productsToCatalogWithStock(items)
+
+    if (ids.length) {
+      const byId = new Map(catalogItems.map((item) => [item.id, item]))
+      catalogItems = ids.map((id) => byId.get(id)).filter(Boolean) as typeof catalogItems
+    }
 
     return response.ok({
-      items: await productsToCatalogWithStock(items),
+      items: catalogItems,
       total,
       page,
       pageSize,

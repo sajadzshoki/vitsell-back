@@ -1,5 +1,6 @@
 import SellerShippingMethod from '#models/seller_shipping_method'
 import { moneyAmount } from '#utils/money'
+import { resolveMethodPrice } from '#utils/shipping_slots'
 
 const LEGACY_METHOD_IDS: Record<string, string> = {
   express: 'ship-express',
@@ -9,7 +10,19 @@ const LEGACY_METHOD_IDS: Record<string, string> = {
 
 const FALLBACK_METHODS: Record<
   string,
-  { id: string, name: string, carrier: string, baseCost: number, status: 'active' }
+  {
+    id: string
+    name: string
+    carrier: string
+    baseCost: number
+    status: 'active'
+    coverage: 'nationwide' | 'cities'
+    slotsEnabled: boolean
+    expressEnabled: boolean
+    expressPrice: number
+    expressDeadlineHour: number
+    holidayMode: 'use_weekday'
+  }
 > = {
   'ship-express': {
     id: 'ship-express',
@@ -17,6 +30,12 @@ const FALLBACK_METHODS: Record<
     carrier: 'ویتسل',
     baseCost: 45_000,
     status: 'active',
+    coverage: 'cities',
+    slotsEnabled: true,
+    expressEnabled: true,
+    expressPrice: 75_000,
+    expressDeadlineHour: 12,
+    holidayMode: 'use_weekday',
   },
   'ship-post': {
     id: 'ship-post',
@@ -24,6 +43,12 @@ const FALLBACK_METHODS: Record<
     carrier: 'پست ایران',
     baseCost: 40_000,
     status: 'active',
+    coverage: 'nationwide',
+    slotsEnabled: false,
+    expressEnabled: false,
+    expressPrice: 0,
+    expressDeadlineHour: 12,
+    holidayMode: 'use_weekday',
   },
   'ship-pickup': {
     id: 'ship-pickup',
@@ -31,6 +56,12 @@ const FALLBACK_METHODS: Record<
     carrier: 'فروشگاه',
     baseCost: 0,
     status: 'active',
+    coverage: 'nationwide',
+    slotsEnabled: false,
+    expressEnabled: false,
+    expressPrice: 0,
+    expressDeadlineHour: 12,
+    holidayMode: 'use_weekday',
   },
 }
 
@@ -44,9 +75,10 @@ export function shippingCostForMethod(
   method: { id: string, name: string, baseCost: number | bigint | string },
   subtotal: number,
   freeShippingThreshold: number,
+  overridePrice?: number | null
 ) {
   if (isPickupShipping(method) || subtotal <= 0) return 0
-  const base = moneyAmount(method.baseCost)
+  const base = overridePrice != null ? moneyAmount(overridePrice) : moneyAmount(method.baseCost)
   if (base <= 0) return 0
   const threshold = freeShippingThreshold > 0 ? freeShippingThreshold : 0
   if (threshold > 0 && subtotal >= threshold) return 0
@@ -69,4 +101,19 @@ export async function resolveCheckoutShippingMethod(rawId: string) {
   if (method && method.status === 'active') return method
   const fallback = FALLBACK_METHODS[mapped] || FALLBACK_METHODS[raw]
   return fallback ?? null
+}
+
+export async function listStorefrontMethodsForCity(province?: string | null, city?: string | null) {
+  const rows = await SellerShippingMethod.query()
+    .where('status', 'active')
+    .orderBy('sort_order', 'asc')
+    .orderBy('id', 'asc')
+
+  const items: ReturnType<SellerShippingMethod['toStorefrontJSON']>[] = []
+  for (const row of rows) {
+    const priced = await resolveMethodPrice(row, province, city)
+    if (!priced.ok) continue
+    items.push(row.toStorefrontJSON({ price: priced.price }))
+  }
+  return items
 }

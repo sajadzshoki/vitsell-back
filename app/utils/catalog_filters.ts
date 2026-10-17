@@ -10,6 +10,8 @@ export type CatalogFilterInput = {
   category?: string
   /** Pre-resolved category tree ids (self + descendants). Prefer over exact `category`. */
   categoryIds?: string[]
+  /** Explicit product ids (order not preserved here; caller may re-sort). */
+  ids?: string[]
   brands?: string[]
   minPrice?: number
   maxPrice?: number
@@ -277,10 +279,15 @@ export function applyCatalogFilters(
 ) {
   const category = String(input.category || '').trim()
   const categoryIds = (input.categoryIds || []).map(String).filter(Boolean)
+  const ids = (input.ids || []).map(String).map((id) => id.trim()).filter(Boolean)
   const q = String(input.q || '').trim()
   const brands = (input.brands || []).map(String).filter(Boolean)
   const minPrice = Number(input.minPrice || 0) || 0
   const maxPrice = Number(input.maxPrice || 0) || 0
+
+  if (ids.length) {
+    query = query.whereIn('id', ids)
+  }
 
   if (categoryIds.length) {
     query = categoryIds.length === 1

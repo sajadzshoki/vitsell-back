@@ -71,6 +71,17 @@ export const technolifeConfig = {
     // Hard safety ceiling only — CLI `--limit` / numeric arg should win up to this.
     return Math.max(1, Math.min(5000, Math.floor(numEnv('TECHNOLIFE_MAX_CATEGORY_IMPORT', 2000))))
   },
+  /** Whiten Techno Life corner watermark while downloading product images. */
+  get stripLogo() {
+    return boolEnv('TECHNOLIFE_STRIP_LOGO', true)
+  },
+  /**
+   * Always paint the logo box even when blue/gold watermark detection is weak.
+   * Useful for compressed gallery shots; may clip phone corners.
+   */
+  get stripLogoForce() {
+    return boolEnv('TECHNOLIFE_STRIP_LOGO_FORCE', false)
+  },
   get defaultFieldPolicy(): TechnolifeFieldPolicy {
     return {
       updatePrice: boolEnv('TECHNOLIFE_UPDATE_PRICE', false),

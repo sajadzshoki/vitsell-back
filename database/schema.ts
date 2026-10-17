@@ -144,12 +144,16 @@ export class AuthAccessTokenSchema extends BaseModel {
 }
 
 export class BannerSchema extends BaseModel {
-  static $columns = ['active', 'alt', 'brandId', 'buttonText', 'campaignId', 'categoryId', 'createdAt', 'endsAt', 'id', 'image', 'imageMobile', 'internalName', 'link', 'linkType', 'placement', 'priority', 'productId', 'sortOrder', 'startsAt', 'title', 'type', 'updatedAt'] as const
+  static $columns = ['active', 'alt', 'aspectDesktop', 'aspectMobile', 'brandId', 'buttonText', 'campaignId', 'categoryId', 'createdAt', 'endsAt', 'id', 'image', 'imageMobile', 'internalName', 'link', 'linkType', 'placement', 'priority', 'productId', 'sortOrder', 'startsAt', 'title', 'type', 'updatedAt'] as const
   $columns = BannerSchema.$columns
   @column()
   declare active: boolean
   @column()
   declare alt: string
+  @column()
+  declare aspectDesktop: string
+  @column()
+  declare aspectMobile: string
   @column()
   declare brandId: string | null
   @column()
@@ -621,7 +625,7 @@ export class OrderItemSchema extends BaseModel {
 }
 
 export class OrderSchema extends BaseModel {
-  static $columns = ['address', 'createdAt', 'date', 'discountAmount', 'discountCode', 'id', 'items', 'paymentMethod', 'shippingCost', 'shippingMethod', 'status', 'total', 'updatedAt', 'userId'] as const
+  static $columns = ['address', 'createdAt', 'date', 'discountAmount', 'discountCode', 'id', 'items', 'paymentMethod', 'shippingCost', 'shippingIsExpress', 'shippingMethod', 'shippingMethodId', 'shippingSlotDate', 'shippingSlotEnd', 'shippingSlotStart', 'status', 'total', 'updatedAt', 'userId'] as const
   $columns = OrderSchema.$columns
   @column()
   declare address: any
@@ -642,7 +646,17 @@ export class OrderSchema extends BaseModel {
   @column()
   declare shippingCost: bigint | number
   @column()
+  declare shippingIsExpress: boolean
+  @column()
   declare shippingMethod: string
+  @column()
+  declare shippingMethodId: string | null
+  @column.date()
+  declare shippingSlotDate: DateTime | null
+  @column()
+  declare shippingSlotEnd: string | null
+  @column()
+  declare shippingSlotStart: string | null
   @column()
   declare status: string
   @column()
@@ -857,7 +871,7 @@ export class ProductReviewSchema extends BaseModel {
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['badge', 'barcode', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageAlts', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'source', 'sourceImportedAt', 'sourceProductId', 'sourceUpdatedAt', 'sourceUrl', 'specs', 'tags', 'title', 'updatedAt', 'variantAxes', 'variants', 'viewCount', 'weight'] as const
+  static $columns = ['badge', 'barcode', 'brand', 'buyNotes', 'category', 'categoryLabel', 'colors', 'createdAt', 'description', 'fastDelivery', 'featured', 'features', 'gallery', 'hasVariants', 'id', 'image', 'imageAlts', 'imageDark', 'inStock', 'lowStockThreshold', 'oldPrice', 'price', 'published', 'rating', 'relatedProductIds', 'reviews', 'scores', 'seo', 'shortDesc', 'shortName', 'sku', 'soldCount', 'source', 'sourceImportedAt', 'sourceProductId', 'sourceUpdatedAt', 'sourceUrl', 'specs', 'tags', 'title', 'updatedAt', 'variantAxes', 'variants', 'viewCount', 'weight'] as const
   $columns = ProductSchema.$columns
   @column()
   declare badge: string | null
@@ -907,6 +921,8 @@ export class ProductSchema extends BaseModel {
   declare published: boolean
   @column()
   declare rating: number
+  @column()
+  declare relatedProductIds: any
   @column()
   declare reviews: number
   @column()
@@ -1201,27 +1217,150 @@ export class SellerReviewSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class SellerShippingDayOverrideSchema extends BaseModel {
+  static $columns = ['createdAt', 'date', 'id', 'isClosed', 'methodId', 'updatedAt', 'useCustomSlots'] as const
+  $columns = SellerShippingDayOverrideSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isClosed: boolean
+  @column()
+  declare methodId: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare useCustomSlots: boolean
+}
+
+export class SellerShippingDaySlotSchema extends BaseModel {
+  static $columns = ['capacity', 'createdAt', 'endTime', 'id', 'overrideId', 'priceOverride', 'sortOrder', 'startTime', 'updatedAt'] as const
+  $columns = SellerShippingDaySlotSchema.$columns
+  @column()
+  declare capacity: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endTime: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare overrideId: number
+  @column()
+  declare priceOverride: bigint | number | null
+  @column()
+  declare sortOrder: number
+  @column()
+  declare startTime: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class SellerShippingHolidaySlotSchema extends BaseModel {
+  static $columns = ['capacity', 'createdAt', 'endTime', 'id', 'methodId', 'priceOverride', 'sortOrder', 'startTime', 'updatedAt'] as const
+  $columns = SellerShippingHolidaySlotSchema.$columns
+  @column()
+  declare capacity: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endTime: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare methodId: string
+  @column()
+  declare priceOverride: bigint | number | null
+  @column()
+  declare sortOrder: number
+  @column()
+  declare startTime: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class SellerShippingMethodCitySchema extends BaseModel {
+  static $columns = ['active', 'city', 'createdAt', 'id', 'methodId', 'price', 'province', 'updatedAt'] as const
+  $columns = SellerShippingMethodCitySchema.$columns
+  @column()
+  declare active: boolean
+  @column()
+  declare city: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare methodId: string
+  @column()
+  declare price: bigint | number
+  @column()
+  declare province: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class SellerShippingMethodSchema extends BaseModel {
-  static $columns = ['baseCost', 'carrier', 'createdAt', 'estimatedDays', 'id', 'name', 'sortOrder', 'status', 'updatedAt'] as const
+  static $columns = ['baseCost', 'carrier', 'coverage', 'createdAt', 'estimatedDays', 'expressDeadlineHour', 'expressEnabled', 'expressPrice', 'holidayMode', 'id', 'name', 'slotsEnabled', 'sortOrder', 'status', 'updatedAt'] as const
   $columns = SellerShippingMethodSchema.$columns
   @column()
   declare baseCost: bigint | number
   @column()
   declare carrier: string
+  @column()
+  declare coverage: string
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
   declare estimatedDays: string
+  @column()
+  declare expressDeadlineHour: number
+  @column()
+  declare expressEnabled: boolean
+  @column()
+  declare expressPrice: bigint | number
+  @column()
+  declare holidayMode: string
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare name: string
+  @column()
+  declare slotsEnabled: boolean
   @column()
   declare sortOrder: number
   @column()
   declare status: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class SellerShippingWeekdaySlotSchema extends BaseModel {
+  static $columns = ['capacity', 'createdAt', 'endTime', 'id', 'methodId', 'priceOverride', 'sortOrder', 'startTime', 'updatedAt', 'weekday'] as const
+  $columns = SellerShippingWeekdaySlotSchema.$columns
+  @column()
+  declare capacity: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endTime: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare methodId: string
+  @column()
+  declare priceOverride: bigint | number | null
+  @column()
+  declare sortOrder: number
+  @column()
+  declare startTime: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare weekday: number
 }
 
 export class SellerShopSchema extends BaseModel {
@@ -1253,6 +1392,48 @@ export class SellerShopSchema extends BaseModel {
   declare updatedAt: DateTime | null
   @column()
   declare userId: number
+}
+
+export class ShippingCalendarHolidaySchema extends BaseModel {
+  static $columns = ['createdAt', 'date', 'id', 'source', 'title', 'updatedAt'] as const
+  $columns = ShippingCalendarHolidaySchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare source: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class ShippingSlotReservationSchema extends BaseModel {
+  static $columns = ['createdAt', 'endTime', 'id', 'isExpress', 'methodId', 'orderId', 'slotDate', 'startTime', 'status', 'updatedAt'] as const
+  $columns = ShippingSlotReservationSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endTime: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isExpress: boolean
+  @column()
+  declare methodId: string
+  @column()
+  declare orderId: string
+  @column.date()
+  declare slotDate: DateTime
+  @column()
+  declare startTime: string
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class StaticPageSchema extends BaseModel {

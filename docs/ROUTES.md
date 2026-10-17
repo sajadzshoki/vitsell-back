@@ -27,7 +27,8 @@
 | `GET` | `/categories` | — |
 | `GET` | `/categories/:id` | — |
 | `GET` | `/category-pages/:id` | — |
-| `GET` | `/products` | — |
+| `GET` | `/products` | — | فیلتر اختیاری `ids` (لیست id با کاما) برای محصولات مرتبط |
+
 | `GET` | `/products/:id` | — |
 | `GET` | `/products/:id/reviews` | — |
 | `POST` | `/products/:id/reviews` | ✅ |

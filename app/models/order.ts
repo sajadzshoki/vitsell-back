@@ -97,6 +97,21 @@ export default class Order extends BaseModel {
   })
   declare shippingCost: number
 
+  @column()
+  declare shippingMethodId: string | null
+
+  @column.date()
+  declare shippingSlotDate: DateTime | null
+
+  @column()
+  declare shippingSlotStart: string | null
+
+  @column()
+  declare shippingSlotEnd: string | null
+
+  @column()
+  declare shippingIsExpress: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -134,6 +149,11 @@ export default class Order extends BaseModel {
       items: this.items,
       total: Number(this.total),
       shippingMethod: this.shippingMethod,
+      shippingMethodId: this.shippingMethodId,
+      shippingSlotDate: this.shippingSlotDate?.toISODate?.() ?? this.shippingSlotDate ?? null,
+      shippingSlotStart: this.shippingSlotStart,
+      shippingSlotEnd: this.shippingSlotEnd,
+      shippingIsExpress: Boolean(this.shippingIsExpress),
       paymentMethod: this.paymentMethod,
       shippingCost: Number(this.shippingCost) || 0,
       discountAmount: Number(this.discountAmount) || 0,

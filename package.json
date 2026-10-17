@@ -82,7 +82,8 @@
     "better-sqlite3": "^13.0.3",
     "luxon": "^3.7.2",
     "pg": "^8.23.0",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "sharp": "^0.35.5"
   },
   "hotHook": {
     "boundaries": [
