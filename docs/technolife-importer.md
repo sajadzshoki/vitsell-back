@@ -94,6 +94,9 @@ Product gallery images are downloaded once; when `TECHNOLIFE_STRIP_LOGO=true` (d
 corner watermark is whitened before upload to Drive/MinIO. No separate post-pass is required for new imports.
 Env: `TECHNOLIFE_STRIP_LOGO`, `TECHNOLIFE_STRIP_LOGO_FORCE`.
 
+Products with **no valid price** on Technolife are still created: `price = 0`, `stock = 0`, listing
+`status = out_of_stock` (with a warning). They are not counted as import failures.
+
 ## Duplicate strategy
 
 1. `source = technolife` + `source_product_id`

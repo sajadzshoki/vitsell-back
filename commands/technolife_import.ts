@@ -110,6 +110,27 @@ export default class TechnolifeImport extends BaseCommand {
     this.logger.success(
       `Done: status=${done.status} success=${done.successCount} duplicate=${done.duplicateCount} failed=${done.failedCount}`
     )
+    if (done.failedCount > 0) {
+      const { default: ProductImportItem } = await import('#models/product_import_item')
+      const failedItems = await ProductImportItem.query()
+        .where('batch_id', done.id)
+        .where('status', 'failed')
+      const counts = new Map<string, number>()
+      for (const item of failedItems) {
+        const key = item.errorCode || 'UNKNOWN'
+        counts.set(key, (counts.get(key) || 0) + 1)
+      }
+      const breakdown = [...counts.entries()]
+        .map(([code, n]) => `${code}=${n}`)
+        .join(', ')
+      this.logger.warning(`Failed breakdown: ${breakdown || 'n/a'}`)
+      const sample = failedItems.slice(0, 3)
+      for (const item of sample) {
+        this.logger.warning(
+          `  - ${item.sourceUrl}: ${item.errorCode || '?'} — ${item.errorMessage || ''}`
+        )
+      }
+    }
   }
 
   private async resolveProductUrls(): Promise<string[]> {

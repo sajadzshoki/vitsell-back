@@ -229,8 +229,8 @@ export default class TechnolifeImportService {
         '[TechnolifeImporter] Product detected'
       )
 
-      if (!normalized.priceToman || normalized.priceToman < 1) {
-        warnings.push('قیمت معتبر یافت نشد')
+      if ((!normalized.priceToman || normalized.priceToman < 1) && options.mode === 'preview') {
+        warnings.push('قیمت معتبر یافت نشد؛ در ایجاد واقعی با قیمت ۰ و وضعیت ناموجود وارد می‌شود')
       }
 
       const brand = await resolveBrand(normalized.brandName, {
@@ -290,18 +290,26 @@ export default class TechnolifeImportService {
         }
       }
 
-      if (!normalized.priceToman || normalized.priceToman < 1) {
-        return {
-          ...preview,
-          status: 'failed',
-          error: { code: 'VALIDATION_ERROR', message: 'قیمت برای ایجاد محصول الزامی است' },
-        }
-      }
-
       const policy = mergePolicy(options.fieldPolicy)
       let imageUrls = normalized.images
       const imagesImported: string[] = []
       let description = normalized.description
+
+      // No valid Technolife price → import as unavailable with price 0 (do not fail the batch).
+      const missingPrice = !normalized.priceToman || normalized.priceToman < 1
+      const priceToman = missingPrice ? 0 : normalized.priceToman
+      const oldPriceToman = missingPrice ? null : normalized.oldPriceToman
+      const stock = missingPrice ? 0 : Math.max(0, Number(normalized.stock) || 0)
+      const listingStatus: 'active' | 'pending' | 'inactive' | 'out_of_stock' = missingPrice
+        ? 'out_of_stock'
+        : options.listingStatus || 'pending'
+      if (missingPrice) {
+        warnings.push('قیمت معتبر یافت نشد؛ محصول با قیمت ۰ و وضعیت ناموجود وارد شد')
+        logger.warn(
+          { url: validated.normalized, sourceProductId: normalized.sourceProductId },
+          '[TechnolifeImporter] Importing without price as out_of_stock @ 0'
+        )
+      }
 
       if (options.downloadImages !== false && normalized.images.length) {
         const limited = normalized.images.slice(0, technolifeConfig.maxImages)
@@ -349,9 +357,9 @@ export default class TechnolifeImportService {
           category.rootId,
           category.brandCategoryId,
         ].filter(Boolean) as string[],
-        price: normalized.priceToman,
-        oldPrice: normalized.oldPriceToman,
-        stock: normalized.stock,
+        price: priceToman,
+        oldPrice: oldPriceToman,
+        stock,
         sku: normalized.sku,
         primaryImage,
         createIfMissing: true,
@@ -380,6 +388,7 @@ export default class TechnolifeImportService {
           variantAxes: variantPack.hasVariants ? variantPack.variantAxes : null,
           variants: variantPack.hasVariants ? variantPack.variants : null,
           colors: variantPack.colors.length ? variantPack.colors : null,
+          inStock: stock > 0 && listingStatus !== 'out_of_stock',
         }
         fieldsChanged.push('source')
 
@@ -390,9 +399,9 @@ export default class TechnolifeImportService {
           patch.description = description
           fieldsChanged.push('description')
         }
-        if (policy.updatePrice) {
-          patch.price = normalized.priceToman
-          patch.oldPrice = normalized.oldPriceToman
+        if (policy.updatePrice || missingPrice) {
+          patch.price = priceToman
+          patch.oldPrice = oldPriceToman
           fieldsChanged.push('price')
         }
         if (policy.updateImages && imageUrls.length) {
@@ -405,11 +414,13 @@ export default class TechnolifeImportService {
           fieldsChanged.push('specs')
         }
 
-        const stock = policy.updateInventory ? normalized.stock : undefined
+        const nextStock = policy.updateInventory || missingPrice ? stock : undefined
+        const nextStatus = missingPrice ? 'out_of_stock' : undefined
 
         const updated = await this.listings.updateListing(duplicate.productId, {
           product: patch as never,
-          ...(stock !== undefined ? { stock } : {}),
+          ...(nextStock !== undefined ? { stock: nextStock } : {}),
+          ...(nextStatus ? { status: nextStatus } : {}),
         })
 
         return {
@@ -423,7 +434,10 @@ export default class TechnolifeImportService {
       }
 
       // create
-      logger.info({ title: normalized.title }, '[TechnolifeImporter] Creating product')
+      logger.info(
+        { title: normalized.title, priceToman, stock, listingStatus },
+        '[TechnolifeImporter] Creating product'
+      )
       const productId = await uniqueProductId(normalized.suggestedProductId)
       const created = await this.listings.createListing({
         product: {
@@ -433,8 +447,8 @@ export default class TechnolifeImportService {
           brand: brand.name,
           category: category.id,
           categoryLabel: category.label,
-          price: normalized.priceToman,
-          oldPrice: normalized.oldPriceToman,
+          price: priceToman,
+          oldPrice: oldPriceToman,
           image: primaryImage,
           gallery: gallery.length ? gallery : null,
           colors: variantPack.colors.length ? variantPack.colors : null,
@@ -442,7 +456,7 @@ export default class TechnolifeImportService {
           description,
           specs: normalized.specs,
           sku: normalized.sku,
-          inStock: normalized.stock > 0,
+          inStock: stock > 0 && listingStatus !== 'out_of_stock',
           published: true,
           hasVariants: variantPack.hasVariants,
           variantAxes: variantPack.hasVariants ? variantPack.variantAxes : null,
@@ -454,8 +468,8 @@ export default class TechnolifeImportService {
           sourceImportedAt: DateTime.now(),
           sourceUpdatedAt: DateTime.now(),
         },
-        stock: normalized.stock,
-        status: options.listingStatus || 'pending',
+        stock,
+        status: listingStatus,
       })
 
       return {
